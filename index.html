@@ -170,9 +170,31 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 .lib .addlbl{display:block;color:var(--accent);font-weight:600;margin:6px 4px 0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
 .toast[hidden]{display:none}
-.modelo{display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid var(--line);border-radius:14px;cursor:pointer}
-.modelo:has(input:checked){border-color:var(--accent);background:var(--soft)}
-.modelo input{margin-top:4px;accent-color:var(--accent)}
+
+/* Assistente e perfil */
+.coach{border:1.5px solid var(--accent-2)}
+.coach-head{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.coach-ic{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:16px;flex:none}
+.coach-sub{font-size:16px;margin:14px 0 8px}
+.tips{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.tip{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4}
+.tip-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;background:var(--soft)}
+.tip.ok .tip-ic{background:var(--ok);color:#fff}
+.tip.atencao .tip-ic{background:#e9a23b;color:#fff}
+.link{background:none;border:none;padding:0;color:var(--accent);font-weight:600;text-decoration:underline;font-size:14px}
+.sug{display:grid;gap:8px}
+.sug-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:6px 12px 6px 6px}
+.sug-item .mini{width:52px;height:48px}
+.sug-item small{display:block;font-size:12px}
+.plus{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:20px;flex:none}
+.ia{margin-top:14px;display:grid;gap:6px}
+.ia-r{white-space:pre-wrap;font-size:14px}
+.opts{border:none;padding:0;margin:4px 0 0;display:grid;gap:6px}
+.opts legend{margin-bottom:6px;padding:0}
+.opt{display:flex;gap:10px;align-items:center;padding:10px 12px;border:2px solid var(--line);border-radius:12px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--soft)}
+.opt input{accent-color:var(--accent)}
+.plan.vazio{border-style:dashed;box-shadow:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -190,72 +212,9 @@ const KEY = 'ritmo.v2';
 const EX = Object.fromEntries(Exercicios.lista.map(e => [e.id, e]));
 const uid = () => Math.random().toString(36).slice(2, 9);
 const it = (ex, reps, series = 3, descanso = 60) => ({ ex, series, reps, descanso });
-const AER = it('aerobico', '10 min', 1, 0);
-const MODELOS = [
-  { id: 'grade-ae', nome: 'Grade A–E (5 dias)', desc: 'Divisão completa em 5 treinos com aeróbico diário: posterior, costas, quadríceps, peito e ombros, pernas.', planos: [
-    { id: uid(), nome: 'Posterior e glúteos', itens: [
-      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
-      { ex: 'agachamento-sumo', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'mesa-flexora', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'cadeira-flexora', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'bulgaro', series: 3, reps: '8 cada perna', descanso: 60 },
-      { ex: 'coice-polia', series: 3, reps: '8 a 10 cada perna', descanso: 60 },
-      { ex: 'abducao-polia', series: 3, reps: '8 a 10 cada perna', descanso: 60 },
-      { ex: 'cadeira-abdutora', series: 3, reps: '10', descanso: 60 } ] },
-    { id: uid(), nome: 'Costas, bíceps e abdômen', itens: [
-      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
-      { ex: 'puxador-frente', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'remada-sentada', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'rosca', series: 3, reps: '10', descanso: 60 },
-      { ex: 'rosca-martelo', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'abdominal-infra', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'abdominal-remador', series: 3, reps: '8', descanso: 60 },
-      { ex: 'prancha', series: 3, reps: '30 s', descanso: 60 } ] },
-    { id: uid(), nome: 'Quadríceps e panturrilha', itens: [
-      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
-      { ex: 'agachamento-smith', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'agachamento-isometria', series: 3, reps: '20 a 30 s', descanso: 60 },
-      { ex: 'leg-press', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'cadeira-extensora', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'cadeira-adutora', series: 3, reps: '10', descanso: 60 },
-      { ex: 'panturrilha', series: 3, reps: '10', descanso: 60 },
-      { ex: 'panturrilha-sentada', series: 3, reps: '8 a 12', descanso: 60 } ] },
-    { id: uid(), nome: 'Ombros, peito, tríceps e abdômen', itens: [
-      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
-      { ex: 'peck-deck', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'elevacao-lateral', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'elevacao-frontal', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'triceps-corda', series: 3, reps: '10', descanso: 60 },
-      { ex: 'abdominal', series: 3, reps: '10', descanso: 60 },
-      { ex: 'prancha', series: 3, reps: '30 s', descanso: 60 },
-      { ex: 'abdominal-infra', series: 3, reps: '8 a 10', descanso: 60 } ] },
-    { id: uid(), nome: 'Pernas e glúteos', itens: [
-      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
-      { ex: 'cadeira-abdutora', series: 3, reps: '8', descanso: 60 },
-      { ex: 'agachamento-smith', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'agachamento-sumo', series: 3, reps: '8 a 12', descanso: 60 },
-      { ex: 'agachamento-hack', series: 3, reps: '10', descanso: 60 },
-      { ex: 'cadeira-extensora', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'mesa-flexora', series: 3, reps: '8 a 10', descanso: 60 },
-      { ex: 'elevacao-pelvica', series: 3, reps: '10', descanso: 60 } ] }
-  ] },
-  { id: 'abc', nome: 'ABC (3 dias)', desc: 'Peito, ombros e tríceps · Costas e bíceps · Pernas e glúteos.', planos: [
-    { nome: 'Peito, ombros e tríceps', itens: [AER, it('supino-maquina', '8 a 12'), it('supino-inclinado', '8 a 12'), it('peck-deck', '10 a 12'), it('desenvolvimento', '8 a 10'), it('elevacao-lateral', '10 a 12'), it('triceps-corda', '10 a 12')] },
-    { nome: 'Costas e bíceps', itens: [AER, it('puxador-frente', '8 a 12'), it('remada-sentada', '8 a 12'), it('remada', '10'), it('rosca', '10'), it('rosca-martelo', '10'), it('prancha', '30 s')] },
-    { nome: 'Pernas e glúteos', itens: [AER, it('agachamento', '10 a 12'), it('leg-press', '10'), it('cadeira-extensora', '10 a 12'), it('mesa-flexora', '10 a 12'), it('elevacao-pelvica', '12'), it('panturrilha', '15')] }
-  ] },
-  { id: 'peito', nome: 'Foco em peito', desc: 'Um treino completo de peito com barra, halteres, máquina e polia.', planos: [
-    { nome: 'Peito completo', itens: [AER, it('supino-reto', '8 a 12', 4), it('supino-inclinado', '8 a 12'), it('supino-maquina', '10 a 12'), it('crucifixo', '10 a 12'), it('crossover', '12 a 15'), it('peck-deck', '12'), it('pullover', '12'), it('flexao', 'até a falha')] }
-  ] },
-  { id: 'casa', nome: 'Em casa, sem aparelhos', desc: 'Corpo inteiro só com o peso do corpo e um colchonete.', planos: [
-    { nome: 'Corpo inteiro', itens: [it('agachamento', '15'), it('afundo', '10 cada perna'), it('elevacao-pelvica', '15'), it('flexao', '8 a 12'), it('coice', '15 cada perna'), it('abdominal', '15'), it('prancha', '30 s')] }
-  ] }
-];
-function aplicarModelo(id){
-  const m = MODELOS.find(x => x.id === id); if (!m) return;
-  m.planos.forEach(p => S.planos.push({ id: uid(), nome: p.nome, itens: p.itens.map(i => ({ ...i })) }));
-}
-const defaultState = () => ({ nome: '', planos: [], checkins: [], sessoes: [], pesos: [], ativo: null });
+const novoPlanoVazio = i => ({ id: uid(), nome: 'Treino ' + letra(i), itens: [] });
+function ensure5(){ while (S.planos.length < 5) S.planos.push(novoPlanoVazio(S.planos.length)); }
+const defaultState = () => ({ nome: '', perfil: null, planos: [], checkins: [], sessoes: [], pesos: [], ativo: null });
 function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.planos) return s; }catch{} return defaultState(); }
 let S = load();
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch{} }
@@ -271,6 +230,7 @@ const fmtData = s => fromIso(s).toLocaleDateString('pt-BR', { day:'2-digit', mon
 const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const plano = id => S.planos.find(p => p.id === id);
 const letra = i => String.fromCharCode(65 + i);
+ensure5();
 
 function checkin(dia = hoje()){ if (!S.checkins.includes(dia)) { S.checkins.push(dia); S.checkins.sort(); } }
 function streakDias(){
@@ -339,17 +299,13 @@ function render(){
 
 /* ---------- Telas ---------- */
 function vHoje(){
-  if (!S.nome) return `
+  if (!S.nome || !S.perfil) return `
     <div class="top"><h1>Ritmo</h1></div>
     <div class="card stack">
-      <h2>Boas-vindas! 👋</h2>
-      <p class="muted" style="margin:0">Aqui ficam seus treinos, seus check-ins e sua evolução. Cada exercício tem uma animação mostrando como fazer.</p>
-      <label class="small muted" for="nomeIn">Como podemos te chamar?</label>
-      <input type="text" id="nomeIn" placeholder="Seu nome" autocomplete="given-name">
-      ${S.planos.length ? '' : `<p class="small muted" style="margin:6px 0 0">Como quer começar?</p>
-      <div class="stack" style="gap:8px">${MODELOS.map((m, i) => `<label class="modelo"><input type="radio" name="modelo" value="${m.id}" ${i === 0 ? 'checked' : ''}><span><b>${esc(m.nome)}</b><br><span class="small muted">${esc(m.desc)}</span></span></label>`).join('')}
-        <label class="modelo"><input type="radio" name="modelo" value=""><span><b>Montar do zero</b><br><span class="small muted">Escolha seus exercícios na grade completa.</span></span></label></div>`}
-      <button class="btn primary block" onclick="salvarNome()">Começar</button>
+      <h2>${S.nome ? 'Complete seu perfil' : 'Boas-vindas! 👋'}</h2>
+      <p class="muted" style="margin:0">Conte um pouco sobre você. O assistente usa essas informações para te ajudar a montar seus 5 treinos da semana, com dicas para o seu objetivo.</p>
+      ${perfilForm()}
+      <button class="btn primary block" onclick="salvarPerfil(true)">Começar</button>
     </div>`;
   const prox = proximoPlano(), sem = semanaAtual(), set = new Set(S.checkins), h = hoje();
   const fezHoje = set.has(h);
@@ -357,7 +313,7 @@ function vHoje(){
   const nomes = ['S','T','Q','Q','S','S','D'];
   const saud = (() => { const hr = new Date().getHours(); return hr < 12 ? 'Bom dia' : hr < 18 ? 'Boa tarde' : 'Boa noite'; })();
   return `
-    <div class="top"><div><div class="hello">${saud},</div><h1>${esc(S.nome)}</h1></div></div>
+    <div class="top"><div><div class="hello">${saud},</div><h1>${esc(S.nome)}</h1><div class="small muted">Objetivo: ${esc(OBJ[S.perfil.objetivo] || '')}</div></div></div>
     <div class="stack">
       <section class="card">
         <div class="streak">
@@ -367,26 +323,26 @@ function vHoje(){
         <div class="week">${sem.map((d, i) => `<div class="day ${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}"><i>${set.has(d) ? '✓' : ''}</i>${nomes[i]}</div>`).join('')}</div>
         <button class="btn ${fezHoje ? 'ghost' : 'primary'} block" style="margin-top:14px" onclick="toggleCheckin()">${fezHoje ? '✓ Check-in feito hoje' : 'Fazer check-in de hoje'}</button>
       </section>
-      <h2 style="margin-top:8px">Treinos</h2>
-      ${S.planos.length ? S.planos.map((p, i) => `
+      <h2 style="margin-top:8px">Seus treinos da semana</h2>
+      ${S.planos.every(p => !p.itens.length) ? `<div class="card stack"><b>Monte seus 5 treinos</b><p class="small muted" style="margin:0">Escolha os exercícios de cada dia. O assistente te dá sugestões e dicas para ${esc((OBJ[S.perfil.objetivo] || '').toLowerCase())}.</p><button class="btn primary" onclick="view='treinos';render();scrollTo(0,0)">Montar meus treinos</button></div>` : ''}
+      ${S.planos.map((p, i) => p.itens.length ? `
         <button class="card plan" onclick="iniciar('${p.id}')">
           <span class="badge">${letra(i)}</span>
           <span class="meta"><b>${esc(p.nome)}${prox && prox.id === p.id ? '<span class="tag">próximo</span>' : ''}</b>
-          <span class="small muted">${p.itens.length} exercícios · ${p.itens.slice(0, 3).map(it => EX[it.ex]?.nome).join(', ')}${p.itens.length > 3 ? '…' : ''}</span></span>
+          <span class="small muted">Dia ${i + 1} · ${p.itens.length} exercícios · ${p.itens.slice(0, 3).map(it => esc(EX[it.ex]?.nome)).join(', ')}${p.itens.length > 3 ? '…' : ''}</span></span>
           <span aria-hidden="true">▶</span>
-        </button>`).join('') : `<div class="card empty-note">Nenhum treino ainda. Crie um na aba Treinos.</div>`}
+        </button>` : `
+        <button class="card plan vazio" onclick="editar('${p.id}')">
+          <span class="badge">${letra(i)}</span>
+          <span class="meta"><b>${esc(p.nome)}</b><span class="small muted">Dia ${i + 1} · vazio, toque para montar</span></span>
+          <span aria-hidden="true">✎</span>
+        </button>`).join('')}
     </div>`;
-}
-function salvarNome(){
-  const n = $('#nomeIn').value.trim(); if (!n) return $('#nomeIn').focus(); S.nome = n;
-  const m = document.querySelector('input[name=modelo]:checked'); let vazio = null;
-  if (m && !S.planos.length) { if (m.value) aplicarModelo(m.value); else { vazio = { id: uid(), nome: 'Treino A', itens: [] }; S.planos.push(vazio); } }
-  save(); if (vazio) editar(vazio.id); else render();
 }
 function toggleCheckin(){ const h = hoje(); S.checkins.includes(h) ? S.checkins = S.checkins.filter(d => d !== h) : checkin(h); save(); render(); }
 
 function iniciar(id){
-  const p = plano(id); if (!p || !p.itens.length) return;
+  const p = plano(id); if (!p) return; if (!p.itens.length) return editar(id);
   S.ativo = { plano: id, inicio: Date.now(), itens: p.itens.map(it => ({ ...it, carga: ultimaCarga(it.ex), feitas: Array(+it.series || 1).fill(false) })) };
   save(); view = 'treino'; render(); scrollTo(0, 0);
 }
@@ -466,18 +422,18 @@ function bip(){ try{ const c = new (window.AudioContext || window.webkitAudioCon
 /* Treinos (planos) */
 function vTreinos(){
   return `
-    <div class="top"><h1>Treinos</h1><button class="btn sm primary" onclick="novoPlano()">+ Novo</button></div>
+    <div class="top"><h1>Seus 5 treinos</h1></div>
     <div class="stack">
-      ${S.planos.length > 1 ? `<p class="muted small" style="margin:0">Segure um treino e arraste para mudar a ordem.</p>` : ''}
-      ${S.planos.length ? '' : `<div class="card empty-note">Você ainda não tem treinos. Toque em <b>+ Novo</b> para montar o seu ou usar uma grade pronta.</div>`}
+      <section class="card coach">${coachHead()}${dicasHtml(dicasSemana())}</section>
+      <p class="muted small" style="margin:0">Toque em Editar para montar cada dia. Segure um treino e arraste para mudar a ordem.</p>
       <div class="stack" id="sortPlanos">
       ${S.planos.map((p, i) => `
         <div class="card sort-item">
           <div class="row" style="justify-content:space-between">
-            <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><h3 class="ell">${esc(p.nome)}</h3></div>
-            <button class="btn sm" onclick="editar('${p.id}')">Editar</button>
+            <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><div style="min-width:0"><h3 class="ell">${esc(p.nome)}</h3><span class="small muted">Dia ${i + 1}</span></div></div>
+            <button class="btn sm ${p.itens.length ? '' : 'primary'}" onclick="editar('${p.id}')">${p.itens.length ? 'Editar' : 'Montar'}</button>
           </div>
-          <p class="small muted" style="margin:10px 0 0">${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}${p.itens.length ? ': ' + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : ''}</p>
+          <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do assistente: <b>${esc(divisao()[i % 5][0])}</b>`}</p>
         </div>`).join('')}
       </div>
       <h2 style="margin-top:12px">Grade completa de exercícios</h2>
@@ -489,53 +445,212 @@ function verEx(id){
   const e = EX[id];
   abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>${esc(e.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
     <div class="mini" style="width:100%;height:auto;aspect-ratio:240/218;border-radius:14px" data-anim="${e.id}"></div>
-    <p class="small muted">${esc(e.grupo)} · ${esc(e.aparelho)}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
+    <p class="small muted">${esc(e.grupo)} · ${esc(e.aparelho)}<br>Trabalha: ${esc(lista(e.alvo.map(a => ALVO[a])))}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
 }
-function novoPlano(){
-  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Novo treino</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
-    <button class="card plan" onclick="criarVazio()"><span class="badge">+</span><span class="meta"><b>Montar do zero</b><span class="small muted">Escolha os exercícios na grade completa.</span></span></button>
-    <h3 style="margin:18px 0 8px">Ou use uma grade pronta</h3>
-    <div class="stack">${MODELOS.map(m => `<div class="card"><b>${esc(m.nome)}</b><p class="small muted" style="margin:4px 0 6px">${esc(m.desc)}</p><p class="small" style="margin:0 0 10px">${m.planos.map(p => esc(p.nome)).join(' · ')}</p><button class="btn sm primary" onclick="usarModelo('${m.id}')">Adicionar ${m.planos.length > 1 ? m.planos.length + ' treinos' : 'treino'}</button></div>`).join('')}</div></div>`);
-}
-function criarVazio(){ const p = { id: uid(), nome: 'Treino ' + letra(S.planos.length), itens: [] }; S.planos.push(p); save(); fecharDlg(); editar(p.id); }
-function usarModelo(id){ const n = MODELOS.find(m => m.id === id).planos.length; aplicarModelo(id); save(); fecharDlg(); view = 'treinos'; render(); toast(n > 1 ? `${n} treinos adicionados` : 'Treino adicionado'); }
 function editar(id){ editId = id; view = 'editar'; render(); scrollTo(0, 0); }
 function vEditar(){
   const p = plano(editId); if (!p) { view = 'treinos'; return vTreinos(); }
+  const i = S.planos.indexOf(p), sug = sugestoes(i);
   return `
-    <div class="top"><button class="icon-btn" onclick="view='treinos';render()" aria-label="Voltar">←</button><h1 style="flex:1">Editar treino</h1></div>
+    <div class="top"><button class="icon-btn" onclick="view='treinos';render()" aria-label="Voltar">←</button><h1 style="flex:1">${esc(p.nome)}</h1><span class="small muted">Dia ${i + 1}</span></div>
     <div class="stack">
       <div class="card"><label class="small muted" for="pn">Nome do treino</label><input type="text" id="pn" value="${esc(p.nome)}" onchange="plano('${p.id}').nome=this.value;save()"></div>
+      <section class="card coach">
+        ${coachHead()}
+        ${dicasHtml(dicasDia(i))}
+        ${sug.itens.length ? `<h3 class="coach-sub">${esc(sug.titulo)}</h3>
+        <div class="sug">${sug.itens.map(e => `<button class="sug-item" onclick="addEx('${e.id}')" aria-label="Adicionar ${esc(e.nome)}"><span class="mini" data-anim="${e.id}" data-still="1"></span><span class="grow"><b>${esc(e.nome)}</b><small class="muted">${esc(cap(ALVO[e.alvo[0]]))} · ${e.alvo[0] === 'cardio' ? 'aeróbico' : e.tipo === 'C' ? 'trabalha vários músculos' : 'isolado'}</small></span><span class="plus" aria-hidden="true">+</span></button>`).join('')}</div>` : ''}
+        ${IA_URL ? iaBox() : ''}
+      </section>
       ${p.itens.length > 1 ? `<p class="muted small" style="margin:0">Segure um exercício e arraste até a posição em que ele deve ficar.</p>` : ''}
-      ${p.itens.length ? '' : `<div class="card empty-note">Nenhum exercício ainda. Busque abaixo e toque em “+ Adicionar”.</div>`}
+      ${p.itens.length ? '' : `<div class="card empty-note">Nenhum exercício ainda. Use as sugestões acima ou busque na grade abaixo.</div>`}
       <div class="stack" id="sortEx">
-      ${p.itens.map((it, i) => `
+      ${p.itens.map((it, k) => `
         <div class="card sort-item">
-          <div class="row"><button class="drag" aria-label="Mover ${esc(EX[it.ex]?.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="num">${i + 1}</span><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${esc(EX[it.ex]?.aparelho)}</span></div>
-            <button class="icon-btn" onclick="remover(${i})" aria-label="Remover ${esc(EX[it.ex]?.nome)}">✕</button></div>
+          <div class="row"><button class="drag" aria-label="Mover ${esc(EX[it.ex]?.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="num">${k + 1}</span><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${esc(EX[it.ex]?.aparelho)}</span></div>
+            <button class="icon-btn" onclick="remover(${k})" aria-label="Remover ${esc(EX[it.ex]?.nome)}">✕</button></div>
           <div class="row" style="margin-top:10px">
-            <label class="grow small muted">Séries<input type="number" min="1" max="10" value="${it.series}" onchange="campo(${i},'series',Math.max(1,+this.value||1))"></label>
-            <label class="grow small muted">Repetições<input type="text" value="${esc(it.reps)}" onchange="campo(${i},'reps',this.value)"></label>
-            <label class="grow small muted">Descanso (s)<input type="number" min="0" step="5" value="${it.descanso}" onchange="campo(${i},'descanso',+this.value||0)"></label>
+            <label class="grow small muted">Séries<input type="number" min="1" max="10" value="${it.series}" onchange="campo(${k},'series',Math.max(1,+this.value||1))"></label>
+            <label class="grow small muted">Repetições<input type="text" value="${esc(it.reps)}" onchange="campo(${k},'reps',this.value)"></label>
+            <label class="grow small muted">Descanso (s)<input type="number" min="0" step="5" value="${it.descanso}" onchange="campo(${k},'descanso',+this.value||0)"></label>
           </div>
         </div>`).join('')}
       </div>
-      <h2 style="margin-top:12px">Adicionar exercícios</h2>
+      <h2 style="margin-top:12px">Grade completa</h2>
       ${libBlock('add')}
-      <button class="btn ghost block" style="color:var(--accent);margin-top:12px" onclick="excluirPlano()">Excluir este treino</button>
+      ${p.itens.length ? `<button class="btn ghost block" style="color:var(--accent);margin-top:12px" onclick="limparPlano()">Limpar este treino</button>` : ''}
     </div>`;
 }
 function campo(i, k, v){ plano(editId).itens[i][k] = v; save(); }
 function moverItem(arr, from, to){ arr.splice(to, 0, arr.splice(from, 1)[0]); save(); const y = scrollY; render(); scrollTo(0, y); }
 function remover(i){ const [r] = plano(editId).itens.splice(i, 1); save(); const y = scrollY; render(); scrollTo(0, y); toast(`${EX[r.ex]?.nome || 'Exercício'} removido`); }
-function excluirPlano(){ if (!confirm('Excluir este treino?')) return; S.planos = S.planos.filter(p => p.id !== editId); save(); view = 'treinos'; render(); }
+function limparPlano(){ if (!confirm('Remover todos os exercícios deste treino?')) return; plano(editId).itens = []; save(); render(); scrollTo(0, 0); }
 function addEx(id){
-  const box = document.querySelector('.libbox[data-action=add]'), before = box ? box.getBoundingClientRect().top : 0;
+  const box = document.querySelector('.libbox[data-action=add]'), before = box ? box.getBoundingClientRect().top : 0, y0 = scrollY;
   const e = EX[id], p = plano(editId);
-  p.itens.push(it(id, id === 'aerobico' ? '10 min' : e.tempo ? '30 s' : '8 a 12', id === 'aerobico' ? 1 : 3, id === 'aerobico' ? 0 : 60));
+  const es = esquema(), cardio = e.alvo[0] === 'cardio';
+  p.itens.push(it(id, cardio ? (['emagrecer', 'condicionamento'].includes(S.perfil?.objetivo) ? '20 a 30 min' : '10 min') : e.tempo ? '30 s' : es.reps, cardio ? 1 : es.series, cardio ? 0 : es.descanso));
   save(); render();
-  const box2 = document.querySelector('.libbox[data-action=add]'); if (box && box2) scrollBy(0, box2.getBoundingClientRect().top - before);
+  const box2 = document.querySelector('.libbox[data-action=add]');
+  if (box && box2 && before < innerHeight * .9) scrollBy(0, box2.getBoundingClientRect().top - before); else scrollTo(0, y0);
   toast(`${e.nome} adicionado como ${p.itens.length}º`);
+}
+
+/* ---------- Assistente ---------- */
+const IA_URL = ''; // endereço do assistente com IA (ver README). Vazio = só as dicas automáticas.
+const OBJ = { emagrecer: 'Emagrecer', hipertrofia: 'Ganhar massa muscular', definir: 'Definir o corpo', forca: 'Ganhar força', condicionamento: 'Melhorar o condicionamento', saude: 'Saúde e bem-estar' };
+const NIVEL = { iniciante: ['Iniciante', 'até 6 meses de treino'], intermediario: ['Intermediário', '6 meses a 2 anos'], avancado: ['Avançado', 'mais de 2 anos'] };
+const ALVO = { peito: 'peito', costas: 'costas', ombros: 'ombros', biceps: 'bíceps', triceps: 'tríceps', quadriceps: 'quadríceps', posterior: 'posterior de coxa', gluteos: 'glúteos', adutores: 'adutores', panturrilha: 'panturrilha', abdomen: 'abdômen', lombar: 'lombar', cardio: 'aeróbico' };
+const GRANDES = ['peito', 'costas', 'quadriceps', 'posterior', 'gluteos'];
+const ESQUEMA = {
+  hipertrofia: { series: 3, reps: '8 a 12', descanso: 75 }, definir: { series: 3, reps: '10 a 15', descanso: 45 },
+  emagrecer: { series: 3, reps: '12 a 15', descanso: 45 }, condicionamento: { series: 3, reps: '15 a 20', descanso: 30 },
+  saude: { series: 3, reps: '10 a 15', descanso: 60 }, forca: { series: 4, reps: '4 a 6', descanso: 150 }
+};
+const DICA_OBJ = {
+  emagrecer: 'Para emagrecer, a constância vale mais que a intensidade: cumpra os 5 dias, inclua aeróbico e cuide da alimentação e do sono.',
+  hipertrofia: 'Para ganhar massa, aumente a carga aos poucos quando fizer todas as repetições com boa técnica, e capriche no descanso e na alimentação.',
+  definir: 'Para definir, mantenha cargas desafiadoras com descansos curtos e some aeróbico em alguns dias.',
+  forca: 'Para ganhar força, comece cada treino pelos exercícios compostos e descanse 2 a 3 minutos entre as séries pesadas.',
+  condicionamento: 'Para o condicionamento, descansos curtos e aeróbico frequente fazem diferença. Aumente o tempo aos poucos.',
+  saude: 'Para saúde e bem-estar, o mais importante é a regularidade e a técnica correta. Aumente a carga com calma.'
+};
+const DIVISAO = {
+  musc: [['Peito e tríceps', ['peito', 'triceps']], ['Costas e bíceps', ['costas', 'biceps']], ['Quadríceps e panturrilha', ['quadriceps', 'panturrilha']], ['Ombros e abdômen', ['ombros', 'abdomen']], ['Posterior e glúteos', ['posterior', 'gluteos']]],
+  geral: [['Pernas e aeróbico', ['quadriceps', 'gluteos', 'cardio']], ['Peito, ombros e tríceps', ['peito', 'ombros', 'triceps', 'cardio']], ['Costas, bíceps e abdômen', ['costas', 'biceps', 'abdomen', 'cardio']], ['Glúteos e posterior', ['gluteos', 'posterior', 'cardio']], ['Corpo inteiro', ['quadriceps', 'peito', 'costas', 'abdomen', 'cardio']]]
+};
+const cap = t => t ? t[0].toUpperCase() + t.slice(1) : '';
+const lista = arr => arr.length < 2 ? arr.join('') : arr.slice(0, -1).join(', ') + ' e ' + arr[arr.length - 1];
+const objetivo = () => S.perfil?.objetivo || 'saude';
+const divisao = () => DIVISAO[['emagrecer', 'condicionamento', 'saude'].includes(objetivo()) ? 'geral' : 'musc'];
+const faixa = () => ({ iniciante: [5, 6], intermediario: [6, 8], avancado: [7, 9] })[S.perfil?.nivel || 'iniciante'];
+function esquema(){
+  const e = { ...ESQUEMA[objetivo()] }, n = S.perfil?.nivel;
+  if (n === 'avancado' && ['hipertrofia', 'forca'].includes(objetivo())) e.series = objetivo() === 'forca' ? 5 : 4;
+  return e;
+}
+const ehCardio = it => EX[it.ex]?.alvo[0] === 'cardio';
+function primarios(p){ const c = {}; p.itens.forEach(it => { const a = EX[it.ex]?.alvo[0]; if (a) c[a] = (c[a] || 0) + 1; }); return c; }
+function focoDoDia(p){
+  const c = {}; p.itens.forEach(it => (EX[it.ex]?.alvo || []).forEach((a, k) => c[a] = (c[a] || 0) + (k ? 1 : 3)));
+  return Object.entries(c).filter(([a]) => !['cardio', 'lombar', 'adutores'].includes(a)).sort((x, y) => y[1] - x[1]).map(([a]) => a);
+}
+function sugestoes(i){
+  const p = S.planos[i], div = divisao()[i % 5], tem = new Set(p.itens.map(x => x.ex));
+  const outros = new Set(S.planos.filter((_, j) => j !== i).flatMap(q => q.itens.map(x => x.ex)));
+  const foco = focoDoDia(p);
+  const alvos = !p.itens.length || foco.some(a => div[1].includes(a)) ? div[1].filter(a => a !== 'cardio') : foco.slice(0, 2);
+  if (['emagrecer', 'condicionamento'].includes(objetivo()) && !alvos.includes('cardio') && !p.itens.some(ehCardio)) alvos.push('cardio');
+  const nivel = S.perfil?.nivel || 'iniciante';
+  const nota = e => (e.tipo === 'C' ? 4 : 0) - (outros.has(e.id) ? 3 : 0)
+    + (nivel === 'iniciante' && /Máquina|Polia|Peso do corpo|Colchonete|Esteira/.test(e.aparelho) ? 2 : 0)
+    + (nivel === 'avancado' && /Barra|Halter/.test(e.aparelho) ? 2 : 0);
+  const out = [];
+  alvos.forEach(a => {
+    const n = a === 'cardio' ? 1 : GRANDES.includes(a) ? 3 : 2;
+    Exercicios.lista.filter(e => e.alvo[0] === a && !tem.has(e.id)).sort((x, y) => nota(y) - nota(x)).slice(0, n).forEach(e => out.push(e));
+  });
+  const nomes = alvos.filter(a => a !== 'cardio').map(a => ALVO[a]);
+  return { titulo: p.itens.length ? `Mais opções para ${lista(nomes)}` : `Sugestão para este dia: ${div[0]}`, itens: out.slice(0, 9) };
+}
+function dicasDia(i){
+  const p = S.planos[i], d = [], itens = p.itens, [mn, mx] = faixa(), n = itens.filter(it => !ehCardio(it)).length;
+  if (!itens.length) {
+    d.push({ t: 'dica', x: 'Comece pelos exercícios que trabalham vários músculos (supinos, agachamentos, remadas) e termine pelos isolados.' });
+    d.push({ t: 'dica', x: `Para o seu nível, monte entre ${mn} e ${mx} exercícios de musculação neste dia.` });
+    return d;
+  }
+  if (n && n < mn) d.push({ t: 'atencao', x: `Este treino tem ${n} exercício${n === 1 ? '' : 's'} de musculação. Para o nível ${NIVEL[S.perfil?.nivel || 'iniciante'][0].toLowerCase()}, o ideal fica entre ${mn} e ${mx}.` });
+  if (n > mx) d.push({ t: 'atencao', x: `São ${n} exercícios de musculação, acima do ideal para o seu nível (${mn} a ${mx}). Treinos longos demais cansam e rendem menos.` });
+  for (let a = 0; a < itens.length; a++) {
+    const ea = EX[itens[a].ex]; if (!ea || ea.tipo !== 'I' || ea.alvo[0] === 'cardio') continue;
+    const b = itens.findIndex((x, k) => k > a && EX[x.ex]?.tipo === 'C' && EX[x.ex].alvo[0] === ea.alvo[0]);
+    if (b > -1) { d.push({ t: 'atencao', x: `Faça ${EX[itens[b].ex].nome} antes de ${ea.nome}: exercícios que trabalham vários músculos rendem mais no começo do treino.` }); break; }
+  }
+  const pc = primarios(p);
+  Object.entries(pc).forEach(([a, c]) => { if (!GRANDES.includes(a) && !['cardio', 'abdomen'].includes(a) && c > 3) d.push({ t: 'atencao', x: `São ${c} exercícios de ${ALVO[a]}. Para músculos menores, 2 ou 3 já bastam.` }); });
+  [i - 1, i + 1].forEach(j => {
+    const q = S.planos[j]; if (!q) return; const qc = primarios(q);
+    GRANDES.forEach(a => { if ((pc[a] || 0) >= 2 && (qc[a] || 0) >= 2) d.push({ t: 'atencao', x: `${cap(ALVO[a])} também é o foco do ${q.nome} (dia ${j + 1}). Deixe cerca de 48 horas de descanso para o mesmo músculo.` }); });
+  });
+  if (['emagrecer', 'condicionamento'].includes(objetivo()) && !itens.some(ehCardio)) d.push({ t: 'dica', x: `Para ${OBJ[objetivo()].toLowerCase()}, inclua de 20 a 30 minutos de aeróbico no fim do treino.`, acao: ['Adicionar aeróbico', "addEx('aerobico')"] });
+  const e = esquema(), fora = itens.filter(it => !EX[it.ex]?.tempo && !ehCardio(it) && (String(it.reps).trim() !== e.reps || +it.series !== e.series)).length;
+  if (fora) d.push({ t: 'dica', x: `Para ${OBJ[objetivo()].toLowerCase()}: ${e.series} séries de ${e.reps} repetições, com cerca de ${e.descanso} s de descanso.`, acao: ['Aplicar neste treino', 'aplicarEsquema()'] });
+  if (!d.some(x => x.t === 'atencao')) d.unshift({ t: 'ok', x: 'Treino bem montado para o seu objetivo e nível.' });
+  return d.filter((x, k) => d.findIndex(y => y.x === x.x) === k);
+}
+function dicasSemana(){
+  const d = [], todos = S.planos.flatMap(p => p.itens), vazios = S.planos.filter(p => !p.itens.length).length;
+  if (vazios === S.planos.length) d.push({ t: 'dica', x: `Monte seus ${S.planos.length} treinos da semana. Ao abrir cada dia, o assistente sugere exercícios para ${OBJ[objetivo()].toLowerCase()}.` });
+  else if (vazios) d.push({ t: 'atencao', x: `${vazios} ${vazios === 1 ? 'dia ainda está vazio' : 'dias ainda estão vazios'}.` });
+  if (todos.length >= 8) {
+    const c = {}; todos.forEach(it => (EX[it.ex]?.alvo || []).forEach(a => c[a] = (c[a] || 0) + 1));
+    const essenciais = ['peito', 'costas', 'ombros', 'quadriceps', 'posterior', 'gluteos', 'biceps', 'triceps', 'abdomen'];
+    if (['emagrecer', 'condicionamento'].includes(objetivo())) essenciais.push('cardio');
+    const falta = essenciais.filter(a => !c[a]);
+    if (falta.length) d.push({ t: 'atencao', x: `Nenhum treino trabalha ${lista(falta.map(a => ALVO[a]))}.` });
+    const pe = todos.filter(it => EX[it.ex]?.alvo[0] === 'peito').length, co = todos.filter(it => EX[it.ex]?.alvo[0] === 'costas').length;
+    if (pe >= 3 && co < pe / 2) d.push({ t: 'atencao', x: `Há ${pe} exercícios de peito e ${co} de costas. Equilibrar os dois ajuda a postura e protege os ombros.` });
+    if (!falta.length && !vazios && d.length === 0) d.push({ t: 'ok', x: 'Semana completa: todos os grupos musculares estão sendo trabalhados.' });
+  }
+  d.push({ t: 'dica', x: DICA_OBJ[objetivo()] });
+  return d;
+}
+function coachHead(){
+  const pf = S.perfil || {};
+  return `<div class="coach-head"><span class="coach-ic" aria-hidden="true">✦</span><div><b>Assistente</b><div class="small muted">${esc(OBJ[pf.objetivo] || '')} · ${esc(NIVEL[pf.nivel || 'iniciante'][0])}</div></div></div>`;
+}
+function dicasHtml(arr){
+  const ic = { ok: '✓', atencao: '!', dica: '💡' };
+  return `<ul class="tips">${arr.map(x => `<li class="tip ${x.t}"><span class="tip-ic" aria-hidden="true">${ic[x.t]}</span><span>${esc(x.x)}${x.acao ? ` <button class="link" onclick="${x.acao[1]}">${esc(x.acao[0])}</button>` : ''}</span></li>`).join('')}</ul>`;
+}
+function aplicarEsquema(){
+  const e = esquema();
+  plano(editId).itens.forEach(it => { if (!EX[it.ex]?.tempo && !ehCardio(it)) Object.assign(it, { series: e.series, reps: e.reps, descanso: e.descanso }); });
+  save(); const y = scrollY; render(); scrollTo(0, y); toast('Séries e repetições ajustadas ao seu objetivo');
+}
+function iaBox(){
+  return `<div class="ia"><label class="small muted" for="iaQ">Pergunte ao assistente</label>
+    <div class="row"><input type="text" id="iaQ" placeholder="Ex.: o que trocar se sinto dor no joelho?" onkeydown="if(event.key==='Enter')perguntarIA()"><button class="btn primary sm" onclick="perguntarIA()">Enviar</button></div>
+    <div id="iaR" class="ia-r" aria-live="polite"></div></div>`;
+}
+async function perguntarIA(){
+  const q = $('#iaQ').value.trim(), out = $('#iaR'); if (!q) return;
+  out.textContent = 'Pensando…';
+  const semana = S.planos.map((p, i) => ({ dia: i + 1, nome: p.nome, exercicios: p.itens.map(it => `${EX[it.ex]?.nome} ${it.series}x${it.reps}`) }));
+  try {
+    const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: q, perfil: { ...S.perfil, nome: S.nome }, semana, diaAtual: S.planos.findIndex(p => p.id === editId) + 1, exercicios: Exercicios.lista.map(e => e.nome) }) });
+    const j = await r.json(); out.textContent = j.resposta || 'Não consegui responder agora.';
+  } catch { out.textContent = 'O assistente com IA não respondeu. Tente de novo em instantes.'; }
+}
+
+/* ---------- Perfil ---------- */
+function perfilForm(){
+  const pf = S.perfil || {};
+  return `
+    <label class="small muted">Nome<input type="text" id="pfNome" value="${esc(S.nome)}" placeholder="Seu nome" autocomplete="given-name"></label>
+    <div class="row"><label class="grow small muted">Peso (kg)<input type="number" id="pfPeso" inputmode="decimal" step="0.1" min="25" max="300" value="${pf.peso ?? ''}" placeholder="Ex.: 62"></label>
+      <label class="grow small muted">Altura (cm)<input type="number" id="pfAltura" inputmode="numeric" min="100" max="250" value="${pf.altura ?? ''}" placeholder="Ex.: 165"></label></div>
+    <fieldset class="opts"><legend class="small muted">Objetivo</legend>${Object.entries(OBJ).map(([k, v]) => `<label class="opt"><input type="radio" name="pfObj" value="${k}" ${pf.objetivo === k ? 'checked' : ''}><span>${v}</span></label>`).join('')}</fieldset>
+    <fieldset class="opts"><legend class="small muted">Experiência com musculação</legend>${Object.entries(NIVEL).map(([k, v]) => `<label class="opt"><input type="radio" name="pfNivel" value="${k}" ${(pf.nivel || 'iniciante') === k ? 'checked' : ''}><span>${v[0]} <small class="muted">· ${v[1]}</small></span></label>`).join('')}</fieldset>
+    <p id="pfErro" class="small" style="color:var(--accent);margin:0" role="alert"></p>`;
+}
+function salvarPerfil(inicio){
+  const err = m => { $('#pfErro').textContent = m; return false; };
+  const nome = $('#pfNome').value.trim();
+  let peso = parseFloat(String($('#pfPeso').value).replace(',', '.')), altura = parseFloat(String($('#pfAltura').value).replace(',', '.'));
+  if (altura && altura < 3) altura = Math.round(altura * 100);
+  const obj = document.querySelector('input[name=pfObj]:checked')?.value, nivel = document.querySelector('input[name=pfNivel]:checked')?.value || 'iniciante';
+  if (!nome) return err('Informe seu nome.');
+  if (!(peso >= 25 && peso <= 300)) return err('Informe seu peso em kg (ex.: 62).');
+  if (!(altura >= 100 && altura <= 250)) return err('Informe sua altura em cm (ex.: 165).');
+  if (!obj) return err('Escolha seu objetivo.');
+  const pesoMudou = S.perfil?.peso !== peso;
+  S.nome = nome; S.perfil = { peso, altura, objetivo: obj, nivel };
+  if (pesoMudou) { S.pesos = S.pesos.filter(x => x.data !== hoje()); S.pesos.push({ data: hoje(), kg: peso }); }
+  ensure5(); save();
+  if (inicio) { view = S.planos.some(p => p.itens.length) ? 'hoje' : 'treinos'; render(); scrollTo(0, 0); if (view === 'treinos') toast('Agora monte seus 5 treinos'); }
+  else { render(); toast('Perfil atualizado'); }
 }
 
 /* Grade completa com busca */
@@ -719,8 +834,9 @@ function vAjustes(){
     <div class="top"><h1>Ajustes</h1></div>
     <div class="stack">
       <section class="card stack">
-        <label class="small muted" for="nm">Seu nome</label>
-        <input type="text" id="nm" value="${esc(S.nome)}" onchange="S.nome=this.value.trim();save()">
+        <h3>Seu perfil</h3>
+        ${perfilForm()}
+        <button class="btn primary" onclick="salvarPerfil(false)">Salvar perfil</button>
       </section>
       <section class="card stack">
         <h3>Backup</h3>
