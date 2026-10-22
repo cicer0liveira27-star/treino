@@ -205,7 +205,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js"></script>
+<script src="exercicios.js?v=6"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -871,7 +871,11 @@ $('#dlg').addEventListener('close', () => { $('#dlgBody').innerHTML = ''; });
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
 
 render();
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  const tinha = !!navigator.serviceWorker.controller; let recarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha && !recarregou && !S.ativo) { recarregou = true; location.reload(); } });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+}
 </script>
 </body>
 </html>
