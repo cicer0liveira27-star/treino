@@ -1,4 +1,4 @@
-// Assistente do Ritmo com IA (Claude) — Cloudflare Worker.
+// Assistente do Musculito com IA (Claude) — Cloudflare Worker.
 // Guarda a chave da API fora do site público. Veja assistente-ia/README.md.
 export default {
   async fetch(req, env) {
@@ -20,7 +20,7 @@ export default {
 
     const exercicios = Array.isArray(b.exercicios) ? b.exercicios.slice(0, 150).join('; ') : '';
     const system = [
-      'Você é o assistente do Ritmo, um app de treinos de academia. A pessoa monta sozinha 5 treinos por semana e você ajuda com dicas.',
+      'Você é o assistente do Musculito, um app de treinos de academia. A pessoa monta sozinha 5 treinos por semana e você ajuda com dicas.',
       'Responda em português do Brasil, em tom amigável e direto, com no máximo 8 linhas.',
       'Leve em conta o perfil (peso, altura, objetivo, nível) e os treinos da semana enviados.',
       `Quando sugerir exercícios, use apenas nomes desta lista do app: ${exercicios}.`,
