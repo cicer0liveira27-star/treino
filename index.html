@@ -150,6 +150,29 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 .celebrate{text-align:center;padding:28px 20px}
 .celebrate .big{font-size:54px}
 .empty-note{text-align:center;color:var(--muted);padding:20px}
+
+/* Grade, busca e arrastar */
+.badge{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-family:Fraunces,serif;font-size:17px;font-weight:700;color:var(--accent);flex:none}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.num{min-width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;flex:none}
+.sort-item{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .18s ease,box-shadow .18s}
+.sort-item input{-webkit-user-select:text;user-select:text}
+.sort-item.dragging{transition:box-shadow .18s;position:relative;z-index:30;box-shadow:0 16px 36px rgba(60,30,20,.25);outline:2px solid var(--accent)}
+.drag{border:none;background:none;color:var(--muted);font-size:22px;line-height:1;padding:8px 4px;margin-left:-6px;cursor:grab;touch-action:none;border-radius:8px}
+.libbox{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.stack{grid-template-columns:minmax(0,1fr)}
+.libq{width:100%;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:12px 16px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.lib button{position:relative}
+.lib .have{position:absolute;top:10px;left:10px;background:var(--ok);color:#fff;font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px;z-index:1}
+.lib .addlbl{display:block;color:var(--accent);font-weight:600;margin:6px 4px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast[hidden]{display:none}
+.modelo{display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid var(--line);border-radius:14px;cursor:pointer}
+.modelo:has(input:checked){border-color:var(--accent);background:var(--soft)}
+.modelo input{margin-top:4px;accent-color:var(--accent)}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -158,6 +181,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 <div id="timer" class="timer" hidden></div>
 <nav class="tabs" aria-label="Seções"><div id="tabs"></div></nav>
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="exercicios.js"></script>
 <script>
@@ -165,9 +189,10 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 const KEY = 'ritmo.v2';
 const EX = Object.fromEntries(Exercicios.lista.map(e => [e.id, e]));
 const uid = () => Math.random().toString(36).slice(2, 9);
-const defaultState = () => ({
-  nome: '',
-  planos: [
+const it = (ex, reps, series = 3, descanso = 60) => ({ ex, series, reps, descanso });
+const AER = it('aerobico', '10 min', 1, 0);
+const MODELOS = [
+  { id: 'grade-ae', nome: 'Grade A–E (5 dias)', desc: 'Divisão completa em 5 treinos com aeróbico diário: posterior, costas, quadríceps, peito e ombros, pernas.', planos: [
     { id: uid(), nome: 'Posterior e glúteos', itens: [
       { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
       { ex: 'agachamento-sumo', series: 3, reps: '8 a 12', descanso: 60 },
@@ -213,9 +238,24 @@ const defaultState = () => ({
       { ex: 'cadeira-extensora', series: 3, reps: '8 a 10', descanso: 60 },
       { ex: 'mesa-flexora', series: 3, reps: '8 a 10', descanso: 60 },
       { ex: 'elevacao-pelvica', series: 3, reps: '10', descanso: 60 } ] }
-  ],
-  checkins: [], sessoes: [], pesos: [], ativo: null
-});
+  ] },
+  { id: 'abc', nome: 'ABC (3 dias)', desc: 'Peito, ombros e tríceps · Costas e bíceps · Pernas e glúteos.', planos: [
+    { nome: 'Peito, ombros e tríceps', itens: [AER, it('supino-maquina', '8 a 12'), it('supino-inclinado', '8 a 12'), it('peck-deck', '10 a 12'), it('desenvolvimento', '8 a 10'), it('elevacao-lateral', '10 a 12'), it('triceps-corda', '10 a 12')] },
+    { nome: 'Costas e bíceps', itens: [AER, it('puxador-frente', '8 a 12'), it('remada-sentada', '8 a 12'), it('remada', '10'), it('rosca', '10'), it('rosca-martelo', '10'), it('prancha', '30 s')] },
+    { nome: 'Pernas e glúteos', itens: [AER, it('agachamento', '10 a 12'), it('leg-press', '10'), it('cadeira-extensora', '10 a 12'), it('mesa-flexora', '10 a 12'), it('elevacao-pelvica', '12'), it('panturrilha', '15')] }
+  ] },
+  { id: 'peito', nome: 'Foco em peito', desc: 'Um treino completo de peito com barra, halteres, máquina e polia.', planos: [
+    { nome: 'Peito completo', itens: [AER, it('supino-reto', '8 a 12', 4), it('supino-inclinado', '8 a 12'), it('supino-maquina', '10 a 12'), it('crucifixo', '10 a 12'), it('crossover', '12 a 15'), it('peck-deck', '12'), it('pullover', '12'), it('flexao', 'até a falha')] }
+  ] },
+  { id: 'casa', nome: 'Em casa, sem aparelhos', desc: 'Corpo inteiro só com o peso do corpo e um colchonete.', planos: [
+    { nome: 'Corpo inteiro', itens: [it('agachamento', '15'), it('afundo', '10 cada perna'), it('elevacao-pelvica', '15'), it('flexao', '8 a 12'), it('coice', '15 cada perna'), it('abdominal', '15'), it('prancha', '30 s')] }
+  ] }
+];
+function aplicarModelo(id){
+  const m = MODELOS.find(x => x.id === id); if (!m) return;
+  m.planos.forEach(p => S.planos.push({ id: uid(), nome: p.nome, itens: p.itens.map(i => ({ ...i })) }));
+}
+const defaultState = () => ({ nome: '', planos: [], checkins: [], sessoes: [], pesos: [], ativo: null });
 function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.planos) return s; }catch{} return defaultState(); }
 let S = load();
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch{} }
@@ -291,8 +331,10 @@ function render(){
   stopAnims();
   const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
   $('#app').innerHTML = v();
-  renderTabs(); mountAnims($('#app'));
+  renderTabs(); mountAnims($('#app')); bindLib($('#app'));
   if (view === 'treino') bindTreino();
+  sortable($('#sortEx'), (a, b) => moverItem(plano(editId).itens, a, b));
+  sortable($('#sortPlanos'), (a, b) => moverItem(S.planos, a, b));
 }
 
 /* ---------- Telas ---------- */
@@ -300,10 +342,13 @@ function vHoje(){
   if (!S.nome) return `
     <div class="top"><h1>Ritmo</h1></div>
     <div class="card stack">
-      <h2>Bem-vinda! 👋</h2>
+      <h2>Boas-vindas! 👋</h2>
       <p class="muted" style="margin:0">Aqui ficam seus treinos, seus check-ins e sua evolução. Cada exercício tem uma animação mostrando como fazer.</p>
       <label class="small muted" for="nomeIn">Como podemos te chamar?</label>
       <input type="text" id="nomeIn" placeholder="Seu nome" autocomplete="given-name">
+      ${S.planos.length ? '' : `<p class="small muted" style="margin:6px 0 0">Como quer começar?</p>
+      <div class="stack" style="gap:8px">${MODELOS.map((m, i) => `<label class="modelo"><input type="radio" name="modelo" value="${m.id}" ${i === 0 ? 'checked' : ''}><span><b>${esc(m.nome)}</b><br><span class="small muted">${esc(m.desc)}</span></span></label>`).join('')}
+        <label class="modelo"><input type="radio" name="modelo" value=""><span><b>Montar do zero</b><br><span class="small muted">Escolha seus exercícios na grade completa.</span></span></label></div>`}
       <button class="btn primary block" onclick="salvarNome()">Começar</button>
     </div>`;
   const prox = proximoPlano(), sem = semanaAtual(), set = new Set(S.checkins), h = hoje();
@@ -332,7 +377,12 @@ function vHoje(){
         </button>`).join('') : `<div class="card empty-note">Nenhum treino ainda. Crie um na aba Treinos.</div>`}
     </div>`;
 }
-function salvarNome(){ const n = $('#nomeIn').value.trim(); if (!n) return $('#nomeIn').focus(); S.nome = n; save(); render(); }
+function salvarNome(){
+  const n = $('#nomeIn').value.trim(); if (!n) return $('#nomeIn').focus(); S.nome = n;
+  const m = document.querySelector('input[name=modelo]:checked'); let vazio = null;
+  if (m && !S.planos.length) { if (m.value) aplicarModelo(m.value); else { vazio = { id: uid(), nome: 'Treino A', itens: [] }; S.planos.push(vazio); } }
+  save(); if (vazio) editar(vazio.id); else render();
+}
 function toggleCheckin(){ const h = hoje(); S.checkins.includes(h) ? S.checkins = S.checkins.filter(d => d !== h) : checkin(h); save(); render(); }
 
 function iniciar(id){
@@ -418,24 +468,37 @@ function vTreinos(){
   return `
     <div class="top"><h1>Treinos</h1><button class="btn sm primary" onclick="novoPlano()">+ Novo</button></div>
     <div class="stack">
+      ${S.planos.length > 1 ? `<p class="muted small" style="margin:0">Segure um treino e arraste para mudar a ordem.</p>` : ''}
+      ${S.planos.length ? '' : `<div class="card empty-note">Você ainda não tem treinos. Toque em <b>+ Novo</b> para montar o seu ou usar uma grade pronta.</div>`}
+      <div class="stack" id="sortPlanos">
       ${S.planos.map((p, i) => `
-        <div class="card">
-          <div class="row" style="justify-content:space-between"><div class="row"><span class="plan"><span class="badge" style="width:40px;height:40px;font-size:18px">${letra(i)}</span></span><h3>${esc(p.nome)}</h3></div>
-          <button class="btn sm" onclick="editar('${p.id}')">Editar</button></div>
-          <div style="margin-top:8px">${p.itens.map(it => `<div class="list-item"><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${it.series} × ${esc(it.reps)}</span></div></div>`).join('') || '<p class="muted small">Sem exercícios.</p>'}</div>
+        <div class="card sort-item">
+          <div class="row" style="justify-content:space-between">
+            <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><h3 class="ell">${esc(p.nome)}</h3></div>
+            <button class="btn sm" onclick="editar('${p.id}')">Editar</button>
+          </div>
+          <p class="small muted" style="margin:10px 0 0">${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}${p.itens.length ? ': ' + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : ''}</p>
         </div>`).join('')}
-      <h2 style="margin-top:10px">Biblioteca de exercícios</h2>
-      <p class="muted small" style="margin:0">Toque para ver a animação e as dicas.</p>
-      <div class="lib">${Exercicios.lista.map(e => `<button onclick="verEx('${e.id}')"><div class="mini" data-anim="${e.id}" data-still="1"></div><b>${esc(e.nome)}</b><small>${esc(e.grupo)}</small></button>`).join('')}</div>
+      </div>
+      <h2 style="margin-top:12px">Grade completa de exercícios</h2>
+      <p class="muted small" style="margin:0">${Exercicios.lista.length} exercícios. Busque pelo nome do exercício ou do aparelho e toque para ver a animação.</p>
+      ${libBlock('ver')}
     </div>`;
 }
 function verEx(id){
   const e = EX[id];
   abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>${esc(e.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
     <div class="mini" style="width:100%;height:auto;aspect-ratio:240/218;border-radius:14px" data-anim="${e.id}"></div>
-    <p class="small muted">${esc(e.grupo)}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
+    <p class="small muted">${esc(e.grupo)} · ${esc(e.aparelho)}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
 }
-function novoPlano(){ const p = { id: uid(), nome: 'Treino ' + letra(S.planos.length), itens: [] }; S.planos.push(p); save(); editar(p.id); }
+function novoPlano(){
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Novo treino</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <button class="card plan" onclick="criarVazio()"><span class="badge">+</span><span class="meta"><b>Montar do zero</b><span class="small muted">Escolha os exercícios na grade completa.</span></span></button>
+    <h3 style="margin:18px 0 8px">Ou use uma grade pronta</h3>
+    <div class="stack">${MODELOS.map(m => `<div class="card"><b>${esc(m.nome)}</b><p class="small muted" style="margin:4px 0 6px">${esc(m.desc)}</p><p class="small" style="margin:0 0 10px">${m.planos.map(p => esc(p.nome)).join(' · ')}</p><button class="btn sm primary" onclick="usarModelo('${m.id}')">Adicionar ${m.planos.length > 1 ? m.planos.length + ' treinos' : 'treino'}</button></div>`).join('')}</div></div>`);
+}
+function criarVazio(){ const p = { id: uid(), nome: 'Treino ' + letra(S.planos.length), itens: [] }; S.planos.push(p); save(); fecharDlg(); editar(p.id); }
+function usarModelo(id){ const n = MODELOS.find(m => m.id === id).planos.length; aplicarModelo(id); save(); fecharDlg(); view = 'treinos'; render(); toast(n > 1 ? `${n} treinos adicionados` : 'Treino adicionado'); }
 function editar(id){ editId = id; view = 'editar'; render(); scrollTo(0, 0); }
 function vEditar(){
   const p = plano(editId); if (!p) { view = 'treinos'; return vTreinos(); }
@@ -443,31 +506,143 @@ function vEditar(){
     <div class="top"><button class="icon-btn" onclick="view='treinos';render()" aria-label="Voltar">←</button><h1 style="flex:1">Editar treino</h1></div>
     <div class="stack">
       <div class="card"><label class="small muted" for="pn">Nome do treino</label><input type="text" id="pn" value="${esc(p.nome)}" onchange="plano('${p.id}').nome=this.value;save()"></div>
+      ${p.itens.length > 1 ? `<p class="muted small" style="margin:0">Segure um exercício e arraste até a posição em que ele deve ficar.</p>` : ''}
+      ${p.itens.length ? '' : `<div class="card empty-note">Nenhum exercício ainda. Busque abaixo e toque em “+ Adicionar”.</div>`}
+      <div class="stack" id="sortEx">
       ${p.itens.map((it, i) => `
-        <div class="card">
-          <div class="row"><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${esc(EX[it.ex]?.grupo)}</span></div>
-            <button class="icon-btn" onclick="mover(${i},-1)" aria-label="Subir" ${i ? '' : 'disabled'}>↑</button>
-            <button class="icon-btn" onclick="mover(${i},1)" aria-label="Descer" ${i < p.itens.length - 1 ? '' : 'disabled'}>↓</button>
-            <button class="icon-btn" onclick="remover(${i})" aria-label="Remover">✕</button></div>
+        <div class="card sort-item">
+          <div class="row"><button class="drag" aria-label="Mover ${esc(EX[it.ex]?.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="num">${i + 1}</span><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${esc(EX[it.ex]?.aparelho)}</span></div>
+            <button class="icon-btn" onclick="remover(${i})" aria-label="Remover ${esc(EX[it.ex]?.nome)}">✕</button></div>
           <div class="row" style="margin-top:10px">
             <label class="grow small muted">Séries<input type="number" min="1" max="10" value="${it.series}" onchange="campo(${i},'series',Math.max(1,+this.value||1))"></label>
             <label class="grow small muted">Repetições<input type="text" value="${esc(it.reps)}" onchange="campo(${i},'reps',this.value)"></label>
             <label class="grow small muted">Descanso (s)<input type="number" min="0" step="5" value="${it.descanso}" onchange="campo(${i},'descanso',+this.value||0)"></label>
           </div>
         </div>`).join('')}
-      <button class="btn block" onclick="adicionar()">+ Adicionar exercício</button>
-      <button class="btn ghost block" style="color:var(--accent)" onclick="excluirPlano()">Excluir este treino</button>
+      </div>
+      <h2 style="margin-top:12px">Adicionar exercícios</h2>
+      ${libBlock('add')}
+      <button class="btn ghost block" style="color:var(--accent);margin-top:12px" onclick="excluirPlano()">Excluir este treino</button>
     </div>`;
 }
 function campo(i, k, v){ plano(editId).itens[i][k] = v; save(); }
-function mover(i, d){ const it = plano(editId).itens; [it[i], it[i + d]] = [it[i + d], it[i]]; save(); render(); }
-function remover(i){ plano(editId).itens.splice(i, 1); save(); render(); }
+function moverItem(arr, from, to){ arr.splice(to, 0, arr.splice(from, 1)[0]); save(); const y = scrollY; render(); scrollTo(0, y); }
+function remover(i){ const [r] = plano(editId).itens.splice(i, 1); save(); const y = scrollY; render(); scrollTo(0, y); toast(`${EX[r.ex]?.nome || 'Exercício'} removido`); }
 function excluirPlano(){ if (!confirm('Excluir este treino?')) return; S.planos = S.planos.filter(p => p.id !== editId); save(); view = 'treinos'; render(); }
-function adicionar(){
-  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Adicionar exercício</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
-    <div class="lib">${Exercicios.lista.map(e => `<button onclick="addEx('${e.id}')"><div class="mini" data-anim="${e.id}"></div><b>${esc(e.nome)}</b><small>${esc(e.grupo)}</small></button>`).join('')}</div></div>`);
+function addEx(id){
+  const box = document.querySelector('.libbox[data-action=add]'), before = box ? box.getBoundingClientRect().top : 0;
+  const e = EX[id], p = plano(editId);
+  p.itens.push(it(id, id === 'aerobico' ? '10 min' : e.tempo ? '30 s' : '8 a 12', id === 'aerobico' ? 1 : 3, id === 'aerobico' ? 0 : 60));
+  save(); render();
+  const box2 = document.querySelector('.libbox[data-action=add]'); if (box && box2) scrollBy(0, box2.getBoundingClientRect().top - before);
+  toast(`${e.nome} adicionado como ${p.itens.length}º`);
 }
-function addEx(id){ plano(editId).itens.push({ ex: id, series: 3, reps: EX[id].tempo ? '30 s' : '12', descanso: 60 }); save(); fecharDlg(); render(); scrollTo(0, document.body.scrollHeight); }
+
+/* Grade completa com busca */
+const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const GRUPOS = ['Todos', ...new Set(Exercicios.lista.map(e => e.grupo))];
+const LIB = { ver: { q: '', g: 'Todos' }, add: { q: '', g: 'Todos' } };
+function filtrar(q, g){
+  const ws = norm(q).split(/\s+/).filter(Boolean);
+  return Exercicios.lista.filter(e => (g === 'Todos' || e.grupo === g) && ws.every(w => norm(`${e.nome} ${e.aparelho} ${e.grupo} ${e.id}`).includes(w)));
+}
+function libBlock(action){
+  const st = LIB[action];
+  return `<div class="libbox" data-action="${action}">
+    <input type="search" class="libq" value="${esc(st.q)}" placeholder="Buscar exercício ou aparelho (ex.: supino, polia, voador)" aria-label="Buscar exercício ou aparelho">
+    <div class="chips" role="group" aria-label="Grupos musculares">${GRUPOS.map(g => `<button class="chip ${g === st.g ? 'on' : ''}" data-g="${esc(g)}" aria-pressed="${g === st.g}">${esc(g)}</button>`).join('')}</div>
+    <div class="lib libgrid"></div></div>`;
+}
+function bindLib(root){
+  root.querySelectorAll('.libbox').forEach(box => {
+    const act = box.dataset.action, st = LIB[act], q = box.querySelector('.libq'), grid = box.querySelector('.libgrid');
+    const tem = act === 'add' ? new Set((plano(editId)?.itens || []).map(i => i.ex)) : new Set();
+    const draw = () => {
+      const list = filtrar(st.q, st.g);
+      grid.innerHTML = list.length ? list.map(e => `<button data-ex="${e.id}">${tem.has(e.id) ? '<span class="have">✓ no treino</span>' : ''}<div class="mini" data-anim="${e.id}" data-still="1"></div><b>${esc(e.nome)}</b><small>${esc(e.aparelho)}</small>${act === 'add' ? '<span class="addlbl">+ Adicionar</span>' : ''}</button>`).join('')
+        : `<p class="muted small" style="grid-column:1/-1;text-align:center">Nada encontrado para “${esc(st.q)}”.</p>`;
+      mountAnims(grid);
+    };
+    q.oninput = () => { st.q = q.value; draw(); };
+    box.querySelectorAll('.chip').forEach(c => c.onclick = () => { st.g = c.dataset.g; box.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); draw(); });
+    grid.onclick = e => { const b = e.target.closest('[data-ex]'); if (b) (act === 'add' ? addEx : verEx)(b.dataset.ex); };
+    draw();
+  });
+}
+
+/* Arrastar para reordenar (segurar e arrastar, ou alça ⠿; setas no teclado) */
+let DRAG = null, PRESS = null, lastDrag = 0;
+const sortItems = list => [...list.children].filter(c => c.classList.contains('sort-item'));
+function sortable(list, onMove){
+  if (!list) return;
+  list._onMove = onMove;
+  list.addEventListener('touchstart', e => { if (e.touches.length === 1) pressStart(e, list, e.touches[0]); }, { passive: true });
+  list.addEventListener('mousedown', e => { if (e.button === 0) pressStart(e, list, e); });
+  list.addEventListener('keydown', e => {
+    const h = e.target.closest('.drag'); if (!h || !['ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    const els = sortItems(list), i = els.indexOf(h.closest('.sort-item')), j = i + (e.key === 'ArrowUp' ? -1 : 1);
+    if (j < 0 || j >= els.length) return;
+    e.preventDefault(); const id = list.id; onMove(i, j);
+    const nl = document.getElementById(id); if (nl) sortItems(nl)[j]?.querySelector('.drag')?.focus();
+  });
+}
+function pressStart(e, list, pt){
+  if (DRAG) return;
+  const item = e.target.closest('.sort-item'); if (!item || item.parentElement !== list) return;
+  if (e.target.closest('input,select,textarea')) return;
+  if (e.target.closest('.drag')) { if (e.type === 'mousedown') e.preventDefault(); beginDrag(list, item, pt.clientY); return; }
+  if (e.target.closest('button,a')) return;
+  clearTimeout(PRESS?.timer);
+  PRESS = { x: pt.clientX, y: pt.clientY, timer: setTimeout(() => { const p = PRESS; PRESS = null; if (p) beginDrag(list, item, p.y); }, 380) };
+}
+function beginDrag(list, item, y){
+  const els = sortItems(list), from = els.indexOf(item); if (from < 0 || els.length < 2) return;
+  const rects = els.map(el => { const r = el.getBoundingClientRect(); return { top: r.top + scrollY, h: r.height }; });
+  const gap = rects[1].top - rects[0].top - rects[0].h;
+  DRAG = { list, item, els, from, to: from, rects, gap, y0: y + scrollY, y };
+  item.classList.add('dragging'); list.classList.add('sorting');
+  if (navigator.vibrate) navigator.vibrate(15);
+  const loop = () => {
+    if (!DRAG) return;
+    if (DRAG.y < 70) scrollBy(0, -10); else if (DRAG.y > innerHeight - 150) scrollBy(0, 10);
+    dragUpdate(); DRAG.raf = requestAnimationFrame(loop);
+  };
+  DRAG.raf = requestAnimationFrame(loop);
+}
+function dragUpdate(){
+  const d = DRAG, dy = d.y + scrollY - d.y0, r = d.rects[d.from], center = r.top + r.h / 2 + dy;
+  d.item.style.transform = `translateY(${dy}px)`;
+  let to = d.from;
+  d.rects.forEach((q, i) => { const mid = q.top + q.h / 2; if (i < d.from && center < mid) to = Math.min(to, i); if (i > d.from && center > mid) to = Math.max(to, i); });
+  d.to = to;
+  const shift = r.h + d.gap;
+  d.els.forEach((el, i) => {
+    if (i === d.from) return;
+    const t = d.from < to && i > d.from && i <= to ? -shift : to < d.from && i >= to && i < d.from ? shift : 0;
+    el.style.transform = t ? `translateY(${t}px)` : '';
+  });
+}
+function endDrag(){
+  const d = DRAG; DRAG = null; cancelAnimationFrame(d.raf); lastDrag = Date.now();
+  d.els.forEach(el => el.style.transform = ''); d.item.classList.remove('dragging'); d.list.classList.remove('sorting');
+  if (d.from !== d.to) { if (navigator.vibrate) navigator.vibrate(10); d.list._onMove(d.from, d.to); }
+}
+function pointerMove(x, y, e){
+  if (DRAG) { if (e.cancelable) e.preventDefault(); DRAG.y = y; return; }
+  if (PRESS && (Math.abs(x - PRESS.x) > 8 || Math.abs(y - PRESS.y) > 8)) { clearTimeout(PRESS.timer); PRESS = null; }
+}
+function pointerEnd(){ if (PRESS) { clearTimeout(PRESS.timer); PRESS = null; } if (DRAG) endDrag(); }
+document.addEventListener('touchmove', e => pointerMove(e.touches[0].clientX, e.touches[0].clientY, e), { passive: false });
+document.addEventListener('touchend', pointerEnd);
+document.addEventListener('touchcancel', pointerEnd);
+document.addEventListener('mousemove', e => pointerMove(e.clientX, e.clientY, e));
+document.addEventListener('mouseup', pointerEnd);
+document.addEventListener('click', e => { if (Date.now() - lastDrag < 400) { e.stopPropagation(); e.preventDefault(); } }, true);
+document.addEventListener('contextmenu', e => { if (DRAG || PRESS) e.preventDefault(); });
+
+/* Aviso rápido */
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); }
 
 /* Evolução */
 function lineChart(pts, unidade){
