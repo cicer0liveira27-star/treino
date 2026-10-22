@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16110f" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Ritmo: seus treinos com check-in, evolução e animações de cada exercício.">
+<title>Ritmo · Treinos</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ritmo">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff7f2; --card:#ffffff; --soft:#fbe9e0; --line:#f0dcd2;
+  --text:#2a1f1b; --muted:#8c7a72; --accent:#e8573f; --accent-2:#ffb4a2; --ok:#2f9e6d;
+  --fig:#2a1f1b; --fig-far:#c9b4aa; --mat:#ffd9cc; --db:#e8573f; --mq:#9fb0ba;
+  --shadow:0 1px 2px rgba(60,30,20,.06),0 6px 20px rgba(60,30,20,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#16110f; --card:#211a17; --soft:#2c221e; --line:#3a2e29;
+    --text:#f6ece7; --muted:#a8968e; --accent:#ff7a5f; --accent-2:#7a3a2c; --ok:#4cc38a;
+    --fig:#f6ece7; --fig-far:#6e5a52; --mat:#4a2f27; --db:#ff7a5f; --mq:#5d6d76; --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.45 Inter,system-ui,sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;letter-spacing:-.01em;margin:0}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.top h1{font-size:28px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.stack{display:grid;gap:12px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 16px;font-weight:500}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}
+.btn.block{width:100%;padding:14px}
+.btn.sm{padding:6px 12px;font-size:14px}
+.icon-btn{border:none;background:var(--soft);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:16px}
+input[type=text],input[type=number],input[type=date],select{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+
+/* Hoje */
+.hello{font-size:15px;color:var(--muted)}
+.streak{display:flex;gap:12px}
+.stat{flex:1;background:var(--soft);border-radius:14px;padding:12px}
+.stat b{display:block;font-family:Fraunces,serif;font-size:26px;line-height:1.1}
+.week{display:flex;justify-content:space-between;margin-top:14px}
+.day{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.day i{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:14px}
+.day.on i{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.today{color:var(--text);font-weight:600}
+.plan{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
+.plan .badge{width:52px;height:52px;border-radius:14px;background:var(--soft);display:grid;place-items:center;font-family:Fraunces,serif;font-size:24px;font-weight:700;color:var(--accent);flex:none}
+.plan .meta{flex:1;min-width:0}
+.plan .meta b{display:block}
+.tag{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:2px 8px;font-weight:600;vertical-align:middle;margin-left:6px}
+
+/* Treino em andamento */
+.ex{padding:0;overflow:hidden}
+.ex .anim{background:var(--soft);aspect-ratio:240/218;max-height:260px;width:100%;display:grid;place-items:center}
+.ex .anim svg{width:100%;height:100%;max-height:260px}
+.ex .body{padding:14px 16px 16px}
+.ex .head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ex.done .anim{opacity:.55}
+.sets{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.set{min-width:56px;padding:10px 0;border-radius:12px;border:2px solid var(--line);background:var(--card);font-weight:600;text-align:center}
+.set.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.load{display:flex;align-items:center;gap:8px;margin-top:12px}
+.load input{width:92px;text-align:center}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:500}
+details ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px}
+.progress{height:6px;background:var(--soft);border-radius:99px;overflow:hidden;margin:6px 0 2px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+
+/* Figura */
+.fig .limb,.fig .torso{stroke:var(--fig);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.fig .torso{stroke-width:13}
+.fig-far .limb{stroke:var(--fig-far)}
+.fig .head{fill:var(--fig)}
+.fig-ground{stroke:var(--line);stroke-width:2}
+.fig-mat{fill:var(--mat)}
+.db rect,.dbc{fill:var(--db)}
+.fig .mq{stroke:var(--mq);stroke-linecap:round;fill:none}
+.fig .mqf{fill:var(--mq)}
+.fig .mqb{fill:var(--mq);opacity:.3}
+.fig .cabo{stroke:var(--muted);stroke-width:1.5;fill:none}
+.fig .plate{fill:none;stroke:var(--mq);stroke-width:4}
+.fig .pad{stroke:var(--mq);stroke-width:9;stroke-linecap:round;opacity:.85}
+
+.timer[hidden]{display:none}
+.has-timer{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
+/* Timer */
+.timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));width:min(640px,calc(100% - 24px));background:var(--text);color:var(--bg);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.timer b{font-family:Fraunces,serif;font-size:26px;min-width:64px}
+.timer .bar{flex:1;height:6px;background:rgba(127,127,127,.35);border-radius:99px;overflow:hidden}
+.timer .bar i{display:block;height:100%;background:var(--accent)}
+.timer button{background:transparent;border:1px solid currentColor;border-radius:999px;padding:6px 12px;font-size:14px}
+
+/* Navegação inferior */
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav.tabs div{display:flex;max-width:680px;width:100%}
+nav.tabs button{flex:1;background:none;border:none;display:grid;justify-items:center;gap:2px;padding:8px 0;font-size:12px;color:var(--muted);border-radius:12px}
+nav.tabs button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button.on{color:var(--accent);font-weight:600}
+
+/* Evolução */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-top:12px}
+.cal span{font-size:11px;color:var(--muted)}
+.cal i{font-style:normal;aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:13px;background:var(--soft)}
+.cal i.on{background:var(--accent);color:#fff;font-weight:600}
+.cal i.empty{background:transparent}
+.cal i.today{outline:2px solid var(--accent);outline-offset:-2px}
+.chart{width:100%;height:auto;margin-top:10px}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--accent)}
+.chart .ax{stroke:var(--line)}
+.chart text{fill:var(--muted);font-size:11px;font-family:Inter,sans-serif}
+.row{display:flex;gap:8px;align-items:center}
+.list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.list-item:first-child{border-top:none}
+.mini{width:56px;height:52px;border-radius:10px;background:var(--soft);flex:none}
+.mini svg{width:100%;height:100%}
+.grow{flex:1;min-width:0}
+.grow b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;background:var(--soft);border-radius:999px;padding:4px;gap:4px;overflow-x:auto}
+.seg button{flex:1;border:none;background:none;border-radius:999px;padding:8px 12px;white-space:nowrap;font-size:14px}
+.seg button.on{background:var(--card);box-shadow:var(--shadow);font-weight:600}
+
+dialog{border:none;border-radius:20px;padding:0;background:var(--card);color:var(--text);width:min(560px,calc(100vw - 20px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(20,10,8,.5)}
+.dlg{padding:18px}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.lib{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.lib button{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:6px 6px 10px;text-align:left;font-size:13px}
+.lib .mini{width:100%;height:auto;aspect-ratio:240/218}
+.lib b{display:block;font-weight:500;margin:6px 4px 0}
+.lib small{color:var(--muted);margin:0 4px}
+.celebrate{text-align:center;padding:28px 20px}
+.celebrate .big{font-size:54px}
+.empty-note{text-align:center;color:var(--muted);padding:20px}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<div id="timer" class="timer" hidden></div>
+<nav class="tabs" aria-label="Seções"><div id="tabs"></div></nav>
+<dialog id="dlg"><div id="dlgBody"></div></dialog>
+
+<script src="exercicios.js"></script>
+<script>
+/* ---------- Dados ---------- */
+const KEY = 'ritmo.v2';
+const EX = Object.fromEntries(Exercicios.lista.map(e => [e.id, e]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const defaultState = () => ({
+  nome: '',
+  planos: [
+    { id: uid(), nome: 'Posterior e glúteos', itens: [
+      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
+      { ex: 'agachamento-sumo', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'mesa-flexora', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'cadeira-flexora', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'bulgaro', series: 3, reps: '8 cada perna', descanso: 60 },
+      { ex: 'coice-polia', series: 3, reps: '8 a 10 cada perna', descanso: 60 },
+      { ex: 'abducao-polia', series: 3, reps: '8 a 10 cada perna', descanso: 60 },
+      { ex: 'cadeira-abdutora', series: 3, reps: '10', descanso: 60 } ] },
+    { id: uid(), nome: 'Costas, bíceps e abdômen', itens: [
+      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
+      { ex: 'puxador-frente', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'remada-sentada', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'rosca', series: 3, reps: '10', descanso: 60 },
+      { ex: 'rosca-martelo', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'abdominal-infra', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'abdominal-remador', series: 3, reps: '8', descanso: 60 },
+      { ex: 'prancha', series: 3, reps: '30 s', descanso: 60 } ] },
+    { id: uid(), nome: 'Quadríceps e panturrilha', itens: [
+      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
+      { ex: 'agachamento-smith', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'agachamento-isometria', series: 3, reps: '20 a 30 s', descanso: 60 },
+      { ex: 'leg-press', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'cadeira-extensora', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'cadeira-adutora', series: 3, reps: '10', descanso: 60 },
+      { ex: 'panturrilha', series: 3, reps: '10', descanso: 60 },
+      { ex: 'panturrilha-sentada', series: 3, reps: '8 a 12', descanso: 60 } ] },
+    { id: uid(), nome: 'Ombros, peito, tríceps e abdômen', itens: [
+      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
+      { ex: 'peck-deck', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'elevacao-lateral', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'elevacao-frontal', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'triceps-corda', series: 3, reps: '10', descanso: 60 },
+      { ex: 'abdominal', series: 3, reps: '10', descanso: 60 },
+      { ex: 'prancha', series: 3, reps: '30 s', descanso: 60 },
+      { ex: 'abdominal-infra', series: 3, reps: '8 a 10', descanso: 60 } ] },
+    { id: uid(), nome: 'Pernas e glúteos', itens: [
+      { ex: 'aerobico', series: 1, reps: '10 min', descanso: 0 },
+      { ex: 'cadeira-abdutora', series: 3, reps: '8', descanso: 60 },
+      { ex: 'agachamento-smith', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'agachamento-sumo', series: 3, reps: '8 a 12', descanso: 60 },
+      { ex: 'agachamento-hack', series: 3, reps: '10', descanso: 60 },
+      { ex: 'cadeira-extensora', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'mesa-flexora', series: 3, reps: '8 a 10', descanso: 60 },
+      { ex: 'elevacao-pelvica', series: 3, reps: '10', descanso: 60 } ] }
+  ],
+  checkins: [], sessoes: [], pesos: [], ativo: null
+});
+function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.planos) return s; }catch{} return defaultState(); }
+let S = load();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch{} }
+
+/* ---------- Utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hoje = () => iso(new Date());
+const fromIso = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const fmtData = s => fromIso(s).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const plano = id => S.planos.find(p => p.id === id);
+const letra = i => String.fromCharCode(65 + i);
+
+function checkin(dia = hoje()){ if (!S.checkins.includes(dia)) { S.checkins.push(dia); S.checkins.sort(); } }
+function streakDias(){
+  const set = new Set(S.checkins); let n = 0; const d = new Date();
+  if (!set.has(iso(d))) d.setDate(d.getDate() - 1);
+  while (set.has(iso(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function semanaAtual(){
+  const d = new Date(); const dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow);
+  return Array.from({ length: 7 }, (_, i) => { const x = new Date(d); x.setDate(d.getDate() + i); return iso(x); });
+}
+function ultimaCarga(exId){
+  for (let i = S.sessoes.length - 1; i >= 0; i--) {
+    const it = S.sessoes[i].itens.find(x => x.ex === exId && x.carga !== '' && x.carga != null);
+    if (it) return it.carga;
+  }
+  return '';
+}
+function proximoPlano(){
+  if (!S.planos.length) return null;
+  const ult = S.sessoes[S.sessoes.length - 1];
+  const i = ult ? S.planos.findIndex(p => p.id === ult.plano) : -1;
+  return S.planos[(i + 1) % S.planos.length];
+}
+
+/* ---------- Animações ---------- */
+let anims = [];
+function mountAnims(root = document){
+  root.querySelectorAll('[data-anim]').forEach(el => {
+    if (el.dataset.mounted) return; el.dataset.mounted = 1;
+    anims.push(Exercicios.mount(el, el.dataset.anim, el.dataset.still ? { still: 0.5 } : {}));
+  });
+}
+function stopAnims(){ anims.forEach(a => a.stop()); anims = []; }
+
+/* ---------- Navegação ---------- */
+const TABS = [
+  ['hoje', 'Hoje', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
+  ['treinos', 'Treinos', '<path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>'],
+  ['evolucao', 'Evolução', '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>'],
+  ['ajustes', 'Ajustes', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>']
+];
+let view = S.ativo ? 'treino' : 'hoje';
+let evoEx = null;
+function renderTabs(){
+  const cur = view === 'treino' ? 'hoje' : view === 'editar' ? 'treinos' : view;
+  $('#tabs').innerHTML = TABS.map(([id, nome, ic]) =>
+    `<button data-tab="${id}" class="${cur === id ? 'on' : ''}" aria-current="${cur === id ? 'page' : 'false'}"><svg viewBox="0 0 24 24">${ic}</svg>${nome}</button>`).join('');
+}
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  view = b.dataset.tab === 'hoje' && S.ativo ? 'treino' : b.dataset.tab; render(); scrollTo(0, 0);
+});
+
+let editId = null;
+function render(){
+  stopAnims();
+  const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
+  $('#app').innerHTML = v();
+  renderTabs(); mountAnims($('#app'));
+  if (view === 'treino') bindTreino();
+}
+
+/* ---------- Telas ---------- */
+function vHoje(){
+  if (!S.nome) return `
+    <div class="top"><h1>Ritmo</h1></div>
+    <div class="card stack">
+      <h2>Bem-vinda! 👋</h2>
+      <p class="muted" style="margin:0">Aqui ficam seus treinos, seus check-ins e sua evolução. Cada exercício tem uma animação mostrando como fazer.</p>
+      <label class="small muted" for="nomeIn">Como podemos te chamar?</label>
+      <input type="text" id="nomeIn" placeholder="Seu nome" autocomplete="given-name">
+      <button class="btn primary block" onclick="salvarNome()">Começar</button>
+    </div>`;
+  const prox = proximoPlano(), sem = semanaAtual(), set = new Set(S.checkins), h = hoje();
+  const fezHoje = set.has(h);
+  const noMes = S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length;
+  const nomes = ['S','T','Q','Q','S','S','D'];
+  const saud = (() => { const hr = new Date().getHours(); return hr < 12 ? 'Bom dia' : hr < 18 ? 'Boa tarde' : 'Boa noite'; })();
+  return `
+    <div class="top"><div><div class="hello">${saud},</div><h1>${esc(S.nome)}</h1></div></div>
+    <div class="stack">
+      <section class="card">
+        <div class="streak">
+          <div class="stat"><b>${streakDias()}</b><span class="small muted">dias seguidos</span></div>
+          <div class="stat"><b>${noMes}</b><span class="small muted">treinos em ${MESES[new Date().getMonth()]}</span></div>
+        </div>
+        <div class="week">${sem.map((d, i) => `<div class="day ${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}"><i>${set.has(d) ? '✓' : ''}</i>${nomes[i]}</div>`).join('')}</div>
+        <button class="btn ${fezHoje ? 'ghost' : 'primary'} block" style="margin-top:14px" onclick="toggleCheckin()">${fezHoje ? '✓ Check-in feito hoje' : 'Fazer check-in de hoje'}</button>
+      </section>
+      <h2 style="margin-top:8px">Treinos</h2>
+      ${S.planos.length ? S.planos.map((p, i) => `
+        <button class="card plan" onclick="iniciar('${p.id}')">
+          <span class="badge">${letra(i)}</span>
+          <span class="meta"><b>${esc(p.nome)}${prox && prox.id === p.id ? '<span class="tag">próximo</span>' : ''}</b>
+          <span class="small muted">${p.itens.length} exercícios · ${p.itens.slice(0, 3).map(it => EX[it.ex]?.nome).join(', ')}${p.itens.length > 3 ? '…' : ''}</span></span>
+          <span aria-hidden="true">▶</span>
+        </button>`).join('') : `<div class="card empty-note">Nenhum treino ainda. Crie um na aba Treinos.</div>`}
+    </div>`;
+}
+function salvarNome(){ const n = $('#nomeIn').value.trim(); if (!n) return $('#nomeIn').focus(); S.nome = n; save(); render(); }
+function toggleCheckin(){ const h = hoje(); S.checkins.includes(h) ? S.checkins = S.checkins.filter(d => d !== h) : checkin(h); save(); render(); }
+
+function iniciar(id){
+  const p = plano(id); if (!p || !p.itens.length) return;
+  S.ativo = { plano: id, inicio: Date.now(), itens: p.itens.map(it => ({ ...it, carga: ultimaCarga(it.ex), feitas: Array(+it.series || 1).fill(false) })) };
+  save(); view = 'treino'; render(); scrollTo(0, 0);
+}
+
+function vTreino(){
+  const a = S.ativo; if (!a) { view = 'hoje'; return vHoje(); }
+  const p = plano(a.plano);
+  const tot = a.itens.reduce((s, it) => s + it.feitas.length, 0), ok = a.itens.reduce((s, it) => s + it.feitas.filter(Boolean).length, 0);
+  return `
+    <div class="top">
+      <div><div class="hello">Treino em andamento</div><h1>${esc(p?.nome || 'Treino')}</h1></div>
+      <button class="btn sm ghost" onclick="cancelarTreino()">Sair</button>
+    </div>
+    <div class="small muted">${ok} de ${tot} séries</div>
+    <div class="progress"><i style="width:${tot ? ok / tot * 100 : 0}%"></i></div>
+    <div class="stack" style="margin-top:14px">
+      ${a.itens.map((it, i) => { const e = EX[it.ex]; if (!e) return ''; const done = it.feitas.every(Boolean); return `
+        <article class="card ex ${done ? 'done' : ''}" id="ex${i}">
+          <div class="anim" data-anim="${e.id}"></div>
+          <div class="body">
+            <div class="head"><div><h3>${i + 1}. ${esc(e.nome)}</h3>
+              <div class="small muted">${+it.series === 1 ? esc(it.reps) : it.series + ' × ' + esc(it.reps)}${+it.descanso ? ' · descanso ' + it.descanso + 's' : ''}</div></div>
+              ${done ? '<span style="color:var(--ok);font-weight:600">✓</span>' : ''}</div>
+            <div class="sets">${it.feitas.map((f, s) => `<button class="set ${f ? 'on' : ''}" data-i="${i}" data-s="${s}" aria-pressed="${f}">${f ? '✓' : it.feitas.length === 1 ? 'Feito' : 'Série ' + (s + 1)}</button>`).join('')}</div>
+            ${e.tempo ? '' : `<div class="load"><label class="small muted" for="c${i}">Carga (kg)</label><input type="number" inputmode="decimal" step="0.5" min="0" id="c${i}" data-carga="${i}" value="${esc(it.carga)}" placeholder="—"></div>`}
+            <details><summary>Como fazer</summary><ul>${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></details>
+          </div>
+        </article>`; }).join('')}
+      <button class="btn primary block" onclick="finalizar()">Finalizar treino</button>
+    </div>`;
+}
+function bindTreino(){
+  $('#app').querySelectorAll('.set').forEach(b => b.onclick = () => {
+    const it = S.ativo.itens[+b.dataset.i], s = +b.dataset.s;
+    it.feitas[s] = !it.feitas[s]; save();
+    if (it.feitas[s]) {
+      if (navigator.vibrate) navigator.vibrate(20);
+      if (!it.feitas.every(Boolean)) iniciarTimer(+it.descanso || 60);
+      else { pararTimer(); const prox = document.getElementById('ex' + (+b.dataset.i + 1)); if (prox) setTimeout(() => prox.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
+    }
+    const y = scrollY; render(); scrollTo(0, y);
+  });
+  $('#app').querySelectorAll('[data-carga]').forEach(inp => inp.onchange = () => { S.ativo.itens[+inp.dataset.carga].carga = inp.value; save(); });
+}
+function cancelarTreino(){
+  if (!confirm('Sair do treino sem salvar?')) return;
+  S.ativo = null; save(); pararTimer(); view = 'hoje'; render();
+}
+function finalizar(){
+  const a = S.ativo; const feitas = a.itens.reduce((s, it) => s + it.feitas.filter(Boolean).length, 0);
+  if (!feitas && !confirm('Nenhuma série marcada. Finalizar mesmo assim?')) return;
+  const min = Math.max(1, Math.round((Date.now() - a.inicio) / 60000));
+  S.sessoes.push({ data: hoje(), plano: a.plano, nome: plano(a.plano)?.nome || '', minutos: min,
+    itens: a.itens.map(it => ({ ex: it.ex, carga: it.carga === '' ? '' : +it.carga, series: it.feitas.filter(Boolean).length })) });
+  checkin(); S.ativo = null; save(); pararTimer();
+  view = 'hoje'; render();
+  abrirDlg(`<div class="celebrate"><div class="big">🎉</div><h2>Treino concluído!</h2>
+    <p class="muted">${feitas} ${feitas === 1 ? 'série' : 'séries'} em ${min} min. Check-in de hoje registrado.<br>${streakDias() === 1 ? '1 dia seguido' : streakDias() + ' dias seguidos'}.</p>
+    <button class="btn primary" onclick="fecharDlg()">Fechar</button></div>`);
+}
+
+/* Timer de descanso */
+let tInt = null;
+function iniciarTimer(seg){
+  pararTimer(); const fim = Date.now() + seg * 1000, el = $('#timer'); el.hidden = false; document.body.classList.add('has-timer');
+  const tick = () => {
+    const r = Math.max(0, Math.ceil((fim - Date.now()) / 1000));
+    el.innerHTML = `<span class="small">Descanso</span><b>${Math.floor(r / 60)}:${pad(r % 60)}</b><div class="bar"><i style="width:${r / seg * 100}%"></i></div><button>+15s</button><button onclick="pararTimer()">Pular</button>`;
+    el.querySelector('button').onclick = () => { const left = Math.max(0, Math.ceil((fim - Date.now()) / 1000)); iniciarTimer(left + 15); };
+    if (r <= 0) { pararTimer(); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); bip(); }
+  };
+  tick(); tInt = setInterval(tick, 250);
+}
+function pararTimer(){ clearInterval(tInt); tInt = null; $('#timer').hidden = true; document.body.classList.remove('has-timer'); }
+function bip(){ try{ const c = new (window.AudioContext || window.webkitAudioContext)(); const o = c.createOscillator(), g = c.createGain(); o.frequency.value = 880; g.gain.value = .15; o.connect(g); g.connect(c.destination); o.start(); setTimeout(() => { o.stop(); c.close(); }, 350); }catch{} }
+
+/* Treinos (planos) */
+function vTreinos(){
+  return `
+    <div class="top"><h1>Treinos</h1><button class="btn sm primary" onclick="novoPlano()">+ Novo</button></div>
+    <div class="stack">
+      ${S.planos.map((p, i) => `
+        <div class="card">
+          <div class="row" style="justify-content:space-between"><div class="row"><span class="plan"><span class="badge" style="width:40px;height:40px;font-size:18px">${letra(i)}</span></span><h3>${esc(p.nome)}</h3></div>
+          <button class="btn sm" onclick="editar('${p.id}')">Editar</button></div>
+          <div style="margin-top:8px">${p.itens.map(it => `<div class="list-item"><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${it.series} × ${esc(it.reps)}</span></div></div>`).join('') || '<p class="muted small">Sem exercícios.</p>'}</div>
+        </div>`).join('')}
+      <h2 style="margin-top:10px">Biblioteca de exercícios</h2>
+      <p class="muted small" style="margin:0">Toque para ver a animação e as dicas.</p>
+      <div class="lib">${Exercicios.lista.map(e => `<button onclick="verEx('${e.id}')"><div class="mini" data-anim="${e.id}" data-still="1"></div><b>${esc(e.nome)}</b><small>${esc(e.grupo)}</small></button>`).join('')}</div>
+    </div>`;
+}
+function verEx(id){
+  const e = EX[id];
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>${esc(e.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <div class="mini" style="width:100%;height:auto;aspect-ratio:240/218;border-radius:14px" data-anim="${e.id}"></div>
+    <p class="small muted">${esc(e.grupo)}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
+}
+function novoPlano(){ const p = { id: uid(), nome: 'Treino ' + letra(S.planos.length), itens: [] }; S.planos.push(p); save(); editar(p.id); }
+function editar(id){ editId = id; view = 'editar'; render(); scrollTo(0, 0); }
+function vEditar(){
+  const p = plano(editId); if (!p) { view = 'treinos'; return vTreinos(); }
+  return `
+    <div class="top"><button class="icon-btn" onclick="view='treinos';render()" aria-label="Voltar">←</button><h1 style="flex:1">Editar treino</h1></div>
+    <div class="stack">
+      <div class="card"><label class="small muted" for="pn">Nome do treino</label><input type="text" id="pn" value="${esc(p.nome)}" onchange="plano('${p.id}').nome=this.value;save()"></div>
+      ${p.itens.map((it, i) => `
+        <div class="card">
+          <div class="row"><div class="mini" data-anim="${it.ex}" data-still="1"></div><div class="grow"><b>${esc(EX[it.ex]?.nome)}</b><span class="small muted">${esc(EX[it.ex]?.grupo)}</span></div>
+            <button class="icon-btn" onclick="mover(${i},-1)" aria-label="Subir" ${i ? '' : 'disabled'}>↑</button>
+            <button class="icon-btn" onclick="mover(${i},1)" aria-label="Descer" ${i < p.itens.length - 1 ? '' : 'disabled'}>↓</button>
+            <button class="icon-btn" onclick="remover(${i})" aria-label="Remover">✕</button></div>
+          <div class="row" style="margin-top:10px">
+            <label class="grow small muted">Séries<input type="number" min="1" max="10" value="${it.series}" onchange="campo(${i},'series',Math.max(1,+this.value||1))"></label>
+            <label class="grow small muted">Repetições<input type="text" value="${esc(it.reps)}" onchange="campo(${i},'reps',this.value)"></label>
+            <label class="grow small muted">Descanso (s)<input type="number" min="0" step="5" value="${it.descanso}" onchange="campo(${i},'descanso',+this.value||0)"></label>
+          </div>
+        </div>`).join('')}
+      <button class="btn block" onclick="adicionar()">+ Adicionar exercício</button>
+      <button class="btn ghost block" style="color:var(--accent)" onclick="excluirPlano()">Excluir este treino</button>
+    </div>`;
+}
+function campo(i, k, v){ plano(editId).itens[i][k] = v; save(); }
+function mover(i, d){ const it = plano(editId).itens; [it[i], it[i + d]] = [it[i + d], it[i]]; save(); render(); }
+function remover(i){ plano(editId).itens.splice(i, 1); save(); render(); }
+function excluirPlano(){ if (!confirm('Excluir este treino?')) return; S.planos = S.planos.filter(p => p.id !== editId); save(); view = 'treinos'; render(); }
+function adicionar(){
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Adicionar exercício</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <div class="lib">${Exercicios.lista.map(e => `<button onclick="addEx('${e.id}')"><div class="mini" data-anim="${e.id}"></div><b>${esc(e.nome)}</b><small>${esc(e.grupo)}</small></button>`).join('')}</div></div>`);
+}
+function addEx(id){ plano(editId).itens.push({ ex: id, series: 3, reps: EX[id].tempo ? '30 s' : '12', descanso: 60 }); save(); fecharDlg(); render(); scrollTo(0, document.body.scrollHeight); }
+
+/* Evolução */
+function lineChart(pts, unidade){
+  if (pts.length < 2) return `<p class="muted small">${pts.length ? 'Registre mais uma vez para ver o gráfico.' : 'Sem registros ainda.'}</p>`;
+  const W = 320, H = 150, L = 34, R = 10, T = 12, B = 24;
+  const ys = pts.map(p => p.y), min = Math.min(...ys), max = Math.max(...ys), span = (max - min) || 1;
+  const lo = min - span * .15, hi = max + span * .15;
+  const x = i => L + i * (W - L - R) / (pts.length - 1), y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join('');
+  const ticks = [lo + (hi - lo) * .15, (lo + hi) / 2, hi - (hi - lo) * .15];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de evolução">
+    ${ticks.map(t => `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${+t.toFixed(1)}</text>`).join('')}
+    <path class="ln" d="${d}"/>${pts.map((p, i) => `<circle class="dot" cx="${x(i)}" cy="${y(p.y)}" r="3.5"><title>${fmtData(p.x)}: ${p.y} ${unidade}</title></circle>`).join('')}
+    <text x="${L}" y="${H - 6}">${fmtData(pts[0].x)}</text><text x="${W - R}" y="${H - 6}" text-anchor="end">${fmtData(pts[pts.length - 1].x)}</text></svg>`;
+}
+let calMes = new Date(); calMes.setDate(1);
+function vEvolucao(){
+  const set = new Set(S.checkins), y = calMes.getFullYear(), m = calMes.getMonth();
+  const first = (new Date(y, m, 1).getDay() + 6) % 7, dias = new Date(y, m + 1, 0).getDate(), h = hoje();
+  const noMes = S.checkins.filter(d => d.startsWith(`${y}-${pad(m + 1)}`)).length;
+  const exUsados = [...new Set(S.sessoes.flatMap(s => s.itens.filter(i => i.carga !== '' && i.carga != null).map(i => i.ex)))];
+  if (!evoEx || !exUsados.includes(evoEx)) evoEx = exUsados[0] || null;
+  const cargas = evoEx ? S.sessoes.map(s => ({ x: s.data, it: s.itens.find(i => i.ex === evoEx) })).filter(o => o.it && o.it.carga !== '' && o.it.carga != null).map(o => ({ x: o.x, y: +o.it.carga })) : [];
+  const pesos = [...S.pesos].sort((a, b) => a.data.localeCompare(b.data)).map(p => ({ x: p.data, y: p.kg }));
+  const ultimas = S.sessoes.slice(-5).reverse();
+  return `
+    <div class="top"><h1>Evolução</h1></div>
+    <div class="stack">
+      <section class="card">
+        <div class="row" style="justify-content:space-between">
+          <button class="icon-btn" onclick="mudaMes(-1)" aria-label="Mês anterior">‹</button>
+          <div style="text-align:center"><h3 style="text-transform:capitalize">${MESES[m]} ${y}</h3><span class="small muted">${noMes} check-in${noMes === 1 ? '' : 's'}</span></div>
+          <button class="icon-btn" onclick="mudaMes(1)" aria-label="Próximo mês">›</button>
+        </div>
+        <div class="cal">${['S','T','Q','Q','S','S','D'].map(d => `<span>${d}</span>`).join('')}
+          ${Array(first).fill('<i class="empty"></i>').join('')}
+          ${Array.from({ length: dias }, (_, i) => { const d = `${y}-${pad(m + 1)}-${pad(i + 1)}`; return `<i class="${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}">${i + 1}</i>`; }).join('')}
+        </div>
+        <div class="streak" style="margin-top:14px">
+          <div class="stat"><b>${S.checkins.length}</b><span class="small muted">check-ins no total</span></div>
+          <div class="stat"><b>${S.sessoes.length}</b><span class="small muted">treinos concluídos</span></div>
+        </div>
+      </section>
+      <section class="card">
+        <h3>Carga por exercício</h3>
+        ${exUsados.length ? `<select style="margin-top:10px" onchange="evoEx=this.value;render()" aria-label="Exercício">${exUsados.map(id => `<option value="${id}" ${id === evoEx ? 'selected' : ''}>${esc(EX[id]?.nome || id)}</option>`).join('')}</select>${lineChart(cargas, 'kg')}`
+          : '<p class="muted small">Registre a carga durante os treinos para acompanhar a evolução.</p>'}
+      </section>
+      <section class="card">
+        <h3>Peso corporal</h3>
+        <div class="row" style="margin-top:10px">
+          <input type="number" inputmode="decimal" step="0.1" id="pesoIn" placeholder="kg" aria-label="Peso em kg">
+          <input type="date" id="pesoData" value="${h}" aria-label="Data">
+          <button class="btn primary" onclick="addPeso()">Salvar</button>
+        </div>
+        ${lineChart(pesos, 'kg')}
+      </section>
+      <section class="card">
+        <h3>Últimos treinos</h3>
+        ${ultimas.length ? ultimas.map(s => `<div class="list-item"><div class="grow"><b>${esc(s.nome)}</b><span class="small muted">${fmtData(s.data)} · ${s.minutos} min · ${s.itens.reduce((a, i) => a + i.series, 0)} séries</span></div></div>`).join('') : '<p class="muted small">Nenhum treino concluído ainda.</p>'}
+      </section>
+    </div>`;
+}
+function mudaMes(d){ calMes.setMonth(calMes.getMonth() + d); render(); }
+function addPeso(){
+  const kg = parseFloat($('#pesoIn').value.replace(',', '.')), data = $('#pesoData').value || hoje();
+  if (!kg) return $('#pesoIn').focus();
+  S.pesos = S.pesos.filter(p => p.data !== data); S.pesos.push({ data, kg }); save(); render();
+}
+
+/* Ajustes */
+function vAjustes(){
+  return `
+    <div class="top"><h1>Ajustes</h1></div>
+    <div class="stack">
+      <section class="card stack">
+        <label class="small muted" for="nm">Seu nome</label>
+        <input type="text" id="nm" value="${esc(S.nome)}" onchange="S.nome=this.value.trim();save()">
+      </section>
+      <section class="card stack">
+        <h3>Backup</h3>
+        <p class="muted small" style="margin:0">Seus dados ficam salvos neste celular. Faça um backup de vez em quando para não perder nada se trocar de aparelho ou limpar o navegador.</p>
+        <button class="btn" onclick="exportar()">Baixar backup</button>
+        <label class="btn" style="text-align:center">Restaurar backup<input type="file" accept="application/json,.json" hidden onchange="importar(this.files[0])"></label>
+      </section>
+      <section class="card stack">
+        <h3>Instalar no celular</h3>
+        <p class="muted small" style="margin:0">iPhone: no Safari, toque em Compartilhar → <b>Adicionar à Tela de Início</b>.<br>Android: no Chrome, toque em ⋮ → <b>Instalar app</b>.</p>
+      </section>
+      <button class="btn ghost" style="color:var(--accent)" onclick="zerar()">Apagar todos os dados</button>
+      <p class="muted small" style="text-align:center">As animações são ilustrativas. Para montar ou ajustar seu treino, conte com um profissional de educação física.</p>
+    </div>`;
+}
+function exportar(){
+  const b = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `ritmo-backup-${hoje()}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function importar(f){
+  if (!f) return;
+  try{ const d = JSON.parse(await f.text()); if (!d.planos) throw 0; if (!confirm('Substituir os dados atuais pelo backup?')) return; S = { ...defaultState(), ...d }; save(); view = 'hoje'; render(); alert('Backup restaurado.'); }
+  catch{ alert('Esse arquivo não parece um backup do Ritmo.'); }
+}
+function zerar(){ if (!confirm('Apagar todos os treinos, check-ins e registros?')) return; S = defaultState(); save(); view = 'hoje'; render(); }
+
+/* Diálogo */
+function abrirDlg(html){ $('#dlgBody').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); mountAnims($('#dlgBody')); }
+function fecharDlg(){ $('#dlg').close(); }
+$('#dlg').addEventListener('close', () => { $('#dlgBody').innerHTML = ''; });
+$('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
+
+render();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
