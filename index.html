@@ -72,6 +72,8 @@ input[type=text],input[type=number],input[type=date],select{background:var(--bg)
 .ex{padding:0;overflow:hidden}
 .ex .anim{background:var(--soft);aspect-ratio:240/218;max-height:260px;width:100%;display:grid;place-items:center}
 .ex .anim svg{width:100%;height:100%;max-height:260px}
+.anim:has(img.gif),.mini:has(img.gif){background:#fff}
+img.gif{width:100%;height:100%;object-fit:contain;display:block;border-radius:inherit}
 .ex .body{padding:14px 16px 16px}
 .ex .head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .ex.done .anim{opacity:.55}
@@ -302,7 +304,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=14"></script>
+<script src="exercicios.js?v=15"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -1231,7 +1233,7 @@ function vAjustes(){
         <p class="muted small" style="margin:0">iPhone: no Safari, toque em Compartilhar → <b>Adicionar à Tela de Início</b>.<br>Android: no Chrome, toque em ⋮ → <b>Instalar app</b>.</p>
       </section>
       <button class="btn ghost" style="color:var(--accent)" onclick="zerar()">Apagar todos os dados</button>
-      <p class="muted small" style="text-align:center">As animações são ilustrativas. Para montar ou ajustar seu treino, conte com um profissional de educação física.</p>
+      <p class="muted small" style="text-align:center">As animações são ilustrativas (animações 3D © <a href="https://gymvisual.com/" target="_blank" rel="noopener">Gym visual</a>, via ExerciseDB). Para montar ou ajustar seu treino, conte com um profissional de educação física.</p>
     </div>`;
 }
 async function exportar(){

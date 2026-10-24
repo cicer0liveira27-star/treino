@@ -458,6 +458,33 @@
 
   const ease = p => { let s = 0.5 - 0.5 * Math.cos(2 * Math.PI * p); s = (s - 0.08) / 0.84; return Math.min(1, Math.max(0, s)); };
 
+  // Animações 3D (ExerciseDB, mídia © Gym visual — https://gymvisual.com/).
+  // Exercício sem entrada aqui, ou GIF que não carregar, usa o boneco em SVG.
+  const GIF_BASE = 'https://static.exercisedb.dev/media/';
+  const GIF = {
+    'agachamento': 'qXTaZnJ', 'agachamento-sumo': 's7HX1BY', 'agachamento-smith': 'jFtipLl',
+    'agachamento-hack': 'Qa55kX1', 'leg-press': '2Qh2J1e', 'afundo': '9E25EOx', 'bulgaro': 'qx4fgX7',
+    'elevacao-pelvica': 'qKBpF7I', 'stiff': '5eLRITT', 'mesa-flexora': '17lJ1kr', 'cadeira-flexora': 'Zg3XY7P',
+    'cadeira-extensora': 'my33uHU', 'cadeira-abdutora': 'CHpahtl', 'cadeira-adutora': 'oHsrypV',
+    'coice-polia': 'Kpajagk', 'panturrilha': 'ykUOVze', 'panturrilha-sentada': 'bOOdeyc',
+    'puxador-frente': 'eYnzaCm', 'remada-sentada': 'fUBheHs', 'remada': 'BJ0Hz5L', 'peck-deck': 'v3xmPAR',
+    'supino-reto': 'EIeI8Vf', 'supino-inclinado': 'ns0SIbU', 'supino-maquina': 'DOoWcnA', 'crucifixo': 'yz9nUhF',
+    'crossover': '0CXGHya', 'pullover': '9XjtHvS', 'flexao': 'I4hDWkc', 'elevacao-lateral': 'DsgkuIt',
+    'elevacao-frontal': '3eGE2JC', 'desenvolvimento': 'znQUdHY', 'rosca': 'NbVPDMW', 'rosca-martelo': 'slDvUAU',
+    'triceps-corda': 'dU605di', 'triceps-frances': 'kont8Ut', 'abdominal': 'TFqbd8t', 'abdominal-infra': 'nCU1Ekp',
+    'abdominal-remador': 'BMMolZ3', 'prancha': 'VBAWRPG', 'aerobico': 'rjiM4L3', 'levantamento-terra': 'ila4NZS',
+    'hip-thrust': 'qKBpF7I', 'subida-banco': 'aXtJhlg', 'agachamento-goblet': 'yn8yg1r', 'barra-fixa': 'lBDjFxJ',
+    'remada-unilateral': 'C0MA9bC', 'pulldown-estendido': 'x69MAlq', 'remada-maquina': '7I6LNUG',
+    'hiperextensao': 'zhMwOwE', 'supino-reto-halteres': 'SpYC0Kp', 'supino-declinado': 'GrO65fd',
+    'crossover-baixo': 'FVmZVhk', 'desenvolvimento-maquina': '67n3r98', 'crucifixo-inverso': 'myfUsKf',
+    'encolhimento': 'NJzBsGJ', 'remada-alta': 'UDlhcO8', 'face-pull': 'ZfyAGhK', 'rosca-scott': 'qOgPVf6',
+    'rosca-concentrada': 'gvsWLQw', 'rosca-polia': 'G08RZcQ', 'triceps-testa': 'h8LFzo9', 'triceps-banco': 'RrLske5',
+    'triceps-coice': 'W6PxUkg', 'prancha-lateral': '5VXmnV5', 'elevacao-pernas': 'I3tsCnC', 'escalador': 'RJgzwny',
+    'abdominal-polia': 'WW95auq', 'abdominal-bicicleta': '1ZFqTDN', 'russian-twist': 'XVDdcoj',
+    'bicicleta': 'a8VDgLw', 'eliptico': 'rjtuP6X', 'polichinelo': '1g5bPpA', 'pular-corda': 'e1e76I2'
+  };
+  const gifUrl = id => GIF[id] ? GIF_BASE + GIF[id] + '.gif' : null;
+
   const NS = 'http://www.w3.org/2000/svg';
   function el(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
   const pts = a => a.map(p => f(p[0]) + ',' + f(p[1])).join(' ');
@@ -465,6 +492,16 @@
   // Cria a animação dentro de um container. Retorna { stop() }.
   function mount(container, exId, opts = {}) {
     const ex = EX.find(e => e.id === exId); if (!ex) return { stop() {} };
+    const url = !opts.svg && gifUrl(exId);
+    if (url) {
+      let h = { stop() {} };
+      const img = document.createElement('img');
+      img.className = 'gif'; img.src = url; img.alt = 'Animação: ' + ex.nome;
+      img.loading = 'lazy'; img.decoding = 'async';
+      img.onerror = () => { if (img.isConnected) h = mount(container, exId, { ...opts, svg: true }); };
+      container.innerHTML = ''; container.append(img);
+      return { stop() { h.stop(); } };
+    }
     const front = !!ex.poses[0].front;
     const svg = el('svg', { viewBox: '-120 -208 240 218', class: 'fig', role: 'img', 'aria-label': 'Animação: ' + ex.nome });
     svg.append(el('line', { x1: -116, y1: 0.5, x2: 116, y2: 0.5, class: 'fig-ground' }));
@@ -511,5 +548,5 @@
     return { stop() { alive = false; cancelAnimationFrame(raf); } };
   }
 
-  root.Exercicios = { lista: EX, mount, L };
+  root.Exercicios = { lista: EX, mount, L, gifUrl };
 })(typeof window !== 'undefined' ? window : globalThis);
