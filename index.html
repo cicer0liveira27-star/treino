@@ -18,14 +18,14 @@
 :root{
   --bg:#fff7f2; --card:#ffffff; --soft:#fbe9e0; --line:#f0dcd2;
   --text:#2a1f1b; --muted:#8c7a72; --accent:#e8573f; --accent-2:#ffb4a2; --ok:#2f9e6d;
-  --fig:#2a1f1b; --fig-far:#c9b4aa; --mat:#ffd9cc; --db:#e8573f; --mq:#9fb0ba;
+  --fig:#2a1f1b; --fig-far:#c9b4aa; --mat:#ffd9cc; --db:#e8573f; --mq:#9fb0ba; --on-accent:#fff;
   --shadow:0 1px 2px rgba(60,30,20,.06),0 6px 20px rgba(60,30,20,.06);
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#16110f; --card:#211a17; --soft:#2c221e; --line:#3a2e29;
     --text:#f6ece7; --muted:#a8968e; --accent:#ff7a5f; --accent-2:#7a3a2c; --ok:#4cc38a;
-    --fig:#f6ece7; --fig-far:#6e5a52; --mat:#4a2f27; --db:#ff7a5f; --mq:#5d6d76; --shadow:none;
+    --fig:#f6ece7; --fig-far:#6e5a52; --mat:#4a2f27; --db:#ff7a5f; --mq:#5d6d76; --on-accent:#141414; --shadow:none;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -43,7 +43,7 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;letter-spacing:-.01em;margin:0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
 .stack{display:grid;gap:12px}
 .btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 16px;font-weight:500}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
 .btn.ghost{background:transparent}
 .btn.block{width:100%;padding:14px}
 .btn.sm{padding:6px 12px;font-size:14px}
@@ -58,13 +58,13 @@ input[type=text],input[type=number],input[type=date],select{background:var(--bg)
 .week{display:flex;justify-content:space-between;margin-top:14px}
 .day{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .day i{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:14px}
-.day.on i{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.on i{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .day.today{color:var(--text);font-weight:600}
 .plan{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
 .plan .badge{width:52px;height:52px;border-radius:14px;background:var(--soft);display:grid;place-items:center;font-family:Fraunces,serif;font-size:24px;font-weight:700;color:var(--accent);flex:none}
 .plan .meta{flex:1;min-width:0}
 .plan .meta b{display:block}
-.tag{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:2px 8px;font-weight:600;vertical-align:middle;margin-left:6px}
+.tag{display:inline-block;background:var(--accent);color:var(--on-accent);border-radius:999px;font-size:11px;padding:2px 8px;font-weight:600;vertical-align:middle;margin-left:6px}
 
 /* Treino em andamento */
 .ex{padding:0;overflow:hidden}
@@ -119,7 +119,7 @@ nav.tabs button.on{color:var(--accent);font-weight:600}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-top:12px}
 .cal span{font-size:11px;color:var(--muted)}
 .cal i{font-style:normal;aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:13px;background:var(--soft)}
-.cal i.on{background:var(--accent);color:#fff;font-weight:600}
+.cal i.on{background:var(--accent);color:var(--on-accent);font-weight:600}
 .cal i.empty{background:transparent}
 .cal i.today{outline:2px solid var(--accent);outline-offset:-2px}
 .chart{width:100%;height:auto;margin-top:10px}
@@ -154,7 +154,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 /* Grade, busca e arrastar */
 .badge{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-family:Fraunces,serif;font-size:17px;font-weight:700;color:var(--accent);flex:none}
 .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.num{min-width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:600;display:grid;place-items:center;flex:none}
+.num{min-width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:600;display:grid;place-items:center;flex:none}
 .sort-item{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .18s ease,box-shadow .18s}
 .sort-item input{-webkit-user-select:text;user-select:text}
 .sort-item.dragging{transition:box-shadow .18s;position:relative;z-index:30;box-shadow:0 16px 36px rgba(60,30,20,.25);outline:2px solid var(--accent)}
@@ -174,7 +174,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 /* Assistente e perfil */
 .coach{border:1.5px solid var(--accent-2)}
 .coach-head{display:flex;gap:10px;align-items:center;margin-bottom:6px}
-.coach-ic{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:16px;flex:none}
+.coach-ic{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:16px;flex:none}
 .coach-sub{font-size:16px;margin:14px 0 8px}
 .tips{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
 .tip{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4}
@@ -186,7 +186,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 .sug-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:6px 12px 6px 6px}
 .sug-item .mini{width:52px;height:48px}
 .sug-item small{display:block;font-size:12px}
-.plus{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:20px;flex:none}
+.plus{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:20px;flex:none}
 .ia{margin-top:14px;display:grid;gap:6px}
 .ia-r{white-space:pre-wrap;font-size:14px}
 .opts{border:none;padding:0;margin:4px 0 0;display:grid;gap:6px}
@@ -222,7 +222,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 button.day{border:none;background:none;padding:0;font:inherit;color:inherit}
 button.day:disabled{opacity:.45}
 .cal button,.cal i{font-style:normal;aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:13px;background:var(--soft);border:none;padding:0;color:inherit}
-.cal button.on{background:var(--accent);color:#fff;font-weight:600}
+.cal button.on{background:var(--accent);color:var(--on-accent);font-weight:600}
 .cal button.today{outline:2px solid var(--accent);outline-offset:-2px}
 .cal i.futuro{opacity:.4}
 
@@ -258,8 +258,21 @@ button.day:disabled{opacity:.45}
 @keyframes blob{0%{transform:scale(0) rotate(0)}100%{transform:scale(6.5) rotate(140deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes flex{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg) scale(1.05)}60%{transform:rotate(5deg)}}
+
+/* Temas */
+.tema-grupo{display:grid;gap:8px}
+.temas{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tema{position:relative;display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--line);border-radius:14px;background:var(--card);text-align:left;font-size:14px}
+.tema.on{border-color:var(--accent);background:var(--soft);font-weight:600}
+.tema-cor{width:34px;height:34px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--p) 0 50%,var(--s) 50% 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+.tema-ok{position:absolute;top:6px;right:8px;color:var(--accent);font-size:13px}
+.progress i{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.cel-final{background:linear-gradient(170deg,var(--accent) 55%,color-mix(in srgb,var(--accent) 70%,var(--accent-2)))}
+.badge,.plan .badge{background:color-mix(in srgb,var(--accent-2) 30%,var(--card))}
+.mascote .m-boch{fill:var(--accent-2)}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
+<style id="temaCss"></style>
 </head>
 <body>
 <main class="wrap" id="app"></main>
@@ -268,7 +281,7 @@ button.day:disabled{opacity:.45}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=10"></script>
+<script src="exercicios.js?v=11"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -336,6 +349,37 @@ function proximoPlano(){
   const ult = S.sessoes[S.sessoes.length - 1];
   const i = ult ? S.planos.findIndex(p => p.id === ult.plano) : -1;
   return S.planos[(i + 1) % S.planos.length];
+}
+
+/* ---------- Temas de cores ---------- */
+const TEMAS = [
+  { grupo: 'Quente', id: 'coral', nome: 'Coral', p: '#e8573f', s: '#ffb4a2', pd: '#ff7a5f' },
+  { grupo: 'Quente', id: 'laranja', nome: 'Laranja Energia', p: '#ea580c', s: '#fdba74', pd: '#fb923c' },
+  { grupo: 'Quente', id: 'vermelho', nome: 'Vermelho Fogo', p: '#dc2626', s: '#fca5a5', pd: '#f87171' },
+  { grupo: 'Frio', id: 'oceano', nome: 'Azul Oceano', p: '#2563eb', s: '#93c5fd', pd: '#60a5fa' },
+  { grupo: 'Frio', id: 'turquesa', nome: 'Turquesa', p: '#0d9488', s: '#5eead4', pd: '#2dd4bf' },
+  { grupo: 'Frio', id: 'lavanda', nome: 'Lavanda', p: '#7c3aed', s: '#c4b5fd', pd: '#a78bfa' },
+  { grupo: 'Feminino', id: 'rosa', nome: 'Rosa Chiclete', p: '#db2777', s: '#f9a8d4', pd: '#f472b6' },
+  { grupo: 'Feminino', id: 'orquidea', nome: 'Orquídea', p: '#c026d3', s: '#f0abfc', pd: '#e879f9' },
+  { grupo: 'Masculino', id: 'marinho', nome: 'Marinho e Amarelo', p: '#1e40af', s: '#fbbf24', pd: '#60a5fa' },
+  { grupo: 'Masculino', id: 'verde', nome: 'Verde Musgo', p: '#15803d', s: '#a3e635', pd: '#4ade80' }
+];
+function aplicarTema(id){
+  const t = TEMAS.find(x => x.id === id) || TEMAS[0], m = (c, q, b) => `color-mix(in srgb, ${c} ${q}%, ${b})`;
+  $('#temaCss').textContent = t.id === 'coral' ? '' : `
+:root{--accent:${t.p};--accent-2:${t.s};--db:${t.p};--bg:${m(t.p, 4, '#ffffff')};--soft:${m(t.p, 10, '#ffffff')};--line:${m(t.p, 16, '#ececec')};--mat:${m(t.s, 45, '#ffffff')}}
+@media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
+  requestAnimationFrame(() => {
+    const bg = getComputedStyle(document.body).backgroundColor;
+    document.querySelectorAll('meta[name=theme-color]').forEach(x => x.setAttribute('content', bg));
+  });
+}
+function escolherTema(id){ S.tema = id; save(); aplicarTema(id); const y = scrollY; render(); scrollTo(0, y); toast(`Tema ${TEMAS.find(t => t.id === id).nome} aplicado`); }
+function temasHtml(){
+  const atual = S.tema || 'coral';
+  return [...new Set(TEMAS.map(t => t.grupo))].map(g => `<div class="tema-grupo"><span class="small muted">${g}</span><div class="temas">${TEMAS.filter(t => t.grupo === g).map(t => `
+    <button class="tema ${t.id === atual ? 'on' : ''}" onclick="escolherTema('${t.id}')" aria-pressed="${t.id === atual}" aria-label="Tema ${t.nome}">
+      <span class="tema-cor" style="--p:${t.p};--s:${t.s}"></span><span class="tema-nome">${t.nome}</span>${t.id === atual ? '<span class="tema-ok" aria-hidden="true">✓</span>' : ''}</button>`).join('')}</div></div>`).join('');
 }
 
 /* ---------- Mascote ---------- */
@@ -1056,6 +1100,11 @@ function vAjustes(){
     <div class="top"><h1>Ajustes</h1></div>
     <div class="stack">
       <section class="card stack">
+        <h3>Tema de cores</h3>
+        <p class="muted small" style="margin:0">Escolha a cor primária e a secundária do app. Seus dados não mudam.</p>
+        ${temasHtml()}
+      </section>
+      <section class="card stack">
         <h3>Seu perfil</h3>
         ${perfilForm()}
         <button class="btn primary" onclick="salvarPerfil(false)">Salvar perfil</button>
@@ -1081,10 +1130,10 @@ function exportar(){
 }
 async function importar(f){
   if (!f) return;
-  try{ const d = JSON.parse(await f.text()); if (!d.planos) throw 0; if (!confirm('Substituir os dados atuais pelo backup?')) return; S = { ...defaultState(), ...d }; save(); view = 'hoje'; render(); alert('Backup restaurado.'); }
+  try{ const d = JSON.parse(await f.text()); if (!d.planos) throw 0; if (!confirm('Substituir os dados atuais pelo backup?')) return; S = { ...defaultState(), ...d }; save(); aplicarTema(S.tema); view = 'hoje'; render(); alert('Backup restaurado.'); }
   catch{ alert('Esse arquivo não parece um backup do Musculito.'); }
 }
-function zerar(){ if (!confirm('Apagar todos os treinos, check-ins e registros?')) return; S = defaultState(); save(); view = 'hoje'; render(); }
+function zerar(){ if (!confirm('Apagar todos os treinos, check-ins e registros?')) return; S = defaultState(); save(); aplicarTema(); view = 'hoje'; render(); }
 
 /* Diálogo */
 function abrirDlg(html){ const d0 = $('#dlg'); if (d0.open) d0.close(); $('#dlgBody').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); mountAnims($('#dlgBody')); }
@@ -1092,6 +1141,7 @@ function fecharDlg(){ $('#dlg').close(); }
 $('#dlg').addEventListener('close', () => { if (!$('#dlg').open) $('#dlgBody').innerHTML = ''; });
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
 
+aplicarTema(S.tema);
 render();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   const tinha = !!navigator.serviceWorker.controller; let recarregou = false;
