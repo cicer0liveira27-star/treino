@@ -281,7 +281,7 @@ button.day:disabled{opacity:.45}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=11"></script>
+<script src="exercicios.js?v=12"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -353,22 +353,24 @@ function proximoPlano(){
 
 /* ---------- Temas de cores ---------- */
 const TEMAS = [
-  { grupo: 'Quente', id: 'coral', nome: 'Coral', p: '#e8573f', s: '#ffb4a2', pd: '#ff7a5f' },
-  { grupo: 'Quente', id: 'laranja', nome: 'Laranja Energia', p: '#ea580c', s: '#fdba74', pd: '#fb923c' },
-  { grupo: 'Quente', id: 'vermelho', nome: 'Vermelho Fogo', p: '#dc2626', s: '#fca5a5', pd: '#f87171' },
-  { grupo: 'Frio', id: 'oceano', nome: 'Azul Oceano', p: '#2563eb', s: '#93c5fd', pd: '#60a5fa' },
-  { grupo: 'Frio', id: 'turquesa', nome: 'Turquesa', p: '#0d9488', s: '#5eead4', pd: '#2dd4bf' },
-  { grupo: 'Frio', id: 'lavanda', nome: 'Lavanda', p: '#7c3aed', s: '#c4b5fd', pd: '#a78bfa' },
-  { grupo: 'Feminino', id: 'rosa', nome: 'Rosa Chiclete', p: '#db2777', s: '#f9a8d4', pd: '#f472b6' },
-  { grupo: 'Feminino', id: 'orquidea', nome: 'Orquídea', p: '#c026d3', s: '#f0abfc', pd: '#e879f9' },
-  { grupo: 'Masculino', id: 'marinho', nome: 'Marinho e Amarelo', p: '#1e40af', s: '#fbbf24', pd: '#60a5fa' },
-  { grupo: 'Masculino', id: 'verde', nome: 'Verde Musgo', p: '#15803d', s: '#a3e635', pd: '#4ade80' }
+  { id: 'coral', nome: 'Coral', p: '#e8573f', s: '#ffb4a2', pd: '#ff7a5f' },
+  { id: 'laranja', nome: 'Laranja Energia', p: '#ea580c', s: '#fdba74', pd: '#fb923c' },
+  { id: 'vermelho', nome: 'Vermelho Fogo', p: '#dc2626', s: '#fca5a5', pd: '#f87171' },
+  { id: 'rosa', nome: 'Rosa Chiclete', p: '#db2777', s: '#f9a8d4', pd: '#f472b6' },
+  { id: 'orquidea', nome: 'Orquídea', p: '#c026d3', s: '#f0abfc', pd: '#e879f9' },
+  { id: 'lavanda', nome: 'Lavanda', p: '#7c3aed', s: '#c4b5fd', pd: '#a78bfa' },
+  { id: 'oceano', nome: 'Azul Oceano', p: '#2563eb', s: '#93c5fd', pd: '#60a5fa' },
+  { id: 'marinho', nome: 'Marinho e Amarelo', p: '#1e40af', s: '#fbbf24', pd: '#60a5fa' },
+  { id: 'turquesa', nome: 'Turquesa', p: '#0d9488', s: '#5eead4', pd: '#2dd4bf' },
+  { id: 'verde', nome: 'Verde Musgo', p: '#15803d', s: '#a3e635', pd: '#4ade80' },
+  { id: 'grena', nome: 'Grená e Azul', p: '#a50044', s: '#004d98', pd: '#e8578f', sd: '#4f8fd6' },
+  { id: 'celeste', nome: 'Celeste e Dourado', p: '#3c7fc2', s: '#f6b40e', pd: '#75aadb' }
 ];
 function aplicarTema(id){
   const t = TEMAS.find(x => x.id === id) || TEMAS[0], m = (c, q, b) => `color-mix(in srgb, ${c} ${q}%, ${b})`;
   $('#temaCss').textContent = t.id === 'coral' ? '' : `
 :root{--accent:${t.p};--accent-2:${t.s};--db:${t.p};--bg:${m(t.p, 4, '#ffffff')};--soft:${m(t.p, 10, '#ffffff')};--line:${m(t.p, 16, '#ececec')};--mat:${m(t.s, 45, '#ffffff')}}
-@media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
+@media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${t.sd || m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
   requestAnimationFrame(() => {
     const bg = getComputedStyle(document.body).backgroundColor;
     document.querySelectorAll('meta[name=theme-color]').forEach(x => x.setAttribute('content', bg));
@@ -377,9 +379,9 @@ function aplicarTema(id){
 function escolherTema(id){ S.tema = id; save(); aplicarTema(id); const y = scrollY; render(); scrollTo(0, y); toast(`Tema ${TEMAS.find(t => t.id === id).nome} aplicado`); }
 function temasHtml(){
   const atual = S.tema || 'coral';
-  return [...new Set(TEMAS.map(t => t.grupo))].map(g => `<div class="tema-grupo"><span class="small muted">${g}</span><div class="temas">${TEMAS.filter(t => t.grupo === g).map(t => `
+  return `<div class="temas">${TEMAS.map(t => `
     <button class="tema ${t.id === atual ? 'on' : ''}" onclick="escolherTema('${t.id}')" aria-pressed="${t.id === atual}" aria-label="Tema ${t.nome}">
-      <span class="tema-cor" style="--p:${t.p};--s:${t.s}"></span><span class="tema-nome">${t.nome}</span>${t.id === atual ? '<span class="tema-ok" aria-hidden="true">✓</span>' : ''}</button>`).join('')}</div></div>`).join('');
+      <span class="tema-cor" style="--p:${t.p};--s:${t.s}"></span><span class="tema-nome">${t.nome}</span>${t.id === atual ? '<span class="tema-ok" aria-hidden="true">✓</span>' : ''}</button>`).join('')}</div>`;
 }
 
 /* ---------- Mascote ---------- */
