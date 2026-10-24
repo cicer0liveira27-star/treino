@@ -71,7 +71,6 @@ input[type=text],input[type=number],input[type=date],select{background:var(--bg)
 /* Treino em andamento */
 .ex{padding:0;overflow:hidden}
 .ex .anim{background:var(--soft);aspect-ratio:240/218;max-height:260px;width:100%;display:grid;place-items:center}
-.ex .anim svg{width:100%;height:100%;max-height:260px}
 .anim:has(img.gif),.mini:has(img.gif){background:#fff}
 img.gif{width:100%;height:100%;object-fit:contain;display:block;border-radius:inherit}
 .sem-anim{display:grid;place-items:center;width:100%;height:100%;padding:6px;text-align:center;font-size:11px;color:var(--muted)}
@@ -89,20 +88,6 @@ details ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px}
 .progress{height:6px;background:var(--soft);border-radius:99px;overflow:hidden;margin:6px 0 2px}
 .progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
 
-/* Figura */
-.fig .limb,.fig .torso{stroke:var(--fig);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;fill:none}
-.fig .torso{stroke-width:13}
-.fig-far .limb{stroke:var(--fig-far)}
-.fig .head{fill:var(--fig)}
-.fig-ground{stroke:var(--line);stroke-width:2}
-.fig-mat{fill:var(--mat)}
-.db rect,.dbc{fill:var(--db)}
-.fig .mq{stroke:var(--mq);stroke-linecap:round;fill:none}
-.fig .mqf{fill:var(--mq)}
-.fig .mqb{fill:var(--mq);opacity:.3}
-.fig .cabo{stroke:var(--muted);stroke-width:1.5;fill:none}
-.fig .plate{fill:none;stroke:var(--mq);stroke-width:4}
-.fig .pad{stroke:var(--mq);stroke-width:9;stroke-linecap:round;opacity:.85}
 
 .timer[hidden]{display:none}
 .has-timer{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
@@ -305,8 +290,8 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="catalogo.js?v=16"></script>
-<script src="exercicios.js?v=16"></script>
+<script src="catalogo.js?v=17"></script>
+<script src="exercicios.js?v=17"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -547,7 +532,7 @@ let anims = [];
 function mountAnims(root = document){
   root.querySelectorAll('[data-anim]').forEach(el => {
     if (el.dataset.mounted) return; el.dataset.mounted = 1;
-    anims.push(Exercicios.mount(el, el.dataset.anim, el.dataset.still ? { still: 0.5 } : {}));
+    anims.push(Exercicios.mount(el, el.dataset.anim));
   });
 }
 function stopAnims(){ anims.forEach(a => a.stop()); anims = []; }
