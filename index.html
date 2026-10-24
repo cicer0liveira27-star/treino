@@ -290,8 +290,8 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="catalogo.js?v=17"></script>
-<script src="exercicios.js?v=17"></script>
+<script src="catalogo.js?v=18"></script>
+<script src="exercicios.js?v=18"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -303,6 +303,9 @@ function ensure5(){ while (S.planos.length < 5) S.planos.push(novoPlanoVazio(S.p
 const defaultState = () => ({ nome: '', perfil: null, planos: [], checkins: [], sessoes: [], pesos: [], ativo: null });
 function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.planos) return s; }catch{} return defaultState(); }
 let S = load();
+// Exercícios removidos da biblioteca saem dos treinos salvos.
+S.planos.forEach(p => { p.itens = p.itens.filter(i => EX[i.ex]); });
+if (S.ativo) S.ativo.itens = S.ativo.itens.filter(i => EX[i.ex]);
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch{} }
 
 /* ---------- Utilidades ---------- */
@@ -1125,7 +1128,7 @@ function vEvolucao(){
   const set = new Set(S.checkins), y = calMes.getFullYear(), m = calMes.getMonth();
   const first = (new Date(y, m, 1).getDay() + 6) % 7, dias = new Date(y, m + 1, 0).getDate(), h = hoje();
   const noMes = S.checkins.filter(d => d.startsWith(`${y}-${pad(m + 1)}`)).length;
-  const exUsados = [...new Set(S.sessoes.flatMap(s => s.itens.filter(i => i.carga !== '' && i.carga != null).map(i => i.ex)))];
+  const exUsados = [...new Set(S.sessoes.flatMap(s => s.itens.filter(i => i.carga !== '' && i.carga != null).map(i => i.ex)))].filter(id => EX[id]);
   if (!evoEx || !exUsados.includes(evoEx)) evoEx = exUsados[0] || null;
   const cargas = evoEx ? S.sessoes.map(s => ({ x: s.data, it: s.itens.find(i => i.ex === evoEx) })).filter(o => o.it && o.it.carga !== '' && o.it.carga != null).map(o => ({ x: o.x, y: +o.it.carga })) : [];
   const pesos = [...S.pesos].sort((a, b) => a.data.localeCompare(b.data)).map(p => ({ x: p.data, y: p.kg }));
