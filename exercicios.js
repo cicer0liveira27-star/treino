@@ -456,6 +456,19 @@
 
   ];
 
+  // Categorias pelo músculo principal (bíceps e tríceps separados).
+  const GRUPO_DE = { peito: 'Peito', costas: 'Costas', lombar: 'Costas', ombros: 'Ombros', biceps: 'Bíceps', triceps: 'Tríceps',
+    antebraco: 'Antebraço', abdomen: 'Abdômen', quadriceps: 'Quadríceps', posterior: 'Posterior de coxa', gluteos: 'Glúteos',
+    adutores: 'Adutores', panturrilha: 'Panturrilha', cardio: 'Aeróbico' };
+  const GRUPOS = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Antebraço', 'Abdômen', 'Quadríceps', 'Posterior de coxa',
+    'Glúteos', 'Adutores', 'Panturrilha', 'Aeróbico', 'Alongamento'];
+  EX.forEach(e => { e.grupo = GRUPO_DE[e.alvo[0]] || e.grupo; });
+
+  // Acervo completo (catalogo.js): só GIF, sem boneco em SVG.
+  const CAT = (root.CATALOGO || []).map(([m, nome, grupo, aparelho, alvo, tipo, along]) =>
+    ({ id: 'x-' + m, gif: m, nome, grupo, aparelho, alvo, tipo, dicas: [], extra: true, along: !!along }));
+  EX.push(...CAT);
+
   const ease = p => { let s = 0.5 - 0.5 * Math.cos(2 * Math.PI * p); s = (s - 0.08) / 0.84; return Math.min(1, Math.max(0, s)); };
 
   // Animações 3D (ExerciseDB, mídia © Gym visual — https://gymvisual.com/).
@@ -483,7 +496,7 @@
     'abdominal-polia': 'WW95auq', 'abdominal-bicicleta': '1ZFqTDN', 'russian-twist': 'XVDdcoj',
     'bicicleta': 'a8VDgLw', 'eliptico': 'rjtuP6X', 'polichinelo': '1g5bPpA', 'pular-corda': 'e1e76I2'
   };
-  const gifUrl = id => GIF[id] ? GIF_BASE + GIF[id] + '.gif' : null;
+  const gifUrl = id => { const m = GIF[id] || (id.startsWith('x-') && id.slice(2)); return m ? GIF_BASE + m + '.gif' : null; };
 
   const NS = 'http://www.w3.org/2000/svg';
   function el(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -501,6 +514,10 @@
       img.onerror = () => { if (img.isConnected) h = mount(container, exId, { ...opts, svg: true }); };
       container.innerHTML = ''; container.append(img);
       return { stop() { h.stop(); } };
+    }
+    if (!ex.poses) {
+      container.innerHTML = '<div class="sem-anim">Animação indisponível sem internet</div>';
+      return { stop() {} };
     }
     const front = !!ex.poses[0].front;
     const svg = el('svg', { viewBox: '-120 -208 240 218', class: 'fig', role: 'img', 'aria-label': 'Animação: ' + ex.nome });
@@ -548,5 +565,5 @@
     return { stop() { alive = false; cancelAnimationFrame(raf); } };
   }
 
-  root.Exercicios = { lista: EX, mount, L, gifUrl };
+  root.Exercicios = { lista: EX, mount, L, gifUrl, grupos: GRUPOS };
 })(typeof window !== 'undefined' ? window : globalThis);

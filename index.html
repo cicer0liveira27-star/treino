@@ -74,6 +74,7 @@ input[type=text],input[type=number],input[type=date],select{background:var(--bg)
 .ex .anim svg{width:100%;height:100%;max-height:260px}
 .anim:has(img.gif),.mini:has(img.gif){background:#fff}
 img.gif{width:100%;height:100%;object-fit:contain;display:block;border-radius:inherit}
+.sem-anim{display:grid;place-items:center;width:100%;height:100%;padding:6px;text-align:center;font-size:11px;color:var(--muted)}
 .ex .body{padding:14px 16px 16px}
 .ex .head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .ex.done .anim{opacity:.55}
@@ -304,7 +305,8 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=15"></script>
+<script src="catalogo.js?v=16"></script>
+<script src="exercicios.js?v=16"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -784,7 +786,7 @@ function verEx(id){
   const e = EX[id];
   abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>${esc(e.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
     <div class="mini" style="width:100%;height:auto;aspect-ratio:240/218;border-radius:14px" data-anim="${e.id}"></div>
-    <p class="small muted">${esc(e.grupo)} · ${esc(e.aparelho)}<br>Trabalha: ${esc(lista(e.alvo.map(a => ALVO[a])))}</p><ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`);
+    <p class="small muted">${esc(e.grupo)} · ${esc(e.aparelho)}<br>Trabalha: ${esc(lista(e.alvo.map(a => ALVO[a])))}</p>${e.dicas.length ? `<ul style="padding-left:20px">${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul>` : ''}</div>`);
 }
 function editar(id){ editId = id; view = 'editar'; render(); scrollTo(0, 0); }
 function vEditar(){
@@ -845,7 +847,7 @@ const tem = k => objetivos().includes(k);
 const querCardio = () => tem('emagrecer') || tem('condicionamento');
 const nomesObj = () => lista(objetivos().map(k => OBJ[k]));
 const NIVEL = { iniciante: ['Iniciante', 'até 6 meses de treino'], intermediario: ['Intermediário', '6 meses a 2 anos'], avancado: ['Avançado', 'mais de 2 anos'] };
-const ALVO = { peito: 'peito', costas: 'costas', ombros: 'ombros', biceps: 'bíceps', triceps: 'tríceps', quadriceps: 'quadríceps', posterior: 'posterior de coxa', gluteos: 'glúteos', adutores: 'adutores', panturrilha: 'panturrilha', abdomen: 'abdômen', lombar: 'lombar', cardio: 'aeróbico' };
+const ALVO = { peito: 'peito', costas: 'costas', ombros: 'ombros', biceps: 'bíceps', triceps: 'tríceps', quadriceps: 'quadríceps', posterior: 'posterior de coxa', gluteos: 'glúteos', adutores: 'adutores', panturrilha: 'panturrilha', abdomen: 'abdômen', lombar: 'lombar', antebraco: 'antebraço', cardio: 'aeróbico' };
 const GRANDES = ['peito', 'costas', 'quadriceps', 'posterior', 'gluteos'];
 const ESQUEMA = {
   hipertrofia: { series: 3, reps: '8 a 12', descanso: 75 }, definir: { series: 3, reps: '10 a 15', descanso: 45 },
@@ -897,7 +899,7 @@ function sugestoes(i){
   const out = [];
   alvos.forEach(a => {
     const n = a === 'cardio' ? 1 : GRANDES.includes(a) ? 3 : 2;
-    Exercicios.lista.filter(e => e.alvo[0] === a && !tem.has(e.id)).sort((x, y) => nota(y) - nota(x)).slice(0, n).forEach(e => out.push(e));
+    Exercicios.lista.filter(e => !e.extra && e.alvo[0] === a && !tem.has(e.id)).sort((x, y) => nota(y) - nota(x)).slice(0, n).forEach(e => out.push(e));
   });
   const nomes = alvos.filter(a => a !== 'cardio').map(a => ALVO[a]);
   return { titulo: p.itens.length ? `Mais opções para ${lista(nomes)}` : `Sugestão para este dia: ${div[0]}`, itens: out.slice(0, 9) };
@@ -977,7 +979,7 @@ async function perguntarIA(){
   out.textContent = 'Pensando…';
   const semana = S.planos.map((p, i) => ({ dia: i + 1, nome: p.nome, exercicios: p.itens.map(it => `${EX[it.ex]?.nome} ${it.series}x${it.reps}`) }));
   try {
-    const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: q, perfil: { ...S.perfil, nome: S.nome }, semana, diaAtual: S.planos.findIndex(p => p.id === editId) + 1, exercicios: Exercicios.lista.map(e => e.nome) }) });
+    const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: q, perfil: { ...S.perfil, nome: S.nome }, semana, diaAtual: S.planos.findIndex(p => p.id === editId) + 1, exercicios: Exercicios.lista.filter(e => !e.extra).map(e => e.nome) }) });
     const j = await r.json(); out.textContent = j.resposta || 'Não consegui responder agora.';
   } catch { out.textContent = 'O assistente com IA não respondeu. Tente de novo em instantes.'; }
 }
@@ -1014,11 +1016,11 @@ function salvarPerfil(inicio){
 
 /* Grade completa com busca */
 const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const GRUPOS = ['Todos', ...new Set(Exercicios.lista.map(e => e.grupo))];
-const LIB = { ver: { q: '', g: 'Todos' }, add: { q: '', g: 'Todos' } };
+const GRUPOS = ['Todos', ...Exercicios.grupos.filter(g => Exercicios.lista.some(e => e.grupo === g))];
+const LIB = { ver: { q: '', g: 'Todos', n: 60 }, add: { q: '', g: 'Todos', n: 60 } };
 function filtrar(q, g){
   const ws = norm(q).split(/\s+/).filter(Boolean);
-  return Exercicios.lista.filter(e => (g === 'Todos' || e.grupo === g) && ws.every(w => norm(`${e.nome} ${e.aparelho} ${e.grupo} ${e.id}`).includes(w)));
+  return Exercicios.lista.filter(e => (g === 'Todos' || e.grupo === g) && ws.every(w => norm(`${e.nome} ${e.aparelho} ${e.grupo} ${e.extra ? "" : e.id}`).includes(w)));
 }
 function libBlock(action){
   const st = LIB[action];
@@ -1032,14 +1034,15 @@ function bindLib(root){
     const act = box.dataset.action, st = LIB[act], q = box.querySelector('.libq'), grid = box.querySelector('.libgrid');
     const tem = act === 'add' ? new Set((plano(editId)?.itens || []).map(i => i.ex)) : new Set();
     const draw = () => {
-      const list = filtrar(st.q, st.g);
+      const all = filtrar(st.q, st.g), list = all.slice(0, st.n);
       grid.innerHTML = list.length ? list.map(e => `<button data-ex="${e.id}">${tem.has(e.id) ? '<span class="have">✓ no treino</span>' : ''}<div class="mini" data-anim="${e.id}" data-still="1"></div><b>${esc(e.nome)}</b><small>${esc(e.aparelho)}</small>${act === 'add' ? '<span class="addlbl">+ Adicionar</span>' : ''}</button>`).join('')
+          + (all.length > list.length ? `<button class="btn mais" data-mais="1" style="grid-column:1/-1">Mostrar mais (${all.length - list.length} restantes)</button>` : '')
         : `<p class="muted small" style="grid-column:1/-1;text-align:center">Nada encontrado para “${esc(st.q)}”.</p>`;
       mountAnims(grid);
     };
-    q.oninput = () => { st.q = q.value; draw(); };
-    box.querySelectorAll('.chip').forEach(c => c.onclick = () => { st.g = c.dataset.g; box.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); draw(); });
-    grid.onclick = e => { const b = e.target.closest('[data-ex]'); if (b) (act === 'add' ? addEx : verEx)(b.dataset.ex); };
+    q.oninput = () => { st.q = q.value; st.n = 60; draw(); };
+    box.querySelectorAll('.chip').forEach(c => c.onclick = () => { st.g = c.dataset.g; st.n = 60; box.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); draw(); });
+    grid.onclick = e => { if (e.target.closest('[data-mais]')) { st.n += 60; draw(); return; } const b = e.target.closest('[data-ex]'); if (b) (act === 'add' ? addEx : verEx)(b.dataset.ex); };
     draw();
   });
 }
