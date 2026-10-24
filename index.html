@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#fff7f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16110f" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Musculito: seus treinos com check-in, evolução e animações de cada exercício.">
@@ -29,6 +29,8 @@
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+input,select,textarea{font-size:16px!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--text);font:16px/1.45 Inter,system-ui,sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 button,input,select{font:inherit;color:inherit}
@@ -270,6 +272,25 @@ button.day:disabled{opacity:.45}
 .cel-final{background:linear-gradient(170deg,var(--accent) 55%,color-mix(in srgb,var(--accent) 70%,var(--accent-2)))}
 .badge,.plan .badge{background:color-mix(in srgb,var(--accent-2) 30%,var(--card))}
 .mascote .m-boch{fill:var(--accent-2)}
+
+/* Fotos */
+[hidden]{display:none!important}
+.cel-final{overflow-y:auto}
+.hd-logo{border:none;background:none;padding:0;line-height:0}
+.avatar{border-radius:50%;object-fit:cover;display:block}
+.hd-logo .avatar{width:38px;height:38px;border:2px solid var(--accent)}
+img.cel-mini{border-radius:50%;object-fit:cover}
+.pf-foto{display:flex;gap:14px;align-items:center}
+.pf-av{width:72px;height:72px;flex:none}
+svg.pf-av{background:var(--accent);border-radius:50%}
+.cel-foto{flex:1;display:grid;place-items:center;min-height:0;padding:8px 0}
+.cel-foto img{max-width:100%;max-height:30vh;border-radius:18px;border:4px solid #fff;box-shadow:0 10px 30px rgba(0,0,0,.25);transform:rotate(-2deg)}
+.cel-btn.foto{background:#2a1f1b;color:#fff}
+.thumb{width:48px;height:48px;border-radius:10px;border:none;background:var(--soft) center/cover;flex:none}
+.galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.gal-item{aspect-ratio:1;border:none;border-radius:12px;background:var(--soft) center/cover;position:relative;overflow:hidden;padding:0}
+.gal-item span{position:absolute;left:0;right:0;bottom:0;padding:14px 6px 5px;font-size:11px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));text-align:left}
+.foto-grande{width:100%;border-radius:14px;display:block}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 <style id="temaCss"></style>
@@ -281,7 +302,7 @@ button.day:disabled{opacity:.45}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=13"></script>
+<script src="exercicios.js?v=14"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -397,6 +418,69 @@ function temasHtml(){
       <span class="tema-cor" style="--p:${t.p};--s:${t.s}"></span><span class="tema-nome">${t.nome}</span>${t.id === atual ? '<span class="tema-ok" aria-hidden="true">✓</span>' : ''}</button>`).join('')}</div>`;
 }
 
+/* ---------- Fotos (ficam só no aparelho) ---------- */
+let _db;
+function db(){
+  return _db ||= new Promise((ok, erro) => {
+    const r = indexedDB.open('musculito', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('fotos');
+    r.onsuccess = () => ok(r.result); r.onerror = () => erro(r.error);
+  });
+}
+async function fotoOp(modo, fn){ const d = await db(); return new Promise((ok, erro) => { const t = d.transaction('fotos', modo); const r = fn(t.objectStore('fotos')); t.oncomplete = () => ok(r?.result); t.onerror = () => erro(t.error); }); }
+const fotoPut = (k, v) => fotoOp('readwrite', st => st.put(v, k));
+const fotoGet = k => fotoOp('readonly', st => st.get(k));
+const fotoDel = k => fotoOp('readwrite', st => st.delete(k));
+async function fotoTodas(){ const d = await db(); return new Promise(ok => { const out = {}; const r = d.transaction('fotos').objectStore('fotos').openCursor(); r.onsuccess = () => { const c = r.result; if (c) { out[c.key] = c.value; c.continue(); } else ok(out); }; r.onerror = () => ok(out); }); }
+async function reduzir(file, max, q = .82){
+  let src;
+  try { src = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch { src = await new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = URL.createObjectURL(file); }); }
+  const w = src.width, h = src.height, k = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', q);
+}
+function escolherImagem(camera){
+  return new Promise(ok => {
+    const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
+    if (camera) i.setAttribute('capture', camera);
+    i.onchange = () => ok(i.files[0] || null); i.click();
+  });
+}
+async function quadrado(file, lado = 320){
+  const url = await reduzir(file, 900), img = await new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.src = url; });
+  const m = Math.min(img.width, img.height), c = document.createElement('canvas'); c.width = c.height = lado;
+  c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, lado, lado);
+  return c.toDataURL('image/jpeg', .85);
+}
+function avatar(cls = ''){ return S.foto ? `<img class="avatar ${cls}" src="${S.foto}" alt="">` : mascote(cls); }
+async function trocarFotoPerfil(){
+  const f = await escolherImagem(); if (!f) return;
+  try { S.foto = await quadrado(f); save(); render(); toast('Foto de perfil atualizada'); } catch { toast('Não consegui abrir essa imagem.'); }
+}
+function removerFotoPerfil(){ S.foto = null; save(); render(); }
+async function fotoDoTreino(i, camera = 'user'){
+  const s = S.sessoes[i]; if (!s) return null;
+  const f = await escolherImagem(camera); if (!f) return null;
+  try {
+    const url = await reduzir(f, 1080), k = s.foto || 'f' + uid();
+    await fotoPut(k, url); s.foto = k; save(); return url;
+  } catch { toast('Não consegui salvar a foto.'); return null; }
+}
+async function verFoto(i){
+  const s = S.sessoes[i]; const url = s?.foto && await fotoGet(s.foto); if (!url) return;
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><div><h2>${esc(s.nome)}</h2><span class="small muted">${fmtData(s.data)}${s.minutos ? ' · ' + fmtMin(s.minutos) : ''}</span></div><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <img class="foto-grande" src="${url}" alt="Foto do treino ${esc(s.nome)} em ${fmtData(s.data)}">
+    <div class="row" style="margin-top:12px"><a class="btn grow" style="text-align:center;text-decoration:none" href="${url}" download="musculito-${s.data}.jpg">Baixar</a><button class="btn grow" onclick="trocarFoto(${i})">Trocar</button><button class="btn grow" style="color:var(--accent)" onclick="apagarFoto(${i})">Apagar</button></div></div>`);
+}
+async function trocarFoto(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { render(); verFoto(i); } }
+async function apagarFoto(i){ if (!confirm('Apagar esta foto?')) return; const s = S.sessoes[i]; await fotoDel(s.foto); delete s.foto; save(); fecharDlg(); render(); toast('Foto apagada'); }
+async function addFotoSessao(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { render(); toast('Foto adicionada'); } }
+async function carregarMiniaturas(root){
+  for (const el of root.querySelectorAll('[data-foto]')) { const u = await fotoGet(el.dataset.foto).catch(() => null); if (u) el.style.backgroundImage = `url(${u})`; else el.remove(); }
+}
+
 /* ---------- Mascote ---------- */
 function mascote(cls = ''){
   return `<svg class="mascote ${cls}" viewBox="0 0 192 192" aria-hidden="true">
@@ -422,11 +506,12 @@ function celebrarCheckin(info = {}){
     <div class="cel-final">
       <div class="cel-top"><span class="cel-marca">Musculito</span><button class="cel-x" aria-label="Fechar">✕</button></div>
       <div class="cel-meio">${mascote('cel-masc2')}<div class="cel-num">${plural(semanasSeguidas(), 'semana seguida', 'semanas seguidas')} · ${plural(streakDias(), 'dia seguido', 'dias seguidos')}</div></div>
-      <h2 class="cel-tit">Check-in confirmado</h2>
+      <h2 class="cel-tit">${esc(info.cabecalho || 'Check-in confirmado')}</h2>
       <div class="cel-card">
-        <div class="cel-card-top">${mascote('cel-mini')}<div><b>${esc(info.titulo || (prox ? 'Hoje: ' + prox : 'Treino de hoje'))}</b><div class="small muted">${esc(S.nome)} · ${MESES[new Date().getMonth()]}: ${plural(S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length, 'treino', 'treinos')}</div></div></div>
+        <div class="cel-card-top">${S.foto ? avatar('cel-mini') : mascote('cel-mini')}<div><b>${esc(info.titulo || (prox ? 'Hoje: ' + prox : 'Treino de hoje'))}</b><div class="small muted">${esc(S.nome)} · ${MESES[new Date().getMonth()]}: ${plural(S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length, 'treino', 'treinos')}</div></div></div>
         <div class="cel-linha">🕒 ${hora ? hora + ' • ' : ''}${fmtData(h)}${info.duracao ? ' • ' + esc(info.duracao) : ''}</div>
       </div>
+      ${info.sessao != null ? `<div class="cel-foto" hidden><img alt="Sua foto do treino"></div><button class="cel-btn foto" data-a="foto">📸 Tirar foto do treino</button>` : ''}
       ${info.ajustar ? `<button class="cel-btn sec" data-a="ajustar">Ajustar duração</button>` : ''}
       <button class="cel-btn" data-a="share">Compartilhar</button>
     </div>`;
@@ -438,6 +523,12 @@ function celebrarCheckin(info = {}){
   document.addEventListener('keydown', esc_);
   el.querySelector('.cel-x').onclick = fechar;
   el.querySelector('[data-a=share]').onclick = () => compartilharCheckin(info);
+  const fb = el.querySelector('[data-a=foto]');
+  if (fb) fb.onclick = async () => {
+    const url = await fotoDoTreino(info.sessao, 'user'); if (!url) return;
+    const box = el.querySelector('.cel-foto'); box.hidden = false; box.querySelector('img').src = url;
+    el.querySelector('.cel-meio').hidden = true; fb.textContent = '📸 Tirar outra'; toast('Foto salva na sua evolução');
+  };
   const aj = el.querySelector('[data-a=ajustar]'); if (aj) aj.onclick = () => { fechar(); editarSessao(S.sessoes.length - 1); };
   setTimeout(() => el.querySelector('.cel-x')?.focus(), reduz ? 50 : 1900);
 }
@@ -487,6 +578,7 @@ function render(){
   stopAnims();
   const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
   $('#app').innerHTML = bannerAtivo() + v();
+  carregarMiniaturas($('#app'));
   renderTabs(); mountAnims($('#app')); bindLib($('#app'));
   if (view === 'treino') bindTreino();
   sortable($('#sortEx'), (a, b) => moverItem(plano(editId).itens, a, b));
@@ -510,7 +602,7 @@ function vHoje(){
   const saud = (() => { const hr = new Date().getHours(); return hr < 12 ? 'Bom dia' : hr < 18 ? 'Boa tarde' : 'Boa noite'; })();
   const sessHoje = [...S.sessoes].reverse().find(x => x.data === h);
   return `
-    <header class="hd"><span class="hd-logo">${mascote()}</span><span class="hd-saud">${saud}, <b>${esc(S.nome)}</b></span></header>
+    <header class="hd"><button class="hd-logo" onclick="view='ajustes';render();scrollTo(0,0)" aria-label="Seu perfil">${avatar()}</button><span class="hd-saud">${saud}, <b>${esc(S.nome)}</b></span></header>
     <h1 class="hd-tit">Check-in</h1>
     <div class="stack">
       ${fezHoje ? `
@@ -645,11 +737,8 @@ function finalizar(){
     itens: a.itens.map(it => ({ ex: it.ex, carga: it.carga === '' ? '' : +it.carga, series: it.feitas.filter(Boolean).length })) });
   const novo = checkin(); S.ativo = null; save(); pararTimer();
   view = 'hoje'; render();
-  const info = { treino: plano(a.plano)?.nome || '', titulo: (plano(a.plano)?.nome || 'Treino') + ' concluído', duracao: `${fmtMin(min)} · ${plural(feitas, 'série', 'séries')}`, ajustar: true };
-  if (novo) celebrarCheckin(info);
-  else abrirDlg(`<div class="celebrate"><div class="big">🎉</div><h2>Treino concluído!</h2>
-    <p class="muted">${plural(feitas, 'série', 'séries')} em ${fmtMin(min)}.</p>
-    <div class="row" style="justify-content:center"><button class="btn" onclick="fecharDlg();editarSessao(S.sessoes.length - 1)">Ajustar duração</button><button class="btn primary" onclick="fecharDlg()">Fechar</button></div></div>`);
+  const info = { treino: plano(a.plano)?.nome || '', titulo: (plano(a.plano)?.nome || 'Treino') + ' concluído', duracao: `${fmtMin(min)} · ${plural(feitas, 'série', 'séries')}`, ajustar: true, sessao: S.sessoes.length - 1, cabecalho: novo ? 'Check-in confirmado' : 'Treino concluído' };
+  celebrarCheckin(info);
 }
 
 /* Timer de descanso */
@@ -895,6 +984,7 @@ async function perguntarIA(){
 function perfilForm(){
   const pf = S.perfil || {};
   return `
+    <div class="pf-foto">${avatar('pf-av')}<div class="stack" style="gap:6px"><button type="button" class="btn sm" onclick="trocarFotoPerfil()">${S.foto ? 'Trocar foto' : 'Adicionar foto de perfil'}</button>${S.foto ? `<button type="button" class="link" onclick="removerFotoPerfil()">Remover foto</button>` : '<span class="small muted">Opcional</span>'}</div></div>
     <label class="small muted">Nome<input type="text" id="pfNome" value="${esc(S.nome)}" placeholder="Seu nome" autocomplete="given-name"></label>
     <div class="row"><label class="grow small muted">Peso (kg)<input type="number" id="pfPeso" inputmode="decimal" step="0.1" min="25" max="300" value="${pf.peso ?? ''}" placeholder="Ex.: 62"></label>
       <label class="grow small muted">Altura (cm)<input type="number" id="pfAltura" inputmode="numeric" min="100" max="250" value="${pf.altura ?? ''}" placeholder="Ex.: 165"></label></div>
@@ -1084,7 +1174,12 @@ function vEvolucao(){
       </section>
       <section class="card">
         <h3>Últimos treinos</h3>
-        ${ultimas.length ? ultimas.map(s => { const idx = S.sessoes.indexOf(s); return `<div class="list-item"><div class="grow"><b>${esc(s.nome)}</b><span class="small muted">${fmtData(s.data)} · ${fmtMin(s.minutos)} · ${s.itens.reduce((a, i) => a + i.series, 0)} séries</span></div><button class="btn sm" onclick="editarSessao(${idx})" aria-label="Editar duração de ${esc(s.nome)} em ${fmtData(s.data)}">Editar</button></div>`; }).join('') : '<p class="muted small">Nenhum treino concluído ainda.</p>'}
+        ${ultimas.length ? ultimas.map(s => { const idx = S.sessoes.indexOf(s); return `<div class="list-item">${s.foto ? `<button class="thumb" data-foto="${s.foto}" onclick="verFoto(${idx})" aria-label="Ver foto"></button>` : ''}<div class="grow"><b>${esc(s.nome)}</b><span class="small muted">${fmtData(s.data)} · ${fmtMin(s.minutos)} · ${s.itens.reduce((a, i) => a + i.series, 0)} séries</span></div><button class="btn sm" onclick="editarSessao(${idx})" aria-label="Editar duração de ${esc(s.nome)} em ${fmtData(s.data)}">Editar</button></div>`; }).join('') : '<p class="muted small">Nenhum treino concluído ainda.</p>'}
+      </section>
+      <section class="card">
+        <h3>Fotos dos treinos</h3>
+        ${S.sessoes.some(x => x.foto) ? `<div class="galeria">${S.sessoes.map((x, i) => x.foto ? `<button class="gal-item" data-foto="${x.foto}" onclick="verFoto(${i})" aria-label="Foto de ${fmtData(x.data)}"><span>${fmtData(x.data)}</span></button>` : '').reverse().join('')}</div>`
+          : '<p class="muted small">Ao finalizar um treino, toque em “Tirar foto do treino”. As fotos aparecem aqui para você ver sua evolução.</p>'}
       </section>
     </div>`;
 }
@@ -1095,7 +1190,8 @@ function editarSessao(i){
     <p class="muted small" style="margin-top:0">${esc(s.nome)} · ${fmtData(s.data)}</p>
     <div class="row"><label class="grow small muted">Horas<input type="number" id="durH" min="0" max="6" inputmode="numeric" value="${Math.floor(s.minutos / 60)}"></label>
       <label class="grow small muted">Minutos<input type="number" id="durM" min="0" max="59" inputmode="numeric" value="${s.minutos % 60}"></label></div>
-    <button class="btn primary block" style="margin-top:14px" onclick="salvarDuracao(${i})">Salvar</button></div>`);
+    <button class="btn primary block" style="margin-top:14px" onclick="salvarDuracao(${i})">Salvar</button>
+    <button class="btn block" style="margin-top:8px" onclick="${s.foto ? `fecharDlg();verFoto(${i})` : `addFotoSessao(${i})`}">${s.foto ? 'Ver foto do treino' : '📷 Adicionar foto a este treino'}</button></div>`);
 }
 function salvarDuracao(i){
   const m = Math.max(0, parseInt($('#durH').value) || 0) * 60 + Math.max(0, Math.min(59, parseInt($('#durM').value) || 0));
@@ -1138,14 +1234,16 @@ function vAjustes(){
       <p class="muted small" style="text-align:center">As animações são ilustrativas. Para montar ou ajustar seu treino, conte com um profissional de educação física.</p>
     </div>`;
 }
-function exportar(){
-  const b = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+async function exportar(){
+  const fotos = await fotoTodas().catch(() => ({}));
+  const b = new Blob([JSON.stringify({ ...S, fotos }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `musculito-backup-${hoje()}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 async function importar(f){
   if (!f) return;
-  try{ const d = JSON.parse(await f.text()); if (!d.planos) throw 0; if (!confirm('Substituir os dados atuais pelo backup?')) return; S = { ...defaultState(), ...d }; save(); aplicarTema(S.tema); view = 'hoje'; render(); alert('Backup restaurado.'); }
+  try{ const d = JSON.parse(await f.text()); if (!d.planos) throw 0; if (!confirm('Substituir os dados atuais pelo backup?')) return; const { fotos, ...dados } = d; S = { ...defaultState(), ...dados }; save(); aplicarTema(S.tema);
+    if (fotos) for (const [k, v] of Object.entries(fotos)) await fotoPut(k, v).catch(() => {}); view = 'hoje'; render(); alert('Backup restaurado.'); }
   catch{ alert('Esse arquivo não parece um backup do Musculito.'); }
 }
 function zerar(){ if (!confirm('Apagar todos os treinos, check-ins e registros?')) return; S = defaultState(); save(); aplicarTema(); view = 'hoje'; render(); }
@@ -1157,6 +1255,8 @@ $('#dlg').addEventListener('close', () => { if (!$('#dlg').open) $('#dlgBody').i
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
 
 aplicarTema(S.tema);
+['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault()));
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 render();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   const tinha = !!navigator.serviceWorker.controller; let recarregou = false;
