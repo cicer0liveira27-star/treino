@@ -195,6 +195,8 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 .opt:has(input:checked){border-color:var(--accent);background:var(--soft)}
 .opt input{accent-color:var(--accent)}
 .plan.vazio{border-style:dashed;box-shadow:none}
+.andamento{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1.5px solid var(--accent);background:var(--soft);margin-bottom:12px}
+.andamento .btn{flex:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -205,7 +207,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=8"></script>
+<script src="exercicios.js?v=9"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -275,6 +277,7 @@ const TABS = [
   ['ajustes', 'Ajustes', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>']
 ];
 let view = S.ativo ? 'treino' : 'hoje';
+if (S.ativo) setTimeout(sincronizarAtivo, 0);
 let evoEx = null;
 function renderTabs(){
   const cur = view === 'treino' ? 'hoje' : view === 'editar' ? 'treinos' : view;
@@ -283,14 +286,19 @@ function renderTabs(){
 }
 $('#tabs').addEventListener('click', e => {
   const b = e.target.closest('[data-tab]'); if (!b) return;
-  view = b.dataset.tab === 'hoje' && S.ativo ? 'treino' : b.dataset.tab; render(); scrollTo(0, 0);
+  if (b.dataset.tab === 'hoje' && S.ativo) return continuarTreino();
+  view = b.dataset.tab; render(); scrollTo(0, 0);
 });
 
 let editId = null;
+function bannerAtivo(){
+  if (!S.ativo || ['treino', 'editar'].includes(view)) return '';
+  return `<div class="card andamento"><div><b>${esc(plano(S.ativo.plano)?.nome || 'Treino')} em andamento</b><div class="small muted">${tempoDecorrido()} · seu progresso está salvo</div></div><button class="btn primary" onclick="continuarTreino()">Continuar</button></div>`;
+}
 function render(){
   stopAnims();
   const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
-  $('#app').innerHTML = v();
+  $('#app').innerHTML = bannerAtivo() + v();
   renderTabs(); mountAnims($('#app')); bindLib($('#app'));
   if (view === 'treino') bindTreino();
   sortable($('#sortEx'), (a, b) => moverItem(plano(editId).itens, a, b));
@@ -343,9 +351,33 @@ function toggleCheckin(){ const h = hoje(); S.checkins.includes(h) ? S.checkins 
 
 function iniciar(id){
   const p = plano(id); if (!p) return; if (!p.itens.length) return editar(id);
+  if (S.ativo) {
+    if (S.ativo.plano === id) return continuarTreino();
+    const atual = plano(S.ativo.plano)?.nome || 'outro treino';
+    if (!confirm(`Você tem o treino "${atual}" em andamento. Descartar ele e começar "${p.nome}"?`)) return continuarTreino();
+  }
   S.ativo = { plano: id, inicio: Date.now(), itens: p.itens.map(it => ({ ...it, carga: ultimaCarga(it.ex), feitas: Array(+it.series || 1).fill(false) })) };
   save(); view = 'treino'; render(); scrollTo(0, 0);
 }
+/* Junta as mudanças do treino (exercícios novos, séries, ordem) com o que já foi feito, sem zerar nada. */
+function sincronizarAtivo(){
+  const a = S.ativo, p = a && plano(a.plano); if (!p) return;
+  const sobra = [...a.itens], usados = new Set();
+  const novos = p.itens.map(it => {
+    const k = sobra.findIndex((x, j) => !usados.has(j) && x.ex === it.ex);
+    const n = Math.max(1, +it.series || 1);
+    if (k < 0) return { ...it, carga: ultimaCarga(it.ex), feitas: Array(n).fill(false) };
+    usados.add(k); const old = sobra[k];
+    const feitas = old.feitas.slice(0, n); while (feitas.length < n) feitas.push(false);
+    return { ...it, carga: old.carga, feitas };
+  });
+  // exercícios já feitos que saíram do treino continuam no registro de hoje
+  sobra.forEach((x, j) => { if (!usados.has(j) && x.feitas.some(Boolean)) novos.push(x); });
+  a.itens = novos; save();
+}
+function continuarTreino(){ sincronizarAtivo(); view = 'treino'; render(); scrollTo(0, 0); }
+function editarAtivo(){ pararTimer(); editar(S.ativo.plano); }
+const tempoDecorrido = () => { const m = Math.max(0, Math.round((Date.now() - S.ativo.inicio) / 60000)); return m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${pad(m % 60)}min`; };
 
 function vTreino(){
   const a = S.ativo; if (!a) { view = 'hoje'; return vHoje(); }
@@ -353,8 +385,8 @@ function vTreino(){
   const tot = a.itens.reduce((s, it) => s + it.feitas.length, 0), ok = a.itens.reduce((s, it) => s + it.feitas.filter(Boolean).length, 0);
   return `
     <div class="top">
-      <div><div class="hello">Treino em andamento</div><h1>${esc(p?.nome || 'Treino')}</h1></div>
-      <button class="btn sm ghost" onclick="cancelarTreino()">Sair</button>
+      <div><div class="hello">Treino em andamento · ${tempoDecorrido()}</div><h1>${esc(p?.nome || 'Treino')}</h1></div>
+      <button class="btn sm" onclick="editarAtivo()">+ Exercícios</button>
     </div>
     <div class="small muted">${ok} de ${tot} séries</div>
     <div class="progress"><i style="width:${tot ? ok / tot * 100 : 0}%"></i></div>
@@ -371,7 +403,9 @@ function vTreino(){
             <details><summary>Como fazer</summary><ul>${e.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></details>
           </div>
         </article>`; }).join('')}
+      <button class="btn block" onclick="editarAtivo()">+ Adicionar ou mudar exercícios</button>
       <button class="btn primary block" onclick="finalizar()">Finalizar treino</button>
+      <button class="btn ghost block small" style="color:var(--muted)" onclick="cancelarTreino()">Descartar este treino</button>
     </div>`;
 }
 function bindTreino(){
@@ -388,20 +422,20 @@ function bindTreino(){
   $('#app').querySelectorAll('[data-carga]').forEach(inp => inp.onchange = () => { S.ativo.itens[+inp.dataset.carga].carga = inp.value; save(); });
 }
 function cancelarTreino(){
-  if (!confirm('Sair do treino sem salvar?')) return;
+  if (!confirm('Descartar este treino? As séries marcadas hoje serão perdidas.')) return;
   S.ativo = null; save(); pararTimer(); view = 'hoje'; render();
 }
 function finalizar(){
   const a = S.ativo; const feitas = a.itens.reduce((s, it) => s + it.feitas.filter(Boolean).length, 0);
   if (!feitas && !confirm('Nenhuma série marcada. Finalizar mesmo assim?')) return;
-  const min = Math.max(1, Math.round((Date.now() - a.inicio) / 60000));
+  const min = Math.max(1, Math.min(360, Math.round((Date.now() - a.inicio) / 60000)));
   S.sessoes.push({ data: hoje(), plano: a.plano, nome: plano(a.plano)?.nome || '', minutos: min,
     itens: a.itens.map(it => ({ ex: it.ex, carga: it.carga === '' ? '' : +it.carga, series: it.feitas.filter(Boolean).length })) });
   checkin(); S.ativo = null; save(); pararTimer();
   view = 'hoje'; render();
   abrirDlg(`<div class="celebrate"><div class="big">🎉</div><h2>Treino concluído!</h2>
-    <p class="muted">${feitas} ${feitas === 1 ? 'série' : 'séries'} em ${min} min. Check-in de hoje registrado.<br>${streakDias() === 1 ? '1 dia seguido' : streakDias() + ' dias seguidos'}.</p>
-    <button class="btn primary" onclick="fecharDlg()">Fechar</button></div>`);
+    <p class="muted">${feitas} ${feitas === 1 ? 'série' : 'séries'} em ${fmtMin(min)}. Check-in de hoje registrado.<br>${streakDias() === 1 ? '1 dia seguido' : streakDias() + ' dias seguidos'}.</p>
+    <div class="row" style="justify-content:center"><button class="btn" onclick="fecharDlg();editarSessao(S.sessoes.length - 1)">Ajustar duração</button><button class="btn primary" onclick="fecharDlg()">Fechar</button></div></div>`);
 }
 
 /* Timer de descanso */
@@ -450,10 +484,11 @@ function verEx(id){
 function editar(id){ editId = id; view = 'editar'; render(); scrollTo(0, 0); }
 function vEditar(){
   const p = plano(editId); if (!p) { view = 'treinos'; return vTreinos(); }
-  const i = S.planos.indexOf(p), sug = sugestoes(i);
+  const i = S.planos.indexOf(p), sug = sugestoes(i), emAndamento = S.ativo?.plano === p.id;
   return `
-    <div class="top"><button class="icon-btn" onclick="view='treinos';render()" aria-label="Voltar">←</button><h1 style="flex:1">${esc(p.nome)}</h1><span class="small muted">Dia ${i + 1}</span></div>
+    <div class="top"><button class="icon-btn" onclick="${emAndamento ? 'continuarTreino()' : "view='treinos';render()"}" aria-label="Voltar">←</button><h1 style="flex:1">${esc(p.nome)}</h1><span class="small muted">Dia ${i + 1}</span></div>
     <div class="stack">
+      ${emAndamento ? `<div class="card andamento"><div><b>Treino em andamento · ${tempoDecorrido()}</b><div class="small muted">Adicione ou mude exercícios. O que você já fez continua marcado.</div></div><button class="btn primary" onclick="continuarTreino()">Voltar ao treino</button></div>` : ''}
       <div class="card"><label class="small muted" for="pn">Nome do treino</label><input type="text" id="pn" value="${esc(p.nome)}" onchange="plano('${p.id}').nome=this.value;save()"></div>
       <section class="card coach">
         ${coachHead()}
@@ -493,7 +528,7 @@ function addEx(id){
   save(); render();
   const box2 = document.querySelector('.libbox[data-action=add]');
   if (box && box2 && before < innerHeight * .9) scrollBy(0, box2.getBoundingClientRect().top - before); else scrollTo(0, y0);
-  toast(`${e.nome} adicionado como ${p.itens.length}º`);
+  toast(S.ativo?.plano === p.id ? `${e.nome} adicionado. Toque em “Voltar ao treino” para continuar.` : `${e.nome} adicionado como ${p.itens.length}º`);
 }
 
 /* ---------- Assistente ---------- */
@@ -835,9 +870,23 @@ function vEvolucao(){
       </section>
       <section class="card">
         <h3>Últimos treinos</h3>
-        ${ultimas.length ? ultimas.map(s => `<div class="list-item"><div class="grow"><b>${esc(s.nome)}</b><span class="small muted">${fmtData(s.data)} · ${s.minutos} min · ${s.itens.reduce((a, i) => a + i.series, 0)} séries</span></div></div>`).join('') : '<p class="muted small">Nenhum treino concluído ainda.</p>'}
+        ${ultimas.length ? ultimas.map(s => { const idx = S.sessoes.indexOf(s); return `<div class="list-item"><div class="grow"><b>${esc(s.nome)}</b><span class="small muted">${fmtData(s.data)} · ${fmtMin(s.minutos)} · ${s.itens.reduce((a, i) => a + i.series, 0)} séries</span></div><button class="btn sm" onclick="editarSessao(${idx})" aria-label="Editar duração de ${esc(s.nome)} em ${fmtData(s.data)}">Editar</button></div>`; }).join('') : '<p class="muted small">Nenhum treino concluído ainda.</p>'}
       </section>
     </div>`;
+}
+const fmtMin = m => m < 60 ? `${m} min` : `${Math.floor(m / 60)}h${m % 60 ? ' ' + pad(m % 60) + 'min' : ''}`;
+function editarSessao(i){
+  const s = S.sessoes[i]; if (!s) return;
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Duração do treino</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <p class="muted small" style="margin-top:0">${esc(s.nome)} · ${fmtData(s.data)}</p>
+    <div class="row"><label class="grow small muted">Horas<input type="number" id="durH" min="0" max="6" inputmode="numeric" value="${Math.floor(s.minutos / 60)}"></label>
+      <label class="grow small muted">Minutos<input type="number" id="durM" min="0" max="59" inputmode="numeric" value="${s.minutos % 60}"></label></div>
+    <button class="btn primary block" style="margin-top:14px" onclick="salvarDuracao(${i})">Salvar</button></div>`);
+}
+function salvarDuracao(i){
+  const m = Math.max(0, parseInt($('#durH').value) || 0) * 60 + Math.max(0, Math.min(59, parseInt($('#durM').value) || 0));
+  if (!m) return $('#durM').focus();
+  S.sessoes[i].minutos = m; save(); fecharDlg(); render(); toast(`Duração atualizada: ${fmtMin(m)}`);
 }
 function mudaMes(d){ calMes.setMonth(calMes.getMonth() + d); render(); }
 function addPeso(){
@@ -883,9 +932,9 @@ async function importar(f){
 function zerar(){ if (!confirm('Apagar todos os treinos, check-ins e registros?')) return; S = defaultState(); save(); view = 'hoje'; render(); }
 
 /* Diálogo */
-function abrirDlg(html){ $('#dlgBody').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); mountAnims($('#dlgBody')); }
+function abrirDlg(html){ const d0 = $('#dlg'); if (d0.open) d0.close(); $('#dlgBody').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); mountAnims($('#dlgBody')); }
 function fecharDlg(){ $('#dlg').close(); }
-$('#dlg').addEventListener('close', () => { $('#dlgBody').innerHTML = ''; });
+$('#dlg').addEventListener('close', () => { if (!$('#dlg').open) $('#dlgBody').innerHTML = ''; });
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
 
 render();
