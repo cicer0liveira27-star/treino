@@ -197,6 +197,67 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 .plan.vazio{border-style:dashed;box-shadow:none}
 .andamento{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1.5px solid var(--accent);background:var(--soft);margin-bottom:12px}
 .andamento .btn{flex:none}
+
+/* Cabeçalho, card de check-in */
+.hd{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.hd-logo .mascote{width:34px;height:34px}
+.hd-saud{color:var(--muted);font-size:15px}
+.hd-saud b{color:var(--text);font-weight:600}
+.hd-tit{font-size:30px;margin:4px 0 14px}
+.sec-tit{font-size:21px;margin:6px 0 0}
+.mascote .m-corpo,.mascote .m-braco *{fill:#fff7f2}
+.mascote .m-faixa{fill:var(--accent)}
+.mascote .m-olho{fill:#2a1f1b}.mascote .m-boca{stroke:#2a1f1b}.mascote .m-boch{fill:#ffb4a2}
+.hd-logo .mascote,.ci-masc{background:var(--accent);border-radius:12px}
+.ci-card{position:relative;display:grid;gap:14px;overflow:hidden}
+.ci-badge{position:absolute;top:0;right:0;background:var(--ok);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-bottom-left-radius:12px}
+.ci-top{display:flex;gap:12px;align-items:center}
+.ci-top b{display:block;font-size:17px}
+.ci-masc{width:52px;height:52px;flex:none}
+.ci-desfazer{justify-self:center;font-weight:500;color:var(--muted)}
+.ci-card.pendente{border:1.5px dashed var(--accent)}
+.ci-btn{font-size:17px;padding:16px}
+.streak .stat b{font-size:24px}
+.streak .stat .small{font-size:12px}
+button.day{border:none;background:none;padding:0;font:inherit;color:inherit}
+button.day:disabled{opacity:.45}
+.cal button,.cal i{font-style:normal;aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:13px;background:var(--soft);border:none;padding:0;color:inherit}
+.cal button.on{background:var(--accent);color:#fff;font-weight:600}
+.cal button.today{outline:2px solid var(--accent);outline-offset:-2px}
+.cal i.futuro{opacity:.4}
+
+/* Animação de check-in */
+.cel{position:fixed;inset:0;z-index:100;overflow:hidden;background:var(--bg);color:#fff;opacity:0;transition:opacity .2s}
+.cel.go{opacity:1}
+.cel.saindo{opacity:0;transition:opacity .25s}
+.cel-intro{position:absolute;inset:0;display:grid;place-items:center}
+.cel-masc{width:84px;height:84px;background:var(--accent);border-radius:26px;transform:scale(.3) rotate(-30deg);opacity:0}
+.cel.go .cel-masc{animation:mascIn 1.1s cubic-bezier(.2,1.4,.4,1) forwards}
+.cel-blob{position:absolute;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;transform:scale(0) rotate(0);fill:var(--accent)}
+.cel.go .cel-blob{animation:blob 1s .85s cubic-bezier(.6,0,.3,1) forwards}
+.cel-final{position:absolute;inset:0;background:var(--accent);display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));opacity:0;max-width:680px;margin:0 auto}
+.cel.go .cel-final{animation:fadeUp .45s 1.7s ease-out forwards}
+.cel-top{display:flex;justify-content:space-between;align-items:center}
+.cel-marca{font-family:Fraunces,serif;font-weight:700;font-size:20px}
+.cel-x{background:none;border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%}
+.cel-meio{flex:1;display:grid;place-items:center;align-content:center;gap:12px;text-align:center}
+.cel-masc2{width:120px;height:120px}
+.cel.go .cel-masc2{animation:flex 1.2s 2.1s ease-in-out 2}
+.cel-num{font-weight:600;font-size:15px;opacity:.95}
+.cel-tit{font-family:Fraunces,serif;font-size:34px;line-height:1.05;margin:0 0 14px;color:#fff}
+.cel-card{background:#fff;color:#2a1f1b;border-radius:16px;padding:14px;display:grid;gap:10px}
+.cel-card-top{display:flex;gap:12px;align-items:center}
+.cel-card .muted{color:#7a6a63}
+.cel-mini{width:44px;height:44px;background:var(--accent);border-radius:12px;flex:none}
+.cel-linha{font-size:14px;color:#5b4c46}
+.cel-btn{margin-top:12px;border:none;border-radius:999px;padding:15px;font-weight:700;font-size:16px;background:#fff;color:var(--accent)}
+.cel-btn.sec{background:rgba(255,255,255,.18);color:#fff}
+.cel.sem-mov .cel-intro,.cel.sem-mov .cel-blob{display:none}
+.cel.sem-mov .cel-final{opacity:1;animation:none}
+@keyframes mascIn{0%{opacity:0;transform:scale(.3) rotate(-30deg)}60%{opacity:1;transform:scale(1.15) rotate(8deg)}80%{transform:scale(.95) rotate(-4deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes blob{0%{transform:scale(0) rotate(0)}100%{transform:scale(6.5) rotate(140deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes flex{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg) scale(1.05)}60%{transform:rotate(5deg)}}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -207,7 +268,7 @@ dialog::backdrop{background:rgba(20,10,8,.5)}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=9"></script>
+<script src="exercicios.js?v=10"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -234,7 +295,25 @@ const plano = id => S.planos.find(p => p.id === id);
 const letra = i => String.fromCharCode(65 + i);
 ensure5();
 
-function checkin(dia = hoje()){ if (!S.checkins.includes(dia)) { S.checkins.push(dia); S.checkins.sort(); } }
+function checkin(dia = hoje()){
+  if (S.checkins.includes(dia)) return false;
+  S.checkins.push(dia); S.checkins.sort();
+  if (dia === hoje()) { S.horas = S.horas || {}; const n = new Date(); S.horas[dia] = `${pad(n.getHours())}:${pad(n.getMinutes())}`; }
+  return true;
+}
+const segunda = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; };
+function semanasSeguidas(){
+  const sem = new Set(S.checkins.map(c => iso(segunda(fromIso(c))))); let n = 0; const d = segunda(new Date());
+  if (!sem.has(iso(d))) d.setDate(d.getDate() - 7);
+  while (sem.has(iso(d))) { n++; d.setDate(d.getDate() - 7); }
+  return n;
+}
+function recordeDias(){
+  let best = 0, cur = 0, prev = null;
+  S.checkins.forEach(c => { const d = fromIso(c); cur = prev && (d - prev) / 864e5 === 1 ? cur + 1 : 1; best = Math.max(best, cur); prev = d; });
+  return best;
+}
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 function streakDias(){
   const set = new Set(S.checkins); let n = 0; const d = new Date();
   if (!set.has(iso(d))) d.setDate(d.getDate() - 1);
@@ -257,6 +336,56 @@ function proximoPlano(){
   const ult = S.sessoes[S.sessoes.length - 1];
   const i = ult ? S.planos.findIndex(p => p.id === ult.plano) : -1;
   return S.planos[(i + 1) % S.planos.length];
+}
+
+/* ---------- Mascote ---------- */
+function mascote(cls = ''){
+  return `<svg class="mascote ${cls}" viewBox="0 0 192 192" aria-hidden="true">
+    <g class="m-braco"><rect x="118" y="92" width="42" height="20" rx="10"/><rect x="140" y="52" width="22" height="56" rx="11"/><ellipse cx="144" cy="72" rx="16" ry="14"/><ellipse cx="151" cy="51" rx="15" ry="11"/></g>
+    <circle class="m-corpo" cx="84" cy="102" r="50"/>
+    <rect class="m-faixa" x="46" y="66" width="76" height="10" rx="5"/>
+    <ellipse class="m-olho" cx="68" cy="93" rx="6" ry="7"/><ellipse class="m-olho" cx="100" cy="93" rx="6" ry="7"/>
+    <path class="m-boca" d="M70 108 Q84 124 98 108" fill="none" stroke-width="5" stroke-linecap="round"/>
+    <ellipse class="m-boch" cx="58" cy="108" rx="6" ry="4"/><ellipse class="m-boch" cx="110" cy="108" rx="6" ry="4"/>
+  </svg>`;
+}
+
+/* ---------- Animação de check-in ---------- */
+function celebrarCheckin(info = {}){
+  const h = hoje(), hora = S.horas?.[h] || '', prox = info.treino || proximoPlano()?.nome || '';
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = document.createElement('div');
+  el.className = 'cel' + (reduz ? ' sem-mov' : '');
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Check-in confirmado');
+  el.innerHTML = `
+    <div class="cel-intro">${mascote('cel-masc')}</div>
+    <svg class="cel-blob" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 18c26 0 34 22 52 30s38 16 36 44-24 30-26 52-14 40-44 38-34-24-56-30-46-14-44-44 26-34 30-52 26-38 52-38z"/></svg>
+    <div class="cel-final">
+      <div class="cel-top"><span class="cel-marca">Musculito</span><button class="cel-x" aria-label="Fechar">✕</button></div>
+      <div class="cel-meio">${mascote('cel-masc2')}<div class="cel-num">${plural(semanasSeguidas(), 'semana seguida', 'semanas seguidas')} · ${plural(streakDias(), 'dia seguido', 'dias seguidos')}</div></div>
+      <h2 class="cel-tit">Check-in confirmado</h2>
+      <div class="cel-card">
+        <div class="cel-card-top">${mascote('cel-mini')}<div><b>${esc(info.titulo || (prox ? 'Hoje: ' + prox : 'Treino de hoje'))}</b><div class="small muted">${esc(S.nome)} · ${MESES[new Date().getMonth()]}: ${plural(S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length, 'treino', 'treinos')}</div></div></div>
+        <div class="cel-linha">🕒 ${hora ? hora + ' • ' : ''}${fmtData(h)}${info.duracao ? ' • ' + esc(info.duracao) : ''}</div>
+      </div>
+      ${info.ajustar ? `<button class="cel-btn sec" data-a="ajustar">Ajustar duração</button>` : ''}
+      <button class="cel-btn" data-a="share">Compartilhar</button>
+    </div>`;
+  document.body.append(el);
+  if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
+  requestAnimationFrame(() => el.classList.add('go'));
+  const fechar = () => { el.classList.add('saindo'); setTimeout(() => el.remove(), 250); document.removeEventListener('keydown', esc_); };
+  const esc_ = e => { if (e.key === 'Escape') fechar(); };
+  document.addEventListener('keydown', esc_);
+  el.querySelector('.cel-x').onclick = fechar;
+  el.querySelector('[data-a=share]').onclick = () => compartilharCheckin(info);
+  const aj = el.querySelector('[data-a=ajustar]'); if (aj) aj.onclick = () => { fechar(); editarSessao(S.sessoes.length - 1); };
+  setTimeout(() => el.querySelector('.cel-x')?.focus(), reduz ? 50 : 1900);
+}
+async function compartilharCheckin(info = {}){
+  const txt = `💪 Check-in feito no Musculito! ${info.treino ? 'Treino de hoje: ' + info.treino + '. ' : ''}${plural(semanasSeguidas(), 'semana seguida', 'semanas seguidas')} treinando.`;
+  try { if (navigator.share) return await navigator.share({ text: txt, url: location.href.split('?')[0] }); } catch { return; }
+  try { await navigator.clipboard.writeText(txt + ' ' + location.href.split('?')[0]); toast('Texto copiado para compartilhar'); } catch { toast(txt); }
 }
 
 /* ---------- Animações ---------- */
@@ -316,20 +445,36 @@ function vHoje(){
       <button class="btn primary block" onclick="salvarPerfil(true)">Começar</button>
     </div>`;
   const prox = proximoPlano(), sem = semanaAtual(), set = new Set(S.checkins), h = hoje();
-  const fezHoje = set.has(h);
+  const fezHoje = set.has(h), hora = S.horas?.[h];
   const noMes = S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length;
   const nomes = ['S','T','Q','Q','S','S','D'];
   const saud = (() => { const hr = new Date().getHours(); return hr < 12 ? 'Bom dia' : hr < 18 ? 'Boa tarde' : 'Boa noite'; })();
+  const sessHoje = [...S.sessoes].reverse().find(x => x.data === h);
   return `
-    <div class="top"><div><div class="hello">${saud},</div><h1>${esc(S.nome)}</h1><div class="small muted">${objetivos().length > 1 ? 'Objetivos' : 'Objetivo'}: ${esc(nomesObj())}</div></div></div>
+    <header class="hd"><span class="hd-logo">${mascote()}</span><span class="hd-saud">${saud}, <b>${esc(S.nome)}</b></span></header>
+    <h1 class="hd-tit">Check-in</h1>
     <div class="stack">
+      ${fezHoje ? `
+      <h2 class="sec-tit">Check-in diário concluído!</h2>
+      <section class="card ci-card">
+        <span class="ci-badge">CONCLUÍDO</span>
+        <div class="ci-top">${mascote('ci-masc')}<div><b>${esc(sessHoje ? sessHoje.nome : prox ? 'Hoje: ' + prox.nome : 'Treino de hoje')}</b><div class="small muted">${hora ? hora + ' • ' : ''}${fmtData(h)}${sessHoje?.minutos ? ' • ' + fmtMin(sessHoje.minutos) : ''}</div></div></div>
+        <button class="btn primary block" onclick="compartilharCheckin({ treino: '${esc((sessHoje?.nome || prox?.nome || '').replace(/'/g, ''))}' })">Compartilhar</button>
+        <button class="link ci-desfazer" onclick="desfazerCheckin()">Desfazer check-in</button>
+      </section>` : `
+      <h2 class="sec-tit">Bora treinar hoje?</h2>
+      <section class="card ci-card pendente">
+        <div class="ci-top">${mascote('ci-masc')}<div><b>${prox ? 'Próximo: ' + esc(prox.nome) : 'Treino de hoje'}</b><div class="small muted">Chegou na academia? Faça seu check-in.</div></div></div>
+        <button class="btn primary block ci-btn" onclick="fazerCheckin()">Fazer check-in</button>
+      </section>`}
       <section class="card">
         <div class="streak">
-          <div class="stat"><b>${streakDias()}</b><span class="small muted">dias seguidos</span></div>
-          <div class="stat"><b>${noMes}</b><span class="small muted">treinos em ${MESES[new Date().getMonth()]}</span></div>
+          <div class="stat"><b>${semanasSeguidas()}</b><span class="small muted">${semanasSeguidas() === 1 ? 'semana seguida' : 'semanas seguidas'}</span></div>
+          <div class="stat"><b>${streakDias()}</b><span class="small muted">${streakDias() === 1 ? 'dia seguido' : 'dias seguidos'} · recorde ${recordeDias()}</span></div>
+          <div class="stat"><b>${noMes}</b><span class="small muted">em ${MESES[new Date().getMonth()]}</span></div>
         </div>
-        <div class="week">${sem.map((d, i) => `<div class="day ${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}"><i>${set.has(d) ? '✓' : ''}</i>${nomes[i]}</div>`).join('')}</div>
-        <button class="btn ${fezHoje ? 'ghost' : 'primary'} block" style="margin-top:14px" onclick="toggleCheckin()">${fezHoje ? '✓ Check-in feito hoje' : 'Fazer check-in de hoje'}</button>
+        <div class="week">${sem.map((d, i) => `<button class="day ${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}" ${d > h ? 'disabled' : ''} onclick="marcarDia('${d}')" aria-label="${fmtData(d)}: ${set.has(d) ? 'treinou' : 'sem check-in'}" aria-pressed="${set.has(d)}"><i>${set.has(d) ? '✓' : ''}</i>${nomes[i]}</button>`).join('')}</div>
+        <p class="small muted" style="margin:10px 0 0;text-align:center">Esqueceu de marcar algum dia? Toque nele.</p>
       </section>
       <h2 style="margin-top:8px">Seus treinos da semana</h2>
       ${S.planos.every(p => !p.itens.length) ? `<div class="card stack"><b>Monte seus 5 treinos</b><p class="small muted" style="margin:0">Escolha os exercícios de cada dia. O assistente te dá sugestões e dicas para os seus objetivos.</p><button class="btn primary" onclick="view='treinos';render();scrollTo(0,0)">Montar meus treinos</button></div>` : ''}
@@ -347,7 +492,15 @@ function vHoje(){
         </button>`).join('')}
     </div>`;
 }
-function toggleCheckin(){ const h = hoje(); S.checkins.includes(h) ? S.checkins = S.checkins.filter(d => d !== h) : checkin(h); save(); render(); }
+function fazerCheckin(){ if (checkin()) { save(); render(); celebrarCheckin(); } }
+function desfazerCheckin(){ if (!confirm('Desfazer o check-in de hoje?')) return; S.checkins = S.checkins.filter(d => d !== hoje()); if (S.horas) delete S.horas[hoje()]; save(); render(); }
+function marcarDia(d){
+  if (d === hoje()) return S.checkins.includes(d) ? desfazerCheckin() : fazerCheckin();
+  const tem = S.checkins.includes(d);
+  if (!confirm(tem ? `Remover o check-in de ${fmtData(d)}?` : `Marcar que você treinou em ${fmtData(d)}?`)) return;
+  if (tem) S.checkins = S.checkins.filter(x => x !== d); else checkin(d);
+  save(); const y = scrollY; render(); scrollTo(0, y); toast(tem ? 'Check-in removido' : 'Check-in adicionado');
+}
 
 function iniciar(id){
   const p = plano(id); if (!p) return; if (!p.itens.length) return editar(id);
@@ -431,10 +584,12 @@ function finalizar(){
   const min = Math.max(1, Math.min(360, Math.round((Date.now() - a.inicio) / 60000)));
   S.sessoes.push({ data: hoje(), plano: a.plano, nome: plano(a.plano)?.nome || '', minutos: min,
     itens: a.itens.map(it => ({ ex: it.ex, carga: it.carga === '' ? '' : +it.carga, series: it.feitas.filter(Boolean).length })) });
-  checkin(); S.ativo = null; save(); pararTimer();
+  const novo = checkin(); S.ativo = null; save(); pararTimer();
   view = 'hoje'; render();
-  abrirDlg(`<div class="celebrate"><div class="big">🎉</div><h2>Treino concluído!</h2>
-    <p class="muted">${feitas} ${feitas === 1 ? 'série' : 'séries'} em ${fmtMin(min)}. Check-in de hoje registrado.<br>${streakDias() === 1 ? '1 dia seguido' : streakDias() + ' dias seguidos'}.</p>
+  const info = { treino: plano(a.plano)?.nome || '', titulo: (plano(a.plano)?.nome || 'Treino') + ' concluído', duracao: `${fmtMin(min)} · ${plural(feitas, 'série', 'séries')}`, ajustar: true };
+  if (novo) celebrarCheckin(info);
+  else abrirDlg(`<div class="celebrate"><div class="big">🎉</div><h2>Treino concluído!</h2>
+    <p class="muted">${plural(feitas, 'série', 'séries')} em ${fmtMin(min)}.</p>
     <div class="row" style="justify-content:center"><button class="btn" onclick="fecharDlg();editarSessao(S.sessoes.length - 1)">Ajustar duração</button><button class="btn primary" onclick="fecharDlg()">Fechar</button></div></div>`);
 }
 
@@ -847,7 +1002,7 @@ function vEvolucao(){
         </div>
         <div class="cal">${['S','T','Q','Q','S','S','D'].map(d => `<span>${d}</span>`).join('')}
           ${Array(first).fill('<i class="empty"></i>').join('')}
-          ${Array.from({ length: dias }, (_, i) => { const d = `${y}-${pad(m + 1)}-${pad(i + 1)}`; return `<i class="${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}">${i + 1}</i>`; }).join('')}
+          ${Array.from({ length: dias }, (_, i) => { const d = `${y}-${pad(m + 1)}-${pad(i + 1)}`; return d > h ? `<i class="futuro">${i + 1}</i>` : `<button class="${set.has(d) ? 'on' : ''} ${d === h ? 'today' : ''}" onclick="marcarDia('${d}')" aria-pressed="${set.has(d)}" aria-label="${i + 1} de ${MESES[m]}">${i + 1}</button>`; }).join('')}
         </div>
         <div class="streak" style="margin-top:14px">
           <div class="stat"><b>${S.checkins.length}</b><span class="small muted">check-ins no total</span></div>
