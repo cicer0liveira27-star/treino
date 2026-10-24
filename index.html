@@ -874,7 +874,7 @@ function vEvolucao(){
       </section>
     </div>`;
 }
-const fmtMin = m => m < 60 ? `${m} min` : `${Math.floor(m / 60)}h${m % 60 ? ' ' + pad(m % 60) + 'min' : ''}`;
+const fmtMin = m => !m ? 'duração não registrada' : m < 60 ? `${m} min` : `${Math.floor(m / 60)}h${m % 60 ? ' ' + pad(m % 60) + 'min' : ''}`;
 function editarSessao(i){
   const s = S.sessoes[i]; if (!s) return;
   abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Duração do treino</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
