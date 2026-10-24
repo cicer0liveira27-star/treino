@@ -281,7 +281,7 @@ button.day:disabled{opacity:.45}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="exercicios.js?v=12"></script>
+<script src="exercicios.js?v=13"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -363,14 +363,27 @@ const TEMAS = [
   { id: 'marinho', nome: 'Marinho e Amarelo', p: '#1e40af', s: '#fbbf24', pd: '#60a5fa' },
   { id: 'turquesa', nome: 'Turquesa', p: '#0d9488', s: '#5eead4', pd: '#2dd4bf' },
   { id: 'verde', nome: 'Verde Musgo', p: '#15803d', s: '#a3e635', pd: '#4ade80' },
-  { id: 'grena', nome: 'Grená e Azul', p: '#a50044', s: '#004d98', pd: '#e8578f', sd: '#4f8fd6' },
-  { id: 'celeste', nome: 'Celeste e Dourado', p: '#3c7fc2', s: '#f6b40e', pd: '#75aadb' }
+  { id: 'grena', nome: 'Grená e Azul', p: '#a50044', s: '#004d98', pd: '#b8155a', sd: '#1f6fd1', listra: true, duo: true },
+  { id: 'celeste', nome: 'Celeste e Dourado', p: '#3c7fc2', s: '#f6b40e', pd: '#75aadb', listra: '#ffffff' }
 ];
 function aplicarTema(id){
   const t = TEMAS.find(x => x.id === id) || TEMAS[0], m = (c, q, b) => `color-mix(in srgb, ${c} ${q}%, ${b})`;
   $('#temaCss').textContent = t.id === 'coral' ? '' : `
 :root{--accent:${t.p};--accent-2:${t.s};--db:${t.p};--bg:${m(t.p, 4, '#ffffff')};--soft:${m(t.p, 10, '#ffffff')};--line:${m(t.p, 16, '#ececec')};--mat:${m(t.s, 45, '#ffffff')}}
 @media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${t.sd || m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
+  if (t.listra) {
+    const l2 = t.listra === true ? 'var(--accent-2)' : t.listra;
+    $('#temaCss').textContent += `
+.hd-logo .mascote,.ci-masc,.cel-mini,.cel-masc{background:repeating-linear-gradient(90deg,var(--accent) 0 9px,${l2} 9px 18px)}
+.ci-card{padding-top:22px}
+.ci-card::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:repeating-linear-gradient(90deg,var(--accent) 0 22px,${l2} 22px 44px)}
+.cel-final{background:repeating-linear-gradient(90deg,var(--accent) 0 48px,color-mix(in srgb,${l2} 85%,var(--accent)) 48px 96px)}
+.cel-tit,.cel-num,.cel-marca{text-shadow:0 2px 8px rgba(0,0,0,.35)}
+.day.on i,.cal button.on{background:linear-gradient(135deg,var(--accent) 50%,${t.listra === true ? 'var(--accent-2)' : t.s} 50%);border-color:var(--accent)}
+${t.duo ? `.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#fff}
+.progress i,.num,.tag,.plus,.coach-ic{color:#fff}
+:root{--on-accent:#fff}` : ''}`;
+  }
   requestAnimationFrame(() => {
     const bg = getComputedStyle(document.body).backgroundColor;
     document.querySelectorAll('meta[name=theme-color]').forEach(x => x.setAttribute('content', bg));
