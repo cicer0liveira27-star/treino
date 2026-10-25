@@ -328,7 +328,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=20"></script>
+<script src="exercicios.js?v=21"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -513,7 +513,7 @@ async function carregarMiniaturas(root){
 /* ---------- Métricas de uso (anônimas) ----------
    Painel: GoatCounter (sem cookies, sem dados pessoais). Coloque abaixo o código da sua conta,
    por exemplo 'musculito' para https://musculito.goatcounter.com. Vazio = nada é enviado. */
-const METRICAS_CODIGO = '';
+const METRICAS_CODIGO = 'ciceroav';
 let telaAnterior = null;
 function metricasAtivas(){ return !!METRICAS_CODIGO && !S.semMetricas && /^https:/.test(location.protocol); }
 function carregarMetricas(){
