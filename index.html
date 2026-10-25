@@ -222,11 +222,12 @@ button.day:disabled{opacity:.45}
 .cel.saindo{opacity:0;transition:opacity .25s}
 .cel-intro{position:absolute;inset:0;display:grid;place-items:center}
 .cel-masc{width:84px;height:84px;background:var(--accent);border-radius:26px;transform:scale(.3) rotate(-30deg);opacity:0}
-.cel.go .cel-masc{animation:mascIn 1.1s cubic-bezier(.2,1.4,.4,1) forwards}
-.cel-blob{position:absolute;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;transform:scale(0) rotate(0);fill:var(--accent)}
-.cel.go .cel-blob{animation:blob 1s .85s cubic-bezier(.6,0,.3,1) forwards}
+.cel.go .cel-masc{animation:pulso 1.15s ease-out forwards}
+.cel-blob{position:absolute;left:50%;top:50%;width:240px;height:240px;margin:-120px 0 0 -120px;transform:scale(0) rotate(0);fill:var(--accent)}
+.cel.go .cel-blob{animation:flor 1.05s 1.05s cubic-bezier(.55,0,.35,1) forwards}
+.cel.go .cel-intro{animation:sumir .2s 1.15s forwards}
 .cel-final{position:absolute;inset:0;background:var(--accent);display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));opacity:0;max-width:680px;margin:0 auto}
-.cel.go .cel-final{animation:fadeUp .45s 1.7s ease-out forwards}
+.cel.go .cel-final{animation:fadeUp .45s 1.95s ease-out forwards}
 .cel-top{display:flex;justify-content:space-between;align-items:center}
 .cel-marca{font-family:Fraunces,serif;font-weight:700;font-size:20px}
 .cel-x{background:none;border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%}
@@ -245,10 +246,46 @@ button.day:disabled{opacity:.45}
 .cel.sem-mov .cel-intro,.cel.sem-mov .cel-blob{display:none}
 .cel.sem-mov .cel-final{opacity:1;animation:none}
 @keyframes mascIn{0%{opacity:0;transform:scale(.3) rotate(-30deg)}60%{opacity:1;transform:scale(1.15) rotate(8deg)}80%{transform:scale(.95) rotate(-4deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes blob{0%{transform:scale(0) rotate(0)}100%{transform:scale(6.5) rotate(140deg)}}
+@keyframes flor{0%{transform:scale(.12) rotate(0)}30%{transform:scale(1) rotate(70deg)}100%{transform:scale(16) rotate(260deg)}}
+@keyframes pulso{0%{opacity:0;transform:scale(.45)}30%{opacity:.55;transform:scale(.7)}55%{opacity:1;transform:scale(1)}72%{transform:scale(.86)}88%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes sumir{to{opacity:0;transform:scale(.6)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes flex{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg) scale(1.05)}60%{transform:rotate(5deg)}}
 
+/* Compartilhar check-in */
+.sh{position:fixed;inset:0;z-index:150;display:flex;flex-direction:column;justify-content:flex-end}
+.sh-fundo{position:absolute;inset:0;background:rgba(10,6,6,.55);opacity:0;transition:opacity .25s}
+.sh.on .sh-fundo{opacity:1}
+.sh-painel{position:relative;max-height:96vh;overflow-y:auto;background:color-mix(in srgb,var(--accent) 22%,#16090b);border-radius:26px 26px 0 0;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.9,.3,1);max-width:680px;width:100%;margin:0 auto}
+.sh.on .sh-painel{transform:none}
+.sh-alca{width:44px;height:5px;border-radius:9px;background:rgba(255,255,255,.85);margin:10px auto 0}
+.sh-x{position:absolute;top:14px;right:16px;width:40px;height:40px;border:none;background:none;color:#fff;font-size:24px}
+.sh-car{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:46px 17% 10px;scrollbar-width:none}
+.sh-car::-webkit-scrollbar{display:none}
+.sh-slide{flex:0 0 100%;margin:0;scroll-snap-align:center;cursor:pointer}
+.sh-slide canvas{width:100%;height:auto;display:block}
+.sh-dots{display:flex;justify-content:center;gap:9px;padding:8px 0 18px}
+.sh-dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .2s}
+.sh-dots i.on{background:#fff}
+.sh-base{background:var(--card);color:var(--text);padding:20px 18px calc(22px + env(safe-area-inset-bottom));position:relative}
+.sh-base h3{margin:0 0 14px;font-size:19px}
+.sh-alvos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sh-alvos button{border:none;background:none;color:var(--text);display:grid;justify-items:center;gap:8px;font-size:13px;padding:0}
+.sh-ic{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;transition:transform .2s}
+.sh-ic svg{width:30px;height:30px}
+.sh-ic.ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285aeb 90%)}
+.sh-ic.wa{background:#25d366}
+.sh-ic.cp{background:var(--accent)}
+.sh-ic.mais{border:2px solid var(--text);color:var(--text)}
+.sh-alvos button.on .sh-ic{transform:scale(1.12);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 35%,transparent)}
+.sh-sub{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0 0 16px}
+.sh-op{border:none;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;color:#fff;opacity:0}
+.sh-op.ig{background:linear-gradient(90deg,#d6249f,#fd5949)}
+.sh-op.wa{background:#1fae55}
+.sh-sub.boom .sh-op{animation:explode .5s calc(var(--i) * 70ms) cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes explode{0%{opacity:0;transform:translate(var(--dx,0),46px) scale(.2)}100%{opacity:1;transform:none}}
+.toast{z-index:200}
+@media (prefers-reduced-motion: reduce){.sh-sub.boom .sh-op{animation:none;opacity:1}.sh-painel{transition:none}}
 /* Temas */
 .tema-grupo{display:grid;gap:8px}
 .temas{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
@@ -290,8 +327,8 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <dialog id="dlg"><div id="dlgBody"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="catalogo.js?v=18"></script>
-<script src="exercicios.js?v=18"></script>
+<script src="catalogo.js?v=19"></script>
+<script src="exercicios.js?v=19"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -486,6 +523,8 @@ function mascote(cls = ''){
 }
 
 /* ---------- Animação de check-in ---------- */
+// Flor de 8 pétalas curvas que gira e cresce até cobrir a tela.
+const FLOR = '<circle cx="100" cy="100" r="22"/>' + Array.from({ length: 8 }, (_, i) => `<path transform="rotate(${i * 45} 100 100)" d="M100 100C90 76 100 46 128 36c18-6 30 8 22 22-10 18-28 30-50 42z"/>`).join('');
 function celebrarCheckin(info = {}){
   const h = hoje(), hora = S.horas?.[h] || '', prox = info.treino || proximoPlano()?.nome || '';
   const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -494,7 +533,7 @@ function celebrarCheckin(info = {}){
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Check-in confirmado');
   el.innerHTML = `
     <div class="cel-intro">${mascote('cel-masc')}</div>
-    <svg class="cel-blob" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 18c26 0 34 22 52 30s38 16 36 44-24 30-26 52-14 40-44 38-34-24-56-30-46-14-44-44 26-34 30-52 26-38 52-38z"/></svg>
+    <svg class="cel-blob" viewBox="0 0 200 200" aria-hidden="true">${FLOR}</svg>
     <div class="cel-final">
       <div class="cel-top"><span class="cel-marca">Musculito</span><button class="cel-x" aria-label="Fechar">✕</button></div>
       <div class="cel-meio">${mascote('cel-masc2')}<div class="cel-num">${plural(semanasSeguidas(), 'semana seguida', 'semanas seguidas')} · ${plural(streakDias(), 'dia seguido', 'dias seguidos')}</div></div>
@@ -522,12 +561,204 @@ function celebrarCheckin(info = {}){
     el.querySelector('.cel-meio').hidden = true; fb.textContent = '📸 Tirar outra'; toast('Foto salva na sua evolução');
   };
   const aj = el.querySelector('[data-a=ajustar]'); if (aj) aj.onclick = () => { fechar(); editarSessao(S.sessoes.length - 1); };
-  setTimeout(() => el.querySelector('.cel-x')?.focus(), reduz ? 50 : 1900);
+  setTimeout(() => el.querySelector('.cel-x')?.focus(), reduz ? 50 : 2200);
 }
+/* ---------- Compartilhar check-in ---------- */
+// Cards gerados em canvas no tamanho de cada destino: story 9:16, publicação 4:5, mensagem 1:1.
+const TAM = { story: [1080, 1920], post: [1080, 1350], msg: [1080, 1080] };
+const DESTINOS = {
+  ig: { nome: 'Instagram', ops: [['story', 'Story', 'Escolha Instagram › Story'], ['post', 'Publicação', 'Escolha Instagram › Publicação'], ['msg', 'Mensagem', 'Escolha Instagram › Mensagem (Direct)']] },
+  wa: { nome: 'WhatsApp', ops: [['story', 'Status', 'Escolha WhatsApp › Meu status'], ['msg', 'Conversa', 'Escolha WhatsApp e a conversa']] }
+};
+const MODELOS = ['checkin', 'degrade', 'tapago', 'foto'];
+function corCss(v, pad){
+  const d = document.createElement('i'); d.style.color = `var(${v})`; document.body.append(d);
+  const c = getComputedStyle(d).color; d.remove();
+  const x = document.createElement('canvas').getContext('2d'); x.fillStyle = pad; x.fillStyle = c; x.fillRect(0, 0, 1, 1);
+  const [r, g, b] = x.getImageData(0, 0, 1, 1).data; return `rgb(${r},${g},${b})`;
+}
+const misturar = (c, alvo, k) => { const a = c.match(/\d+/g).map(Number), b = alvo.match(/\d+/g).map(Number); return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`; };
+function imgDe(src){ return new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = src; }); }
+function mascoteSrc(faixa){
+  const svg = mascote().replace('<svg class="mascote "', '<svg xmlns="http://www.w3.org/2000/svg"')
+    .replace(/class="m-corpo"/g, 'fill="#fff7f2"').replace('<g class="m-braco">', '<g fill="#fff7f2">').replace('class="m-faixa"', `fill="${faixa}"`)
+    .replace(/class="m-olho"/g, 'fill="#2a1f1b"').replace('class="m-boca"', 'stroke="#2a1f1b"').replace(/class="m-boch"/g, 'fill="#ffb4a2"');
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+function rr(c, x, y, w, h, r){ c.beginPath(); c.roundRect(x, y, w, h, r); }
+function cabe(c, t, max){ if (c.measureText(t).width <= max) return t; while (t && c.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; }
+function brilho(c, x, y, r){ c.beginPath(); c.moveTo(x, y - r); c.quadraticCurveTo(x, y, x + r, y); c.quadraticCurveTo(x, y, x, y + r); c.quadraticCurveTo(x, y, x - r, y); c.quadraticCurveTo(x, y, x, y - r); c.fill(); }
+
+async function dadosShare(info){
+  const h = hoje(), i = S.sessoes.map(x => x.data).lastIndexOf(h), sess = S.sessoes[i];
+  const acc = corCss('--accent', '#e8573f'), acc2 = corCss('--accent-2', '#ffb4a2');
+  await Promise.all(['700 80px Fraunces', '600 40px Inter', '500 40px Inter'].map(f => document.fonts?.load(f).catch(() => {})));
+  const [masc, fotoUser] = await Promise.all([imgDe(mascoteSrc(acc)), S.foto ? imgDe(S.foto).catch(() => null) : null]);
+  const fotoUrl = sess?.foto ? await fotoGet(sess.foto).catch(() => null) : null;
+  const d = new Date();
+  return {
+    acc, acc2, escuro: misturar(acc, 'rgb(20,8,10)', .72), masc, fotoUser, sessao: i >= 0 ? i : null,
+    foto: fotoUrl ? await imgDe(fotoUrl).catch(() => null) : null,
+    data: `${d.getDate()} ${MESES[d.getMonth()].slice(0, 3)}, ${d.getFullYear()}`,
+    treino: info.treino || sess?.nome || proximoPlano()?.nome || 'Treino de hoje',
+    nome: S.nome || 'Musculito', seq: plural(streakDias(), 'dia seguido', 'dias seguidos')
+  };
+}
+
+// Desenha um modelo no canvas c (W×H). O card fica centralizado sobre fundo escuro.
+function desenhar(cv, m, D, soCard){
+  const c = cv.getContext('2d'), W = cv.width, H = cv.height;
+  c.clearRect(0, 0, W, H);
+  if (!soCard) { c.fillStyle = D.escuro; c.fillRect(0, 0, W, H); }
+  const cw = soCard ? W : Math.round(W * .84), ch = soCard ? H : Math.round(Math.min(H * .84, cw * 1.32)), x = (W - cw) / 2, y = (H - ch) / 2, u = cw / 907, R = 54 * u;
+  const pill = (t, px, py, cor) => { c.font = `600 ${42 * u}px Inter`; const w = c.measureText(t).width + 48 * u; c.fillStyle = '#fff'; rr(c, px, py, w, 74 * u, 20 * u); c.fill(); c.fillStyle = cor; c.textBaseline = 'middle'; c.fillText(t, px + 24 * u, py + 38 * u); c.textBaseline = 'alphabetic'; };
+  const marca = (mx, my, alin) => { c.font = `700 ${50 * u}px Fraunces`; c.fillStyle = '#fff'; c.textAlign = alin; c.fillText('Musculito', mx, my); c.textAlign = 'left'; const tw = c.measureText('Musculito').width, ix = alin === 'right' ? mx + 6 * u : mx + tw + 14 * u; c.drawImage(D.masc, ix, my - 52 * u, 64 * u, 64 * u); };
+  const avatar = (ax, ay, s) => { c.save(); c.beginPath(); c.arc(ax + s / 2, ay + s / 2, s / 2, 0, Math.PI * 2); c.fillStyle = D.acc; c.fill(); c.clip(); if (D.fotoUser) c.drawImage(D.fotoUser, ax, ay, s, s); else c.drawImage(D.masc, ax + s * .08, ay + s * .08, s * .84, s * .84); c.restore(); c.lineWidth = 5 * u; c.strokeStyle = '#fff'; c.stroke(); };
+  c.save(); rr(c, x, y, cw, ch, R); c.clip();
+  if (m === 'checkin' || m === 'degrade') {
+    const corte = y + ch * .79;
+    if (m === 'checkin') c.fillStyle = D.acc;
+    else { const g = c.createLinearGradient(0, y, 0, corte); g.addColorStop(0, misturar(D.acc, 'rgb(255,255,255)', .3)); g.addColorStop(.55, D.acc); g.addColorStop(1, misturar(D.acc, 'rgb(20,8,10)', .55)); c.fillStyle = g; }
+    c.fillRect(x, y, cw, corte - y);
+    c.fillStyle = m === 'checkin' ? D.acc : misturar(D.acc, 'rgb(20,8,10)', .7); c.fillRect(x, corte, cw, y + ch - corte);
+    c.restore(); c.save();
+    c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 4 * u; c.setLineDash([16 * u, 12 * u]); c.beginPath(); c.moveTo(x + 40 * u, corte); c.lineTo(x + cw - 40 * u, corte); c.stroke(); c.setLineDash([]);
+    c.globalCompositeOperation = 'destination-out'; [x, x + cw].forEach(cx => { c.beginPath(); c.arc(cx, corte, 26 * u, 0, Math.PI * 2); c.fill(); });
+    c.globalCompositeOperation = 'source-over'; c.fillStyle = D.escuro; if (!soCard) [x, x + cw].forEach(cx => { c.beginPath(); c.arc(cx, corte, 26 * u, 0, Math.PI * 2); c.fill(); });
+    marca(x + cw - 120 * u, y + 130 * u, 'right');
+    const by = corte - 120 * u;
+    c.fillStyle = '#fff'; c.font = `500 ${46 * u}px Inter`; c.fillText(cabe(c, 'Treino: ' + D.treino, cw - 110 * u), x + 55 * u, by);
+    c.font = `700 ${170 * u}px Fraunces`; c.fillText('Check-in!', x + 50 * u, by - 90 * u);
+    pill(D.data, x + 55 * u, by - 370 * u, D.acc);
+    const sy = corte + (y + ch - corte) / 2; avatar(x + 55 * u, sy - 52 * u, 104 * u);
+    c.fillStyle = '#fff'; c.font = `600 ${46 * u}px Inter`; c.textBaseline = 'middle'; c.fillText(cabe(c, `${D.nome.toUpperCase()} · ${D.seq}`, cw - 230 * u), x + 190 * u, sy); c.textBaseline = 'alphabetic';
+  } else if (m === 'tapago') {
+    const g = c.createLinearGradient(x, 0, x + cw, 0); g.addColorStop(0, misturar(D.acc, 'rgb(20,8,10)', .6)); g.addColorStop(.5, D.acc); g.addColorStop(1, misturar(D.acc, 'rgb(255,255,255)', .35));
+    c.fillStyle = g; c.fillRect(x, y, cw, ch);
+    marca(x + 60 * u, y + 130 * u, 'left');
+    const ms = Math.min(cw * .5, ch * .36); c.drawImage(D.masc, x + cw - ms - 40 * u, y + 130 * u, ms, ms);
+    c.fillStyle = '#fff'; [[.18, .2, 30], [.9, .16, 22], [.95, .55, 34], [.55, .58, 18], [.3, .45, 14]].forEach(([a, b, r]) => brilho(c, x + cw * a, y + ch * b, r * u));
+    const by = y + ch - 90 * u; avatar(x + 55 * u, by - 108 * u, 116 * u);
+    c.fillStyle = '#fff'; c.font = `400 ${42 * u}px Inter`; c.fillText('Check-in feito por', x + 200 * u, by - 62 * u);
+    c.font = `600 ${46 * u}px Inter`; c.fillText(cabe(c, `${D.nome} · ${D.treino}`, cw - 250 * u), x + 200 * u, by - 6 * u);
+    c.font = `700 ${190 * u}px Fraunces`; c.fillText('Tá pago!', x + 50 * u, by - 170 * u);
+    pill(D.data, x + 55 * u, by - 430 * u, D.acc);
+  } else {
+    if (D.foto) {
+      const f = D.foto, k = Math.max(cw / f.width, ch / f.height); c.drawImage(f, x + (cw - f.width * k) / 2, y + (ch - f.height * k) / 2, f.width * k, f.height * k);
+      const g = c.createLinearGradient(0, y + ch * .45, 0, y + ch); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.7)'); c.fillStyle = g; c.fillRect(x, y, cw, ch);
+      const g2 = c.createLinearGradient(0, y, 0, y + 260 * u); g2.addColorStop(0, 'rgba(0,0,0,.45)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g2; c.fillRect(x, y, cw, 260 * u);
+      marca(x + 60 * u, y + 120 * u, 'left');
+      const by = y + ch - 80 * u; c.fillStyle = '#fff'; c.font = `500 ${44 * u}px Inter`; c.fillText(cabe(c, `${D.treino} · ${D.seq}`, cw - 110 * u), x + 55 * u, by);
+      c.font = `700 ${170 * u}px Fraunces`; c.fillText('Tá pago!', x + 50 * u, by - 80 * u);
+      pill(D.data, x + 55 * u, by - 330 * u, D.acc);
+    } else {
+      const g = c.createRadialGradient(x + cw / 2, y + ch * .4, 20, x + cw / 2, y + ch * .45, cw); g.addColorStop(0, '#fffdf3'); g.addColorStop(1, '#fbefc9'); c.fillStyle = g; c.fillRect(x, y, cw, ch);
+      const fw = 300 * u, fx = x + (cw - fw) / 2, fy = y + ch * .3; c.fillStyle = D.acc; rr(c, fx, fy, fw, fw * .78, 46 * u); c.fill();
+      c.fillStyle = misturar(D.acc, 'rgb(20,8,10)', .55); rr(c, fx + 36 * u, fy + 36 * u, fw - 72 * u, fw * .78 - 72 * u, 18 * u); c.fill();
+      c.fillStyle = D.acc; c.beginPath(); c.moveTo(fx + 50 * u, fy + fw * .78 - 50 * u); c.lineTo(fx + 120 * u, fy + 110 * u); c.lineTo(fx + 170 * u, fy + 160 * u); c.lineTo(fx + 210 * u, fy + 120 * u); c.lineTo(fx + fw - 50 * u, fy + fw * .78 - 50 * u); c.fill();
+      c.beginPath(); c.arc(fx + 200 * u, fy + 80 * u, 26 * u, 0, Math.PI * 2); c.fill();
+      c.textAlign = 'center'; c.fillStyle = '#2a1f1b'; c.font = `700 ${82 * u}px Fraunces`; c.fillText('Adicione sua foto', x + cw / 2, fy + fw * .78 + 150 * u);
+      c.fillStyle = '#6b5a52'; c.font = `500 ${42 * u}px Inter`; c.fillText('Toque aqui para tirar ou escolher', x + cw / 2, fy + fw * .78 + 230 * u); c.textAlign = 'left';
+    }
+  }
+  c.restore();
+}
+
+const ICONES = {
+  ig: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg>',
+  wa: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.6-.3z"/></svg>',
+  copiar: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  mais: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'
+};
+
 async function compartilharCheckin(info = {}){
-  const txt = `💪 Check-in feito no Musculito! ${info.treino ? 'Treino de hoje: ' + info.treino + '. ' : ''}${plural(semanasSeguidas(), 'semana seguida', 'semanas seguidas')} treinando.`;
-  try { if (navigator.share) return await navigator.share({ text: txt, url: location.href.split('?')[0] }); } catch { return; }
-  try { await navigator.clipboard.writeText(txt + ' ' + location.href.split('?')[0]); toast('Texto copiado para compartilhar'); } catch { toast(txt); }
+  if (document.querySelector('.sh')) return;
+  const el = document.createElement('div');
+  el.className = 'sh'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Compartilhar check-in');
+  el.innerHTML = `<div class="sh-fundo"></div><div class="sh-painel">
+    <div class="sh-alca"></div><button class="sh-x" aria-label="Fechar">✕</button>
+    <div class="sh-car" tabindex="0" aria-label="Modelos do card">${MODELOS.map((m, i) => `<figure class="sh-slide" data-m="${m}"><canvas width="900" height="1188" aria-label="Modelo ${i + 1}"></canvas></figure>`).join('')}</div>
+    <div class="sh-dots">${MODELOS.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
+    <div class="sh-base"><h3>Compartilhar em</h3>
+      <div class="sh-sub" hidden></div>
+      <div class="sh-alvos">
+        <button data-d="ig"><span class="sh-ic ig">${ICONES.ig}</span>Instagram</button>
+        <button data-d="wa"><span class="sh-ic wa">${ICONES.wa}</span>WhatsApp</button>
+        <button data-d="copiar"><span class="sh-ic cp">${ICONES.copiar}</span>Copiar</button>
+        <button data-d="mais"><span class="sh-ic mais">${ICONES.mais}</span>Mais</button>
+      </div></div></div>`;
+  document.body.append(el);
+  requestAnimationFrame(() => el.classList.add('on'));
+  const fechar = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 280); document.removeEventListener('keydown', tecla); };
+  const tecla = e => { if (e.key === 'Escape') fechar(); };
+  document.addEventListener('keydown', tecla);
+  el.querySelector('.sh-x').onclick = fechar; el.querySelector('.sh-fundo').onclick = fechar;
+
+  const D = await dadosShare(info);
+  const car = el.querySelector('.sh-car'), slides = [...el.querySelectorAll('.sh-slide')];
+  const pintar = () => slides.forEach(f => desenhar(f.querySelector('canvas'), f.dataset.m, D, true));
+  pintar();
+  let atual = 0, cache = {};
+  const modelo = () => MODELOS[atual];
+  // Gera os arquivos antes do toque, porque o compartilhamento precisa acontecer logo após o clique.
+  const preparar = tams => tams.forEach(t => {
+    const k = modelo() + t; if (cache[k]) return;
+    cache[k] = new Promise(ok => { const cv = document.createElement('canvas'); [cv.width, cv.height] = TAM[t]; desenhar(cv, modelo(), D); cv.toBlob(b => ok(new File([b], `musculito-checkin-${hoje()}.png`, { type: 'image/png' })), 'image/png'); });
+    cache[k].then(f => { cache[k].pronto = f; });
+  });
+  preparar(['story', 'post', 'msg']);
+  car.addEventListener('scroll', () => {
+    const i = Math.round(car.scrollLeft / slides[0].offsetWidth);
+    if (i !== atual && slides[i]) { atual = i; el.querySelectorAll('.sh-dots i').forEach((d, j) => d.classList.toggle('on', j === i)); preparar(['story', 'post', 'msg']); }
+  }, { passive: true });
+  car.onclick = async e => {
+    const f = e.target.closest('.sh-slide'); if (!f || f.dataset.m !== 'foto' || D.foto) return;
+    let url = null;
+    if (D.sessao != null) url = await fotoDoTreino(D.sessao, 'user');
+    else { const arq = await escolherImagem('user'); if (arq) url = await reduzir(arq, 1080).catch(() => null); }
+    if (!url) return;
+    D.foto = await imgDe(url); cache = {}; pintar(); preparar(['story', 'post', 'msg']); toast('Foto adicionada ao card');
+  };
+
+  const texto = `💪 Check-in feito no Musculito! ${D.treino}. ${D.seq}.`;
+  const enviar = async (tam, dica, comTexto) => {
+    if (modelo() === 'foto' && !D.foto) return toast('Toque no card para adicionar sua foto');
+    preparar([tam]);
+    const arq = cache[modelo() + tam].pronto || await cache[modelo() + tam];
+    const dados = { files: [arq], ...(comTexto ? { text: texto } : {}) };
+    if (navigator.canShare?.(dados)) {
+      if (dica) toast(dica);
+      try { await navigator.share(dados); } catch (err) { if (err.name !== 'AbortError') toast('Não foi possível abrir o compartilhamento.'); }
+      return;
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(arq); a.download = arq.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast('Imagem salva. Abra o app e publique a partir da galeria.');
+  };
+  const sub = el.querySelector('.sh-sub');
+  el.querySelector('.sh-alvos').onclick = async e => {
+    const b = e.target.closest('[data-d]'); if (!b) return;
+    const d = b.dataset.d;
+    if (DESTINOS[d]) {
+      const aberto = b.classList.contains('on');
+      el.querySelectorAll('.sh-alvos button').forEach(x => x.classList.remove('on'));
+      if (aberto) { sub.hidden = true; return; }
+      b.classList.add('on');
+      const bx = b.offsetLeft + b.offsetWidth / 2;
+      sub.innerHTML = DESTINOS[d].ops.map(([t, nome, dica], i) => `<button class="sh-op ${d}" data-t="${t}" data-dica="${esc(dica)}" style="--i:${i};--de:${bx}px">${nome}</button>`).join('');
+      sub.hidden = false; sub.classList.remove('boom');
+      sub.querySelectorAll('.sh-op').forEach(o => { o.style.setProperty('--dx', `${bx - (o.offsetLeft + o.offsetWidth / 2)}px`); });
+      void sub.offsetWidth; sub.classList.add('boom');
+      sub.onclick = ev => { const o = ev.target.closest('.sh-op'); if (o) enviar(o.dataset.t, o.dataset.dica, false); };
+      return;
+    }
+    sub.hidden = true; el.querySelectorAll('.sh-alvos button').forEach(x => x.classList.remove('on'));
+    if (d === 'mais') return enviar('post', '', true);
+    if (d === 'copiar') {
+      try { preparar(['post']); const arq = cache[modelo() + 'post'].pronto || await cache[modelo() + 'post']; await navigator.clipboard.write([new ClipboardItem({ 'image/png': arq })]); toast('Imagem copiada'); }
+      catch { try { await navigator.clipboard.writeText(texto + ' ' + location.href.split('?')[0]); toast('Texto copiado'); } catch { toast(texto); } }
+    }
+  };
 }
 
 /* ---------- Animações ---------- */
@@ -602,7 +833,7 @@ function vHoje(){
       <section class="card ci-card">
         <span class="ci-badge">CONCLUÍDO</span>
         <div class="ci-top">${mascote('ci-masc')}<div><b>${esc(sessHoje ? sessHoje.nome : prox ? 'Hoje: ' + prox.nome : 'Treino de hoje')}</b><div class="small muted">${hora ? hora + ' • ' : ''}${fmtData(h)}${sessHoje?.minutos ? ' • ' + fmtMin(sessHoje.minutos) : ''}</div></div></div>
-        <button class="btn primary block" onclick="compartilharCheckin({ treino: '${esc((sessHoje?.nome || prox?.nome || '').replace(/'/g, ''))}' })">Compartilhar</button>
+        <button class="btn primary block" onclick="reverCheckin()">Compartilhar</button>
         <button class="link ci-desfazer" onclick="desfazerCheckin()">Desfazer check-in</button>
       </section>` : `
       <h2 class="sec-tit">Bora treinar hoje?</h2>
@@ -634,6 +865,10 @@ function vHoje(){
           <span aria-hidden="true">✎</span>
         </button>`).join('')}
     </div>`;
+}
+function reverCheckin(){
+  const h = hoje(), i = S.sessoes.map(x => x.data).lastIndexOf(h), sess = S.sessoes[i];
+  celebrarCheckin(sess ? { treino: sess.nome, titulo: sess.nome, duracao: sess.minutos ? fmtMin(sess.minutos) : '', sessao: i } : {});
 }
 function fazerCheckin(){ if (checkin()) { save(); render(); celebrarCheckin(); } }
 function desfazerCheckin(){ if (!confirm('Desfazer o check-in de hoje?')) return; S.checkins = S.checkins.filter(d => d !== hoje()); if (S.horas) delete S.horas[hoje()]; save(); render(); }
