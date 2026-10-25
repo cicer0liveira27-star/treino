@@ -328,7 +328,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=19"></script>
+<script src="exercicios.js?v=20"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -509,6 +509,63 @@ async function addFotoSessao(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { r
 async function carregarMiniaturas(root){
   for (const el of root.querySelectorAll('[data-foto]')) { const u = await fotoGet(el.dataset.foto).catch(() => null); if (u) el.style.backgroundImage = `url(${u})`; else el.remove(); }
 }
+
+/* ---------- Métricas de uso (anônimas) ----------
+   Painel: GoatCounter (sem cookies, sem dados pessoais). Coloque abaixo o código da sua conta,
+   por exemplo 'musculito' para https://musculito.goatcounter.com. Vazio = nada é enviado. */
+const METRICAS_CODIGO = '';
+let telaAnterior = null;
+function metricasAtivas(){ return !!METRICAS_CODIGO && !S.semMetricas && /^https:/.test(location.protocol); }
+function carregarMetricas(){
+  if (!metricasAtivas() || window.goatcounter?.count) return;
+  window.goatcounter = { no_onload: true, allow_local: false };
+  const sc = document.createElement('script'); sc.async = true; sc.src = 'https://gc.zgo.at/count.js';
+  sc.dataset.goatcounter = `https://${METRICAS_CODIGO}.goatcounter.com/count`;
+  sc.onload = () => { telaAnterior = null; contarTela(); };
+  document.head.append(sc);
+}
+function enviar(path, title, event){
+  if (!metricasAtivas()) return;
+  try { window.goatcounter?.count?.({ path, title, event }); } catch {}
+}
+function contarTela(){
+  const tela = view; if (tela === telaAnterior) return; telaAnterior = tela;
+  const nomes = { hoje: 'Hoje', treino: 'Treino em andamento', treinos: 'Treinos', editar: 'Editar treino', evolucao: 'Evolução', ajustes: 'Ajustes' };
+  enviar('/' + (S.perfil ? tela : 'cadastro'), S.perfil ? nomes[tela] || tela : 'Cadastro', false);
+}
+function evento(nome, titulo){ enviar('evento-' + nome, titulo || nome, true); }
+function instrumentar(){
+  const envolver = (nomeFn, ev, titulo, quando = () => true) => {
+    const orig = window[nomeFn]; if (typeof orig !== 'function') return;
+    window[nomeFn] = function(...a){ const antes = quando === true ? null : JSON.stringify([S.checkins.length, S.sessoes.length, S.planos.reduce((n, p) => n + p.itens.length, 0), !!S.perfil, S.tema, S.foto?.length]); const r = orig.apply(this, a);
+      const depois = JSON.stringify([S.checkins.length, S.sessoes.length, S.planos.reduce((n, p) => n + p.itens.length, 0), !!S.perfil, S.tema, S.foto?.length]);
+      if (quando === true || antes !== depois) evento(typeof ev === 'function' ? ev(...a) : ev, typeof titulo === 'function' ? titulo(...a) : titulo);
+      return r; };
+  };
+  envolver('fazerCheckin', 'checkin', 'Check-in feito');
+  envolver('desfazerCheckin', 'checkin-desfeito', 'Check-in desfeito');
+  envolver('marcarDia', 'dia-marcado', 'Dia passado marcado/desmarcado');
+  envolver('iniciar', 'treino-iniciado', 'Treino iniciado', true);
+  envolver('finalizar', 'treino-finalizado', 'Treino finalizado');
+  envolver('cancelarTreino', 'treino-descartado', 'Treino descartado');
+  envolver('continuarTreino', 'treino-continuado', 'Voltou ao treino em andamento', true);
+  envolver('addEx', 'exercicio-adicionado', 'Exercício adicionado', true);
+  envolver('remover', 'exercicio-removido', 'Exercício removido', true);
+  envolver('aplicarEsquema', 'assistente-aplicou-series', 'Assistente: aplicou séries', true);
+  envolver('verEx', 'animacao-vista', 'Animação de exercício aberta', true);
+  envolver('escolherTema', id => 'tema-' + id, id => 'Tema escolhido: ' + id, true);
+  envolver('salvarPerfil', ini => ini ? 'cadastro-concluido' : 'perfil-atualizado', ini => ini ? 'Cadastro concluído' : 'Perfil atualizado');
+  envolver('compartilharCheckin', 'compartilhou', 'Compartilhou check-in', true);
+  envolver('exportar', 'backup-baixado', 'Baixou backup', true);
+  envolver('editarSessao', 'historico-editado', 'Abriu edição de treino passado', true);
+  const fotoOrig = window.fotoDoTreino;
+  window.fotoDoTreino = async (...a) => { const u = await fotoOrig(...a); if (u) evento('foto-treino', 'Foto do treino'); return u; };
+  const perfilOrig = window.trocarFotoPerfil;
+  window.trocarFotoPerfil = async () => { const n = S.foto; await perfilOrig(); if (S.foto && S.foto !== n) evento('foto-perfil', 'Foto de perfil'); };
+  const objs = () => objetivos().forEach(o => evento('objetivo-' + o, 'Objetivo: ' + OBJ[o]));
+  const sp = window.salvarPerfil; window.salvarPerfil = function(ini){ const tinha = !!S.perfil; const r = sp.call(this, ini); if (ini && !tinha && S.perfil) objs(); return r; };
+}
+function alternarMetricas(on){ S.semMetricas = !on; save(); if (on) carregarMetricas(); toast(on ? 'Estatísticas anônimas ativadas' : 'Estatísticas desativadas'); }
 
 /* ---------- Mascote ---------- */
 function mascote(cls = ''){
@@ -801,7 +858,7 @@ function render(){
   stopAnims();
   const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
   $('#app').innerHTML = bannerAtivo() + v();
-  carregarMiniaturas($('#app'));
+  carregarMiniaturas($('#app')); contarTela();
   renderTabs(); mountAnims($('#app')); bindLib($('#app'));
   if (view === 'treino') bindTreino();
   sortable($('#sortEx'), (a, b) => moverItem(plano(editId).itens, a, b));
@@ -1449,6 +1506,11 @@ function vAjustes(){
         <button class="btn primary" onclick="salvarPerfil(false)">Salvar perfil</button>
       </section>
       <section class="card stack">
+        <h3>Estatísticas de uso</h3>
+        <p class="muted small" style="margin:0">Para melhorar o app, contamos de forma anônima quais telas e botões são usados (por exemplo, "check-in feito"). Não enviamos nome, peso, fotos nem treinos.</p>
+        <label class="opt"><input type="checkbox" ${S.semMetricas ? '' : 'checked'} onchange="alternarMetricas(this.checked)"><span>Enviar estatísticas anônimas</span></label>
+      </section>
+      <section class="card stack">
         <h3>Backup</h3>
         <p class="muted small" style="margin:0">Seus dados ficam salvos neste celular. Faça um backup de vez em quando para não perder nada se trocar de aparelho ou limpar o navegador.</p>
         <button class="btn" onclick="exportar()">Baixar backup</button>
@@ -1483,6 +1545,7 @@ $('#dlg').addEventListener('close', () => { if (!$('#dlg').open) $('#dlgBody').i
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) fecharDlg(); });
 
 aplicarTema(S.tema);
+instrumentar(); carregarMetricas();
 ['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault()));
 document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 render();
