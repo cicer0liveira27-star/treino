@@ -265,6 +265,8 @@ button.day:disabled{opacity:.45}
 .sh-car::-webkit-scrollbar{display:none}
 .sh-slide{flex:0 0 100%;margin:0;scroll-snap-align:center;cursor:pointer}
 .sh-slide canvas{width:100%;height:auto;display:block}
+.sh-slide[data-m=foto]{display:flex;justify-content:center;align-items:center}
+.sh-slide[data-m=foto] canvas{width:74.25%;height:auto;border-radius:14px}
 .sh-dots{display:flex;justify-content:center;gap:9px;padding:8px 0 18px}
 .sh-dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .2s}
 .sh-dots i.on{background:#fff}
@@ -329,7 +331,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=22"></script>
+<script src="exercicios.js?v=23"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -494,7 +496,7 @@ async function fotoDoTreino(i, camera = 'user'){
   const s = S.sessoes[i]; if (!s) return null;
   const f = await escolherImagem(camera); if (!f) return null;
   try {
-    const url = await reduzir(f, 1080), k = s.foto || 'f' + uid();
+    const url = await reduzir(f, 1920, .85), k = s.foto || 'f' + uid();
     await fotoPut(k, url); s.foto = k; save(); return url;
   } catch { toast('Não consegui salvar a foto.'); return null; }
 }
@@ -502,7 +504,7 @@ async function verFoto(i){
   const s = S.sessoes[i]; const url = s?.foto && await fotoGet(s.foto); if (!url) return;
   abrirDlg(`<div class="dlg"><div class="dlg-head"><div><h2>${esc(s.nome)}</h2><span class="small muted">${fmtData(s.data)}${s.minutos ? ' · ' + fmtMin(s.minutos) : ''}</span></div><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
     <img class="foto-grande" src="${url}" alt="Foto do treino ${esc(s.nome)} em ${fmtData(s.data)}">
-    <div class="row" style="margin-top:12px"><a class="btn grow" style="text-align:center;text-decoration:none" href="${url}" download="musculito-${s.data}.jpg">Baixar</a><button class="btn grow" onclick="trocarFoto(${i})">Trocar</button><button class="btn grow" style="color:var(--accent)" onclick="apagarFoto(${i})">Apagar</button></div></div>`);
+    <div class="row" style="margin-top:12px"><button class="btn primary grow" onclick="storyDaFoto(${i})">Story</button><a class="btn grow" style="text-align:center;text-decoration:none" href="${url}" download="musculito-${s.data}.jpg">Original</a><button class="btn grow" onclick="trocarFoto(${i})">Trocar</button><button class="btn grow" style="color:var(--accent)" onclick="apagarFoto(${i})">Apagar</button></div></div>`);
 }
 async function trocarFoto(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { render(); verFoto(i); } }
 async function apagarFoto(i){ if (!confirm('Apagar esta foto?')) return; const s = S.sessoes[i]; await fotoDel(s.foto); delete s.foto; save(); fecharDlg(); render(); toast('Foto apagada'); }
@@ -667,6 +669,7 @@ async function dadosShare(info){
 function desenhar(cv, m, D, soCard){
   const c = cv.getContext('2d'), W = cv.width, H = cv.height;
   c.clearRect(0, 0, W, H);
+  if (m === 'foto' && D.foto) return fotoComMoldura(c, W, H, D);
   if (!soCard) { c.fillStyle = D.escuro; c.fillRect(0, 0, W, H); }
   const cw = soCard ? W : Math.round(W * .84), ch = soCard ? H : Math.round(Math.min(H * .84, cw * 1.32)), x = (W - cw) / 2, y = (H - ch) / 2, u = cw / 907, R = 54 * u;
   const pill = (t, px, py, cor) => { c.font = `600 ${42 * u}px Inter`; const w = c.measureText(t).width + 48 * u; c.fillStyle = '#fff'; rr(c, px, py, w, 74 * u, 20 * u); c.fill(); c.fillStyle = cor; c.textBaseline = 'middle'; c.fillText(t, px + 24 * u, py + 38 * u); c.textBaseline = 'alphabetic'; };
@@ -723,6 +726,43 @@ function desenhar(cv, m, D, soCard){
   c.restore();
 }
 
+// Foto em tela cheia (cobre todo o story) com a moldura do Musculito por cima.
+function fotoComMoldura(c, W, H, D){
+  const u = W / 1080, f = D.foto, k = Math.max(W / f.width, H / f.height);
+  c.drawImage(f, (W - f.width * k) / 2, (H - f.height * k) / 2, f.width * k, f.height * k);
+  const gT = c.createLinearGradient(0, 0, 0, H * .22); gT.addColorStop(0, 'rgba(0,0,0,.5)'); gT.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = gT; c.fillRect(0, 0, W, H * .22);
+  const gB = c.createLinearGradient(0, H * .55, 0, H); gB.addColorStop(0, 'rgba(0,0,0,0)'); gB.addColorStop(1, 'rgba(0,0,0,.75)'); c.fillStyle = gB; c.fillRect(0, H * .55, W, H * .45);
+  // moldura: borda na cor do tema, com cantos arredondados por dentro
+  const b = 26 * u, r = 56 * u;
+  c.save(); c.fillStyle = D.acc; c.beginPath(); c.rect(0, 0, W, H); c.roundRect(b, b, W - 2 * b, H - 2 * b, r); c.fill('evenodd'); c.restore();
+  c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 4 * u; rr(c, b + 10 * u, b + 10 * u, W - 2 * b - 20 * u, H - 2 * b - 20 * u, r - 10 * u); c.stroke();
+  // selo do Musculito no alto
+  const sy = b + 50 * u; c.font = `700 ${58 * u}px Fraunces`; const tw = c.measureText('Musculito').width, sw = tw + 150 * u, sx = (W - sw) / 2;
+  c.fillStyle = D.acc; rr(c, sx, sy, sw, 96 * u, 48 * u); c.fill();
+  c.drawImage(D.masc, sx + 16 * u, sy + 8 * u, 80 * u, 80 * u);
+  c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText('Musculito', sx + 108 * u, sy + 50 * u); c.textBaseline = 'alphabetic';
+  // informações embaixo
+  const px = b + 60 * u, by = H - b - 80 * u;
+  const av = 110 * u; c.save(); c.beginPath(); c.arc(px + av / 2, by - av / 2 + 10 * u, av / 2, 0, Math.PI * 2); c.fillStyle = D.acc; c.fill(); c.clip();
+  if (D.fotoUser) c.drawImage(D.fotoUser, px, by - av + 10 * u, av, av); else c.drawImage(D.masc, px + av * .08, by - av + 10 * u + av * .08, av * .84, av * .84);
+  c.restore(); c.lineWidth = 5 * u; c.strokeStyle = '#fff'; c.beginPath(); c.arc(px + av / 2, by - av / 2 + 10 * u, av / 2, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = '#fff'; c.font = `600 ${44 * u}px Inter`; c.fillText(cabe(c, D.nome, W - 2 * px - av - 30 * u), px + av + 30 * u, by - 52 * u);
+  c.font = `500 ${38 * u}px Inter`; c.fillText(cabe(c, /^0 /.test(D.seq) ? D.treino : `${D.treino} · ${D.seq}`, W - 2 * px - av - 30 * u), px + av + 30 * u, by + 2 * u);
+  c.font = `700 ${Math.min(190 * u, H * .1)}px Fraunces`; c.fillText('Tá pago!', px - 6 * u, by - av - 50 * u);
+  c.font = `600 ${42 * u}px Inter`; const dt = D.data, dw = c.measureText(dt).width + 48 * u, dy = by - av - 50 * u - Math.min(190 * u, H * .1) - 100 * u;
+  c.fillStyle = '#fff'; rr(c, px, dy, dw, 74 * u, 20 * u); c.fill(); c.fillStyle = D.acc; c.textBaseline = 'middle'; c.fillText(dt, px + 24 * u, dy + 38 * u); c.textBaseline = 'alphabetic';
+}
+// Gera a foto de um treino já passado em tamanho story, com a moldura (para baixar da galeria).
+async function storyDaFoto(i){
+  const s = S.sessoes[i], url = s?.foto && await fotoGet(s.foto); if (!url) return;
+  const D = await dadosShare({ treino: s.nome }); D.foto = await imgDe(url);
+  const dt = fromIso(s.data); D.data = `${dt.getDate()} ${MESES[dt.getMonth()].slice(0, 3)}, ${dt.getFullYear()}`;
+  const cv = document.createElement('canvas'); [cv.width, cv.height] = TAM.story; fotoComMoldura(cv.getContext('2d'), cv.width, cv.height, D);
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', .92)), arq = new File([blob], `musculito-${s.data}-story.jpg`, { type: 'image/jpeg' });
+  if (navigator.canShare?.({ files: [arq] })) { try { await navigator.share({ files: [arq] }); } catch {} return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(arq); a.download = arq.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
 const ICONES = {
   ig: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg>',
   wa: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.6-.3z"/></svg>',
@@ -736,7 +776,7 @@ async function compartilharCheckin(info = {}){
   el.className = 'sh'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Compartilhar check-in');
   el.innerHTML = `<div class="sh-fundo"></div><div class="sh-painel">
     <div class="sh-alca"></div><button class="sh-x" aria-label="Fechar">✕</button>
-    <div class="sh-car" tabindex="0" aria-label="Modelos do card">${MODELOS.map((m, i) => `<figure class="sh-slide" data-m="${m}"><canvas width="900" height="1188" aria-label="Modelo ${i + 1}"></canvas></figure>`).join('')}</div>
+    <div class="sh-car" tabindex="0" aria-label="Modelos do card">${MODELOS.map((m, i) => `<figure class="sh-slide" data-m="${m}">${m === 'foto' ? '<canvas width="675" height="1200"' : '<canvas width="900" height="1188"'} aria-label="Modelo ${i + 1}"></canvas></figure>`).join('')}</div>
     <div class="sh-dots">${MODELOS.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
     <div class="sh-base"><h3>Compartilhar em</h3>
       <div class="sh-sub" hidden></div>
@@ -774,7 +814,7 @@ async function compartilharCheckin(info = {}){
     const f = e.target.closest('.sh-slide'); if (!f || f.dataset.m !== 'foto' || D.foto) return;
     let url = null;
     if (D.sessao != null) url = await fotoDoTreino(D.sessao, 'user');
-    else { const arq = await escolherImagem('user'); if (arq) url = await reduzir(arq, 1080).catch(() => null); }
+    else { const arq = await escolherImagem('user'); if (arq) url = await reduzir(arq, 1920, .85).catch(() => null); }
     if (!url) return;
     D.foto = await imgDe(url); cache = {}; pintar(); preparar(['story', 'post', 'msg']); toast('Foto adicionada ao card');
   };
