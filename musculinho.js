@@ -224,7 +224,7 @@ function respostaLocal(q){
   const t = semAc(q), p = nutri().plano, m = p?.metas;
   const tem_ = (...ws) => ws.some(w => t.includes(w));
   if (tem_('pdf', 'baixar', 'imprimir')) return { t: 'Claro! Toque em "Baixar PDF" para gerar seu plano com o timbrado do Musculito.', acao: 'pdf' };
-  if (!p && tem_('dieta', 'plano', 'cardapio')) return { t: 'Primeiro preciso terminar as perguntas. Responda a pergunta acima e eu monto tudo.' };
+  if (!p && tem_('dieta', 'plano', 'cardapio', 'almoco', 'jantar', 'lanche', 'comer', 'alimenta', 'treino', 'exercicio', 'meta', 'caloria')) return { t: 'Primeiro preciso terminar as perguntas. Responda a pergunta acima e eu monto tudo.' };
   if (tem_('proteina', 'whey')) return { t: m ? `Sua meta é de cerca de ${m.prot} g de proteína por dia (${String(m.protKg).replace('.', ',')} g por kg). Boas fontes: ovos, frango, peixe, carne magra, iogurte, queijo branco, feijão, lentilha e tofu. O whey é só uma praticidade, não é obrigatório.` : 'Quem treina costuma precisar de 1,4 a 2,0 g de proteína por kg por dia. Para o seu caso, o ideal é definir a quantidade com um nutricionista.' };
   if (tem_('agua', 'hidrat')) return { t: m ? `Beba cerca de ${String(m.agua).replace('.', ',')} litros de água por dia, mais nos dias quentes e de treino. Uma dica é deixar uma garrafa sempre à vista.` : 'Beba água ao longo do dia todo, mais nos dias quentes e de treino.' };
   if (tem_('pre treino', 'pre-treino', 'antes do treino', 'antes de treinar')) return { t: 'De 1 a 2 horas antes do treino, prefira carboidratos fáceis de digerir com um pouco de proteína: banana com aveia, pão com ovo ou tapioca com queijo. Treinando cedo, uma fruta já ajuda.' };
@@ -232,10 +232,12 @@ function respostaLocal(q){
   if (tem_('doce', 'chocolate', 'sobremesa', 'acucar', 'besteira', 'lixo')) return { t: 'Pode sim, com moderação! Encaixe um doce pequeno depois do almoço algumas vezes por semana, em vez de beliscar o dia todo. O que manda no resultado é o conjunto da semana.' };
   if (tem_('creatina', 'suplement')) return { t: 'A creatina é um dos suplementos mais estudados para quem treina força, geralmente usada em 3 a 5 g por dia. Antes de usar qualquer suplemento, principalmente se você tiver algum problema de saúde, converse com um nutricionista ou médico.' };
   if (tem_('trocar', 'substitu', 'nao gosto')) return { t: 'Troque dentro do mesmo grupo: arroz ↔ macarrão, batata, mandioca ou cuscuz; frango ↔ peixe, carne magra, ovos ou tofu; feijão ↔ lentilha ou grão-de-bico; fruta ↔ outra fruta. Mantenha quantidades parecidas.' };
-  if (tem_('sono', 'dormir', 'descanso', 'recupera')) return { t: (p ? p.descanso.slice(0, 3) : rotinaDescanso(nutri().r)).join('\n\n') };
-  if (tem_('cafe da manha', 'almoco', 'jantar', 'lanche', 'ceia', 'cardapio', 'dieta', 'refeic', 'comer')) return { t: 'Seu cardápio está na aba "Meu plano", com horários e duas opções por refeição.', acao: 'plano' };
-  if (tem_('treino', 'exercicio', 'academia')) return { t: 'Montei 5 treinos de acordo com o seu objetivo. Você vê tudo em "Meu plano" e pode copiar para os seus treinos com um toque.', acao: 'plano' };
-  if (tem_('caloria', 'kcal', 'meta')) return { t: m ? `Sua meta é de cerca de ${m.kcal} kcal por dia, para ${m.foco}. Você gasta em torno de ${m.gasto} kcal. Divisão: ${m.prot} g de proteína, ${m.carb} g de carboidrato e ${m.gord} g de gordura.` : 'No seu caso, as metas de calorias precisam ser definidas com um nutricionista.' };
+  if (tem_('dica de sono', 'dicas de sono')) return { t: (p ? p.descanso.slice(0, 2) : rotinaDescanso(nutri().r).slice(0, 2)).join('\n\n') + (p ? '\n\nA rotina completa está em "Meu plano" › Rotina de descanso.' : ''), acao: p ? 'plano:descanso' : null };
+  if (tem_('sono', 'dormir', 'descanso', 'recupera')) return p ? { t: 'Sua rotina de descanso está em "Meu plano" › Rotina de descanso: horas de sono, horários, dias de descanso ativo e recuperação. Toque abaixo que eu te levo lá 👇', acao: 'plano:descanso' } : { t: rotinaDescanso(nutri().r).slice(0, 2).join('\n\n') };
+  if (tem_('cafe da manha', 'almoco', 'jantar', 'lanche', 'ceia', 'cardapio', 'dieta', 'refeic', 'comer', 'alimenta')) return { t: `Sua dieta está em "Meu plano" › Plano alimentar: ${p.refeicoes.length} refeições com horários e duas opções em cada uma. Toque abaixo que eu te levo lá 👇`, acao: 'plano:refeicoes' };
+  if (tem_('treino', 'exercicio', 'academia', 'musculacao')) return { t: 'Seus 5 treinos sugeridos estão em "Meu plano" › Treinos sugeridos. De lá você pode copiar todos para a aba Treinos com um toque. Te levo lá 👇', acao: 'plano:treinos' };
+  if (tem_('caloria', 'kcal', 'meta', 'macro')) return { t: m ? `Sua meta é de cerca de ${m.kcal} kcal por dia, para ${m.foco}. Você gasta em torno de ${m.gasto} kcal. Divisão: ${m.prot} g de proteína, ${m.carb} g de carboidrato e ${m.gord} g de gordura.` : 'No seu caso, as metas de calorias precisam ser definidas com um nutricionista.', acao: m ? 'plano:metas' : null };
+  if (tem_('meu plano', 'plano')) return { t: 'Seu plano completo está na aba "Meu plano": metas, dieta, descanso, treinos e dicas. Te levo lá 👇', acao: 'plano:inicio' };
   if (tem_('oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e ai')) return { t: `Oi, ${S.nome || ''}! 😄 Em que posso ajudar?` };
   if (tem_('obrigad', 'valeu')) return { t: 'Tamo junto! Bora pra cima 💪' };
   return null;
@@ -246,7 +248,12 @@ async function enviarPergunta(){
   const etapa = etapaAtual();
   if (etapa && etapa.num) { const v = parseInt(q); if (v >= etapa.num[0] && v <= etapa.num[1]) { nutri().chat.pop(); return responder(etapa.id, v, `${v} anos`); } }
   const loc = respostaLocal(q);
-  if (loc) { falar(loc.t, loc.acao ? { acao: loc.acao } : {}); save(); return renderChat(true); }
+  if (loc) {
+    const n = nutri(); n.sug = false; falar('', { pensando: true }); renderChat(true);
+    const espera = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : Math.min(1400, 450 + loc.t.length * 6);
+    setTimeout(() => { n.chat = n.chat.filter(x => !x.pensando); falar(loc.t, loc.acao ? { acao: loc.acao } : {}); save(); renderChat(true); }, espera);
+    return;
+  }
   if (typeof IA_URL === 'string' && IA_URL) {
     falar('Pensando…', { pensando: true }); renderChat(true);
     const n = nutri();
@@ -277,10 +284,34 @@ function vMusculinho(){
     </div>
     ${n.aba === 'plano' && n.plano ? planoHtml(n.plano) : `<div id="muChat" class="mu-chat" aria-live="polite"></div>`}`;
 }
-function abrirPlano(){ const n = nutri(); if (!n.plano) return; n.aba = 'plano'; save(); render(); scrollTo(0, 0); }
+let planoAlvo = '', planoAnimado = false, planoTimer = null;
+function abrirPlano(secao = ''){ const n = nutri(); if (!n.plano) return; planoAlvo = secao; n.aba = 'plano'; save(); render(); scrollTo(0, 0); }
+function irPara(el){ if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('mu-destaque'); void el.offsetWidth; el.classList.add('mu-destaque'); }
+function animarPlano(){
+  clearTimeout(planoTimer);
+  const box = document.querySelector('.mu-plano'); if (!box) return;
+  const passos = [...box.querySelectorAll('.mu-step')], intro = box.querySelector('#muIntro'), alvo = planoAlvo && box.querySelector('#sec-' + planoAlvo);
+  const frase = intro.dataset.t, reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tudo = () => { intro.textContent = frase; passos.forEach(x => x.classList.add('show')); box.querySelector('.mu-typing')?.remove(); planoAnimado = true; };
+  if (reduz || planoAnimado) { tudo(); if (alvo) setTimeout(() => irPara(alvo), 60); planoAlvo = ''; return; }
+  intro.textContent = ''; let i = 0;
+  const digita = () => { intro.textContent = frase.slice(0, ++i); if (i < frase.length) planoTimer = setTimeout(digita, 18); else proximo(0); };
+  const typing = box.querySelector('.mu-typing');
+  const proximo = k => {
+    if (!document.body.contains(box)) return;
+    if (k >= passos.length) { typing.remove(); planoAnimado = true; return; }
+    passos[k].after(typing); typing.hidden = false;
+    planoTimer = setTimeout(() => {
+      passos[k].classList.add('show'); typing.hidden = true;
+      if (alvo && passos[k] === alvo) { irPara(alvo); planoAlvo = ''; passos.slice(k + 1).forEach(x => x.classList.add('show')); typing.remove(); planoAnimado = true; return; }
+      proximo(k + 1);
+    }, k === 0 ? 450 : 650);
+  };
+  digita();
+}
 function bolha(msg){
   const b = msg.de === 'u';
-  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${esc(msg.t).replace(/\n/g, '<br>')}${msg.pensando ? '<span class="mu-dots"><i></i><i></i><i></i></span>' : ''}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary" style="margin-top:8px" onclick="baixarPDF()">Baixar PDF</button>` : ''}${msg.acao === 'plano' ? `<button class="btn sm" style="margin-top:8px" onclick="abrirPlano()">Ver meu plano</button>` : ''}</div></div>`;
+  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${msg.pensando ? '<span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span>' : esc(msg.t).replace(/\n/g, '<br>')}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary mu-ir" onclick="baixarPDF()">Baixar PDF</button>` : ''}${/^plano/.test(msg.acao || '') ? `<button class="btn sm mu-ir" onclick="abrirPlano('${msg.acao.split(':')[1] || ''}')">${{ 'plano:refeicoes': 'Ver minha dieta', 'plano:treinos': 'Ver meus treinos', 'plano:descanso': 'Ver rotina de descanso', 'plano:metas': 'Ver minhas metas', 'plano:inicio': 'Ver meu plano', plano: 'Ver meu plano' }[msg.acao]} ›</button>` : ''}</div></div>`;
 }
 function resumoPlano(p){
   const m = p.metas;
@@ -297,8 +328,12 @@ function rapidas(){
   }
   if (e && e.horas) return `<div class="mu-ops horas" data-etapa="horas"><label class="small muted">Acordo<input type="time" id="muAc" value="${nutri().r.acorda || '06:30'}"></label><label class="small muted">Durmo<input type="time" id="muDo" value="${nutri().r.dorme || '22:30'}"></label><button class="btn primary sm" onclick="salvarHoras()">Continuar</button></div>`;
   if (e && e.num) return '';
-  const p = nutri().plano;
-  return p ? `<div class="mu-ops">${['Quanto de proteína?', 'O que comer antes do treino?', 'Posso comer doce?', 'Como trocar alimentos?', 'Dicas de sono'].map(x => `<button class="chip" data-livre="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : '';
+  return '';
+}
+const SUGESTOES = ['Minha dieta', 'Meus treinos', 'Rotina de descanso', 'Minhas metas', 'Quanto de proteína?', 'O que comer antes do treino?', 'Posso comer doce?', 'Como trocar alimentos?', 'Dicas de sono', 'Baixar PDF'];
+function bandeja(){
+  const n = nutri(); if (!n.plano || etapaAtual() || !n.sug) return '';
+  return `<div class="mu-bandeja" role="group" aria-label="Sugestões de perguntas"><div class="mu-bandeja-h small muted">Sobre o que quer falar?</div>${SUGESTOES.map(x => `<button class="chip" data-livre="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
 }
 function salvarHoras(){
   const a = document.getElementById('muAc').value || '06:30', d = document.getElementById('muDo').value || '22:30';
@@ -308,7 +343,8 @@ function renderChat(rolar){
   const box = document.getElementById('muChat'); if (!box) return;
   const n = nutri(), e = etapaAtual();
   box.innerHTML = `${n.chat.map(bolha).join('')}<div class="mu-rapidas">${rapidas()}</div>
-    <div class="mu-entrada"><input id="muQ" type="${e && e.num ? 'number' : 'text'}" inputmode="${e && e.num ? 'numeric' : 'text'}" placeholder="${e && e.num ? e.ph : 'Pergunte ao Musculinho…'}" aria-label="Mensagem para o Musculinho" autocomplete="off"><button class="btn primary" onclick="enviarPergunta()" aria-label="Enviar">➤</button></div>`;
+    ${bandeja()}
+    <div class="mu-entrada">${n.plano && !e ? `<button class="mu-lamp ${n.sug ? 'on' : ''}" onclick="nutri().sug=!nutri().sug;save();renderChat(nutri().sug)" aria-label="${n.sug ? 'Esconder' : 'Mostrar'} sugestões de perguntas" aria-expanded="${!!n.sug}">💡</button>` : ''}<input id="muQ" type="${e && e.num ? 'number' : 'text'}" inputmode="${e && e.num ? 'numeric' : 'text'}" placeholder="${e && e.num ? e.ph : 'Pergunte ao Musculinho…'}" aria-label="Mensagem para o Musculinho" autocomplete="off"><button class="btn primary" onclick="enviarPergunta()" aria-label="Enviar">➤</button></div>`;
   box.querySelector('#muQ').onkeydown = ev => { if (ev.key === 'Enter') enviarPergunta(); };
   const ops = box.querySelector('.mu-ops[data-etapa]:not(.horas)');
   if (ops) {
@@ -323,25 +359,29 @@ function renderChat(rolar){
     const ok = ops.querySelector('.mu-ok');
     if (ok) ok.onclick = () => { const vals = [...sel]; responder(ops.dataset.etapa, vals.includes('nenhuma') ? [] : vals, vals.map(v => (Object.fromEntries(ETAPAS.find(x => x.id === ops.dataset.etapa).ops()))[v]).join(', ')); };
   }
-  box.querySelectorAll('[data-livre]').forEach(c => c.onclick = () => { document.getElementById('muQ').value = c.dataset.livre; enviarPergunta(); });
+  box.querySelectorAll('[data-livre]').forEach(c => c.onclick = () => { nutri().sug = false; document.getElementById('muQ').value = c.dataset.livre; enviarPergunta(); });
   if (rolar) requestAnimationFrame(() => { scrollTo(0, document.body.scrollHeight); });
 }
 function planoHtml(p){
   const m = p.metas;
+  const nomeSec = { metas: 'suas metas', refeicoes: 'sua dieta', descanso: 'sua rotina de descanso', treinos: 'seus treinos' }[planoAlvo];
+  const frase = nomeSec ? `Aqui está ${nomeSec}, ${S.nome || ''}! Já te levo até lá 👇` : `Aqui está o seu plano, ${S.nome || ''}! Vou te mostrando por partes 👇`;
   return `<div class="stack mu-plano">
-    ${p.avisos.map(a => `<div class="card mu-aviso">${esc(a)}</div>`).join('')}
-    ${m ? `<section class="card"><h3>Suas metas diárias</h3><p class="small muted" style="margin:4px 0 10px">Foco: ${esc(m.foco)}.</p>
+    <div class="mu-msg ele"><span class="mu-mini">${mascote()}</span><div class="mu-b" id="muIntro" data-t="${esc(frase)}" aria-live="polite">${esc(frase)}</div></div>
+    ${p.avisos.map(a => `<div class="card mu-aviso mu-step">${esc(a)}</div>`).join('')}
+    ${m ? `<section class="card mu-step" id="sec-metas"><h3>Suas metas diárias</h3><p class="small muted" style="margin:4px 0 10px">Foco: ${esc(m.foco)}.</p>
       <div class="mu-macros big"><span><b>${m.kcal}</b>kcal</span><span><b>${m.prot} g</b>proteína</span><span><b>${m.carb} g</b>carbo</span><span><b>${m.gord} g</b>gordura</span><span><b>${String(m.agua).replace('.', ',')} L</b>água</span></div></section>` : ''}
-    ${p.refeicoes.length ? `<section class="card"><h3>Plano alimentar</h3>${p.refeicoes.map(r => `
+    ${p.refeicoes.length ? `<section class="card mu-step" id="sec-refeicoes"><h3>Plano alimentar</h3>${p.refeicoes.map(r => `
       <div class="mu-ref"><div class="mu-ref-h"><b>${r.hora} · ${esc(r.nome)}</b>${r.kcal ? `<span class="small muted">~${r.kcal} kcal</span>` : ''}</div>
       ${r.opcoes.map((op, i) => `<div class="mu-op"><span class="small muted">Opção ${i + 1}</span><ul>${op.map(it => `<li>${esc(it.nome)}${it.qtd ? ` <span class="muted">· ${esc(it.qtd)}</span>` : ''}</li>`).join('')}</ul></div>`).join('')}
       ${r.nota ? `<p class="small mu-nota">${esc(r.nota)}</p>` : ''}</div>`).join('')}</section>` : ''}
-    <section class="card"><h3>Rotina de descanso</h3><ul class="mu-lista">${p.descanso.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
-    <section class="card"><h3>Treinos sugeridos</h3><p class="small muted" style="margin:4px 0 8px">${esquema().series} séries de ${esquema().reps} repetições, para o seu objetivo principal.</p>
+    <section class="card mu-step" id="sec-descanso"><h3>Rotina de descanso</h3><ul class="mu-lista">${p.descanso.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
+    <section class="card mu-step" id="sec-treinos"><h3>Treinos sugeridos</h3><p class="small muted" style="margin:4px 0 8px">${esquema().series} séries de ${esquema().reps} repetições, para o seu objetivo principal.</p>
       ${p.treinos.map((t, i) => `<div class="mu-tr"><b>${letra(i)} · ${esc(t.nome)}</b><span class="small muted">${t.itens.map(it => esc(EX[it.ex]?.nome || it.ex)).join(' · ')}</span></div>`).join('')}
       <button class="btn block" style="margin-top:12px" onclick="usarTreinosSugeridos()">Usar estes treinos nos meus 5 dias</button></section>
-    <section class="card"><h3>Dicas do Musculinho</h3><ul class="mu-lista">${p.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
-    <button class="btn primary block" onclick="baixarPDF()">Baixar PDF do plano</button>
+    <section class="card mu-step" id="sec-dicas"><h3>Dicas do Musculinho</h3><ul class="mu-lista">${p.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
+    <div class="mu-step"><button class="btn primary block" onclick="baixarPDF()">Baixar PDF do plano</button></div>
+    <div class="mu-msg ele mu-typing" hidden><span class="mu-mini">${mascote()}</span><div class="mu-b"><span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span></div></div>
     <p class="small muted" style="text-align:center">Plano automático e educativo. Não substitui nutricionista nem profissional de educação física.<br>Baseado no Guia Alimentar para a População Brasileira e nas recomendações de proteína da ISSN.</p>
   </div>`;
 }
@@ -464,4 +504,4 @@ async function baixarPDF(){
 }
 
 /* integra à tela */
-window.aposRender = () => { if (view === 'musculinho' && nutri().aba !== 'plano') renderChat(false); };
+window.aposRender = () => { if (view !== 'musculinho') return; if (nutri().aba === 'plano') animarPlano(); else renderChat(false); };

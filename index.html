@@ -360,6 +360,21 @@ button.day:disabled{opacity:.45}
 .ex-resumo b{color:var(--text);font-size:15px}
 .ex-linha{display:flex;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
 .ex-linha > span:first-child{min-width:62px}
+
+/* Musculinho: sugestões sob demanda, atalhos e plano "digitando" */
+.mu-b .mu-ir{display:flex;width:max-content;margin-top:10px}
+.mu-lamp{flex:none;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:20px}
+.mu-lamp.on{background:var(--soft);border-color:var(--accent)}
+.mu-bandeja{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));width:min(660px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;z-index:10;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:sobe .18s ease-out}
+.mu-bandeja-h{flex-basis:100%;margin-bottom:2px}
+.mu-bandeja .chip{font-size:14px;padding:9px 14px}
+@keyframes sobe{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.mu-plano .mu-step{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+.mu-plano .mu-step.show{opacity:1;transform:none;pointer-events:auto}
+.mu-plano .mu-step:not(.show){height:0;overflow:hidden;margin:0;padding:0;border:0}
+.mu-destaque{animation:destaque 1.6s ease-out}
+@keyframes destaque{0%,40%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.mu-plano .mu-step{scroll-margin-top:16px}
 @media (prefers-reduced-motion: reduce){.sh-sub.boom .sh-op{animation:none;opacity:1}.sh-painel{transition:none}}
 /* Temas */
 .tema-grupo{display:grid;gap:8px}
@@ -403,7 +418,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=28"></script>
+<script src="exercicios.js?v=29"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -1749,6 +1764,6 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
-<script src="musculinho.js?v=1"></script>
+<script src="musculinho.js?v=2"></script>
 </body>
 </html>
