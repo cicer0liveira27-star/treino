@@ -386,7 +386,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=26"></script>
+<script src="exercicios.js?v=27"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -1178,7 +1178,7 @@ function vTreinos(){
         <div class="card sort-item">
           <div class="row" style="justify-content:space-between">
             <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><div style="min-width:0"><h3 class="ell">${esc(p.nome)}</h3><span class="small muted">Dia ${i + 1}</span></div></div>
-            <button class="btn sm ${p.itens.length ? '' : 'primary'}" onclick="editar('${p.id}')">${p.itens.length ? 'Editar' : 'Montar'}</button>
+            <div class="row" style="gap:6px;flex:none">${p.itens.length ? `<button class="icon-btn" onclick="escolherDestino('${p.id}')" aria-label="Copiar ${esc(p.nome)} para outro dia" title="Copiar para outro dia">⧉</button>` : ''}<button class="btn sm ${p.itens.length ? '' : 'primary'}" onclick="editar('${p.id}')">${p.itens.length ? 'Editar' : 'Montar'}</button></div>
           </div>
           <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do Musculinho: <b>${esc(divisao()[i % 5][0])}</b>`}</p>
         </div>`).join('')}
@@ -1219,12 +1219,38 @@ function vEditar(){
       </div>
       <h2 style="margin-top:12px">Grade completa</h2>
       ${libBlock('add')}
+      ${S.planos.some(q => q.id !== p.id && q.itens.length) ? `<button class="btn block" style="margin-top:12px" onclick="escolherOrigem('${p.id}')">⧉ Copiar exercícios de outro dia</button>` : ''}
+      ${p.itens.length ? `<button class="btn block" style="margin-top:8px" onclick="escolherDestino('${p.id}')">⧉ Copiar este treino para outro dia</button>` : ''}
       ${p.itens.length ? `<button class="btn ghost block" style="color:var(--accent);margin-top:12px" onclick="limparPlano()">Limpar este treino</button>` : ''}
     </div>`;
 }
 function campo(i, k, v){ plano(editId).itens[i][k] = v; save(); }
 function moverItem(arr, from, to){ arr.splice(to, 0, arr.splice(from, 1)[0]); save(); const y = scrollY; render(); scrollTo(0, y); }
 function remover(i){ const [r] = plano(editId).itens.splice(i, 1); save(); const y = scrollY; render(); scrollTo(0, y); toast(`${EX[r.ex]?.nome || 'Exercício'} removido`); }
+/* Copiar dia de treino */
+function copiarTreino(deId, paraId){
+  const de = plano(deId), para = plano(paraId); if (!de || !para || de === para) return;
+  if (para.itens.length && !confirm(`O ${para.nome} (dia ${S.planos.indexOf(para) + 1}) já tem exercícios. Substituir pelos do ${de.nome}?`)) return;
+  para.itens = de.itens.map(it => ({ ...it })); para.nome = de.nome;
+  save(); fecharDlg(); const y = scrollY; render(); scrollTo(0, y);
+  toast(`${de.nome} copiado para o dia ${S.planos.indexOf(para) + 1}`);
+}
+function listaDias(excluir, acao, soComItens){
+  return S.planos.map((q, i) => q.id === excluir || (soComItens && !q.itens.length) ? '' : `
+    <button class="card plan" onclick="${acao(q.id)}"><span class="badge">${letra(i)}</span><span class="meta"><b>${esc(q.nome)}</b><span class="small muted">Dia ${i + 1} · ${q.itens.length ? plural(q.itens.length, 'exercício', 'exercícios') : 'vazio'}</span></span></button>`).join('');
+}
+function escolherDestino(id){
+  const p = plano(id);
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Copiar ${esc(p.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <p class="muted small" style="margin-top:0">Para qual dia? Os exercícios, séries, repetições e descansos serão copiados.</p>
+    <div class="stack">${listaDias(id, q => `copiarTreino('${id}','${q}')`)}</div></div>`);
+}
+function escolherOrigem(id){
+  const p = plano(id);
+  abrirDlg(`<div class="dlg"><div class="dlg-head"><h2>Copiar para ${esc(p.nome)}</h2><button class="icon-btn" onclick="fecharDlg()" aria-label="Fechar">✕</button></div>
+    <p class="muted small" style="margin-top:0">De qual dia você quer copiar os exercícios?</p>
+    <div class="stack">${listaDias(id, q => `copiarTreino('${q}','${id}')`, true)}</div></div>`);
+}
 function limparPlano(){ if (!confirm('Remover todos os exercícios deste treino?')) return; plano(editId).itens = []; save(); render(); scrollTo(0, 0); }
 function addEx(id){
   const box = document.querySelector('.libbox[data-action=add]'), before = box ? box.getBoundingClientRect().top : 0, y0 = scrollY;
