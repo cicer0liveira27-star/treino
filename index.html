@@ -288,6 +288,17 @@ button.day:disabled{opacity:.45}
 .sh-sub.boom .sh-op{animation:explode .5s calc(var(--i) * 70ms) cubic-bezier(.2,1.6,.4,1) forwards}
 @keyframes explode{0%{opacity:0;transform:translate(var(--dx,0),46px) scale(.2)}100%{opacity:1;transform:none}}
 .toast{z-index:200}
+
+/* Origem da foto */
+.cel-fotobtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cel-fotobtns .cel-btn{margin-top:12px}
+.orig{position:fixed;inset:0;z-index:1000}
+.orig-fundo{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .2s}
+.orig-painel{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--card);color:var(--text);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));display:grid;gap:10px;transform:translateY(100%);transition:transform .22s ease-out}
+.orig.on .orig-fundo{opacity:1}.orig.on .orig-painel{transform:none}
+.orig-painel b{text-align:center;font-size:16px;margin-bottom:4px}
+.orig-painel button{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:15px;font-weight:600;font-size:16px;color:inherit}
+.orig-painel .orig-cancel{background:none;border:none;color:var(--muted)}
 @media (prefers-reduced-motion: reduce){.sh-sub.boom .sh-op{animation:none;opacity:1}.sh-painel{transition:none}}
 /* Temas */
 .tema-grupo{display:grid;gap:8px}
@@ -331,7 +342,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=24"></script>
+<script src="exercicios.js?v=25"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -502,6 +513,16 @@ async function quadrado(file, lado = 320){
   c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, lado, lado);
   return c.toDataURL('image/jpeg', .85);
 }
+function origemFoto(titulo, aoEscolher){
+  const el = document.createElement('div'); el.className = 'orig'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', titulo);
+  el.innerHTML = `<div class="orig-fundo"></div><div class="orig-painel"><b>${esc(titulo)}</b>
+    <button data-c="user">📸 Tirar foto agora</button><button data-c="">🖼️ Escolher da galeria</button><button class="orig-cancel">Cancelar</button></div>`;
+  document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
+  const fechar = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 220); };
+  el.querySelector('.orig-fundo').onclick = fechar; el.querySelector('.orig-cancel').onclick = fechar;
+  el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { const c = b.dataset.c; aoEscolher(c); fechar(); });
+  el.querySelector('[data-c]').focus();
+}
 function avatar(cls = ''){ return S.foto ? `<img class="avatar ${cls}" src="${S.foto}" alt="">` : mascote(cls); }
 async function trocarFotoPerfil(){
   const f = await escolherImagem(); if (!f) return;
@@ -522,9 +543,9 @@ async function verFoto(i){
     <img class="foto-grande" src="${url}" alt="Foto do treino ${esc(s.nome)} em ${fmtData(s.data)}">
     <div class="row" style="margin-top:12px"><button class="btn primary grow" onclick="storyDaFoto(${i})">Story</button><a class="btn grow" style="text-align:center;text-decoration:none" href="${url}" download="musculito-${s.data}.jpg">Original</a><button class="btn grow" onclick="trocarFoto(${i})">Trocar</button><button class="btn grow" style="color:var(--accent)" onclick="apagarFoto(${i})">Apagar</button></div></div>`);
 }
-async function trocarFoto(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { render(); verFoto(i); } }
+function trocarFoto(i){ fecharDlg(); origemFoto('Trocar foto do treino', async cam => { if (await fotoDoTreino(i, cam)) { render(); verFoto(i); } }); }
 async function apagarFoto(i){ if (!confirm('Apagar esta foto?')) return; const s = S.sessoes[i]; await fotoDel(s.foto); delete s.foto; save(); fecharDlg(); render(); toast('Foto apagada'); }
-async function addFotoSessao(i){ fecharDlg(); if (await fotoDoTreino(i, '')) { render(); toast('Foto adicionada'); } }
+function addFotoSessao(i){ fecharDlg(); origemFoto('Foto do treino', async cam => { if (await fotoDoTreino(i, cam)) { render(); toast('Foto adicionada'); } }); }
 async function carregarMiniaturas(root){
   for (const el of root.querySelectorAll('[data-foto]')) { const u = await fotoGet(el.dataset.foto).catch(() => null); if (u) el.style.backgroundImage = `url(${u})`; else el.remove(); }
 }
@@ -618,7 +639,7 @@ function celebrarCheckin(info = {}){
         <div class="cel-card-top">${S.foto ? avatar('cel-mini') : mascote('cel-mini')}<div><b>${esc(info.titulo || (prox ? 'Hoje: ' + prox : 'Treino de hoje'))}</b><div class="small muted">${esc(S.nome)} · ${MESES[new Date().getMonth()]}: ${plural(S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length, 'treino', 'treinos')}</div></div></div>
         <div class="cel-linha">🕒 ${hora ? hora + ' • ' : ''}${fmtData(h)}${info.duracao ? ' • ' + esc(info.duracao) : ''}</div>
       </div>
-      ${info.sessao != null ? `<div class="cel-foto" hidden><img alt="Sua foto do treino"></div><button class="cel-btn foto" data-a="foto">📸 Tirar foto do treino</button>` : ''}
+      ${info.sessao != null ? `<div class="cel-foto" hidden><img alt="Sua foto do treino"></div><div class="cel-fotobtns"><button class="cel-btn foto" data-a="foto" data-cam="user">📸 Tirar foto</button><button class="cel-btn foto" data-a="foto" data-cam="">🖼️ Da galeria</button></div>` : ''}
       ${info.ajustar ? `<button class="cel-btn sec" data-a="ajustar">Ajustar duração</button>` : ''}
       <button class="cel-btn" data-a="share">Compartilhar</button>
     </div>`;
@@ -630,12 +651,13 @@ function celebrarCheckin(info = {}){
   document.addEventListener('keydown', esc_);
   el.querySelector('.cel-x').onclick = fechar;
   el.querySelector('[data-a=share]').onclick = () => compartilharCheckin(info);
-  const fb = el.querySelector('[data-a=foto]');
-  if (fb) fb.onclick = async () => {
-    const url = await fotoDoTreino(info.sessao, 'user'); if (!url) return;
+  el.querySelectorAll('[data-a=foto]').forEach(fb => fb.onclick = async () => {
+    const url = await fotoDoTreino(info.sessao, fb.dataset.cam); if (!url) return;
     const box = el.querySelector('.cel-foto'); box.hidden = false; box.querySelector('img').src = url;
-    el.querySelector('.cel-meio').hidden = true; fb.textContent = '📸 Tirar outra'; toast('Foto salva na sua evolução');
-  };
+    el.querySelector('.cel-meio').hidden = true;
+    const [cam, gal] = el.querySelectorAll('[data-a=foto]'); cam.textContent = '📸 Tirar outra'; gal.textContent = '🖼️ Trocar pela galeria';
+    toast('Foto salva na sua evolução');
+  });
   const aj = el.querySelector('[data-a=ajustar]'); if (aj) aj.onclick = () => { fechar(); editarSessao(S.sessoes.length - 1); };
   setTimeout(() => el.querySelector('.cel-x')?.focus(), reduz ? 50 : 2200);
 }
@@ -827,12 +849,14 @@ async function compartilharCheckin(info = {}){
     if (i !== atual && slides[i]) { atual = i; el.querySelectorAll('.sh-dots i').forEach((d, j) => d.classList.toggle('on', j === i)); preparar(['story', 'post', 'msg']); }
   }, { passive: true });
   car.onclick = async e => {
-    const f = e.target.closest('.sh-slide'); if (!f || f.dataset.m !== 'foto' || D.foto) return;
-    let url = null;
-    if (D.sessao != null) url = await fotoDoTreino(D.sessao, 'user');
-    else { const arq = await escolherImagem('user'); if (arq) url = await reduzir(arq, 1920, .85).catch(() => null); }
-    if (!url) return;
-    D.foto = await imgDe(url); cache = {}; pintar(); preparar(['story', 'post', 'msg']); toast('Foto adicionada ao card');
+    const f = e.target.closest('.sh-slide'); if (!f || f.dataset.m !== 'foto') return;
+    origemFoto(D.foto ? 'Trocar a foto do card' : 'Foto para o card', async cam => {
+      let url = null;
+      if (D.sessao != null) url = await fotoDoTreino(D.sessao, cam);
+      else { const arq = await escolherImagem(cam); if (arq) url = await reduzir(arq, 1920, .85).catch(() => null); }
+      if (!url) return;
+      D.foto = await imgDe(url); cache = {}; pintar(); preparar(['story', 'post', 'msg']); toast('Foto adicionada ao card');
+    });
   };
 
   const texto = `💪 Check-in feito no Musculito! ${D.treino}. ${D.seq}.`;
@@ -1521,7 +1545,7 @@ function vEvolucao(){
       <section class="card">
         <h3>Fotos dos treinos</h3>
         ${S.sessoes.some(x => x.foto) ? `<div class="galeria">${S.sessoes.map((x, i) => x.foto ? `<button class="gal-item" data-foto="${x.foto}" onclick="verFoto(${i})" aria-label="Foto de ${fmtData(x.data)}"><span>${fmtData(x.data)}</span></button>` : '').reverse().join('')}</div>`
-          : '<p class="muted small">Ao finalizar um treino, toque em “Tirar foto do treino”. As fotos aparecem aqui para você ver sua evolução.</p>'}
+          : '<p class="muted small">Ao finalizar um treino, tire uma foto ou escolha uma da galeria. As fotos aparecem aqui para você ver sua evolução.</p>'}
       </section>
     </div>`;
 }
