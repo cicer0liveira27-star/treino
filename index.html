@@ -299,6 +299,50 @@ button.day:disabled{opacity:.45}
 .orig-painel b{text-align:center;font-size:16px;margin-bottom:4px}
 .orig-painel button{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:15px;font-weight:600;font-size:16px;color:inherit}
 .orig-painel .orig-cancel{background:none;border:none;color:var(--muted)}
+
+/* Musculinho */
+.mu-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mu-top h1{font-size:26px}
+.mu-av .mascote,.mu-mini .mascote{background:var(--accent);border-radius:50%}
+.mu-av .mascote{width:46px;height:46px;display:block}
+.mu-seg{margin-bottom:14px}
+.mu-seg button:disabled{opacity:.45}
+.mu-chat{display:grid;gap:10px;padding-bottom:84px}
+.mu-msg{display:flex;gap:8px;align-items:flex-end;max-width:92%}
+.mu-msg.eu{justify-self:end;flex-direction:row-reverse}
+.mu-mini .mascote{width:30px;height:30px;display:block;flex:none}
+.mu-b{background:var(--card);border:1px solid var(--line);border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:15px;line-height:1.45}
+.mu-msg.eu .mu-b{background:var(--accent);color:var(--on-accent);border-color:var(--accent);border-radius:18px 18px 4px 18px}
+.mu-msg.aviso .mu-b{border-color:#e9a23b;background:color-mix(in srgb,#e9a23b 12%,var(--card))}
+.mu-rapidas .mu-ops{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0}
+.mu-ops .chip{font-size:14px;padding:9px 14px}
+.mu-ops .chip.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.mu-ops.multi .mu-ok{flex-basis:100%;margin-top:4px;padding:12px}
+.mu-ops.horas{align-items:flex-end}
+.mu-ops.horas label{display:grid;gap:4px;flex:1}
+.mu-ops.horas input{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;color:inherit}
+.mu-entrada{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(660px,calc(100% - 24px));display:flex;gap:8px;background:var(--bg);padding:8px 0;z-index:9}
+.mu-entrada input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:12px 16px;color:inherit}
+.mu-entrada .btn{border-radius:50%;width:48px;height:48px;padding:0;flex:none}
+.mu-dots{display:inline-flex;gap:3px;margin-left:6px}.mu-dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pisca 1s infinite}.mu-dots i:nth-child(2){animation-delay:.2s}.mu-dots i:nth-child(3){animation-delay:.4s}
+@keyframes pisca{0%,100%{opacity:.3}50%{opacity:1}}
+.mu-resumo{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.mu-kcal b{font-family:Fraunces,serif;font-size:30px;display:block;line-height:1}
+.mu-kcal span{font-size:12px;color:var(--muted)}
+.mu-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.mu-macros.big{grid-template-columns:repeat(3,1fr)}
+.mu-macros span{background:var(--soft);border-radius:10px;padding:8px;font-size:11px;color:var(--muted);display:grid;gap:2px}
+.mu-macros b{color:var(--text);font-size:15px}
+.mu-ref{padding:12px 0;border-top:1px solid var(--line)}
+.mu-ref:first-of-type{border-top:none}
+.mu-ref-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.mu-op ul{margin:4px 0 6px;padding-left:18px;font-size:14px}
+.mu-nota{background:var(--soft);border-radius:10px;padding:8px 10px;margin:6px 0 0}
+.mu-lista{margin:8px 0 0;padding-left:18px;display:grid;gap:8px;font-size:14px}
+.mu-tr{display:grid;gap:2px;padding:8px 0;border-top:1px solid var(--line)}
+.mu-aviso{border-color:#e9a23b;background:color-mix(in srgb,#e9a23b 12%,var(--card));font-size:14px}
+.mu-chamada{display:flex;align-items:center;gap:12px;width:100%;text-align:left}
+.mu-chamada b{display:block}
 @media (prefers-reduced-motion: reduce){.sh-sub.boom .sh-op{animation:none;opacity:1}.sh-painel{transition:none}}
 /* Temas */
 .tema-grupo{display:grid;gap:8px}
@@ -342,7 +386,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=25"></script>
+<script src="exercicios.js?v=26"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -432,7 +476,7 @@ const TEMAS = [
   { id: 'celeste', nome: 'Celeste e Dourado', p: '#3c7fc2', s: '#f6b40e', pd: '#75aadb', listra: '#ffffff' }
 ];
 function aplicarTema(id){
-  const t = TEMAS.find(x => x.id === id) || TEMAS[0], m = (c, q, b) => `color-mix(in srgb, ${c} ${q}%, ${b})`;
+  const t = TEMAS.find(x => x.id === id) || TEMAS.find(x => x.id === 'coral'), m = (c, q, b) => `color-mix(in srgb, ${c} ${q}%, ${b})`;
   $('#temaCss').textContent = t.id === 'coral' ? '' : `
 :root{--accent:${t.p};--accent-2:${t.s};--db:${t.p};--bg:${m(t.p, 4, '#ffffff')};--soft:${m(t.p, 10, '#ffffff')};--line:${m(t.p, 16, '#ececec')};--mat:${m(t.s, 45, '#ffffff')}}
 @media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${t.sd || m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
@@ -913,6 +957,7 @@ function stopAnims(){ anims.forEach(a => a.stop()); anims = []; }
 const TABS = [
   ['hoje', 'Hoje', '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
   ['treinos', 'Treinos', '<path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>'],
+  ['musculinho', 'Musculinho', '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>'],
   ['evolucao', 'Evolução', '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>'],
   ['ajustes', 'Ajustes', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>']
 ];
@@ -937,9 +982,9 @@ function bannerAtivo(){
 }
 function render(){
   stopAnims();
-  const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes }[view] || vHoje;
+  const v = { hoje: vHoje, treino: vTreino, treinos: vTreinos, editar: vEditar, evolucao: vEvolucao, ajustes: vAjustes, musculinho: () => typeof vMusculinho === 'function' ? vMusculinho() : '' }[view] || vHoje;
   $('#app').innerHTML = bannerAtivo() + v();
-  carregarMiniaturas($('#app')); contarTela();
+  carregarMiniaturas($('#app')); contarTela(); window.aposRender?.();
   renderTabs(); mountAnims($('#app')); bindLib($('#app'));
   if (view === 'treino') bindTreino();
   sortable($('#sortEx'), (a, b) => moverItem(plano(editId).itens, a, b));
@@ -1126,7 +1171,7 @@ function vTreinos(){
   return `
     <div class="top"><h1>Seus 5 treinos</h1></div>
     <div class="stack">
-      <section class="card coach">${coachHead()}${dicasHtml(dicasSemana())}</section>
+      <button class="card mu-chamada" onclick="view='musculinho';render();scrollTo(0,0)"><span class="mu-av">${mascote()}</span><span class="grow"><b>Precisa de ajuda para montar?</b><span class="small muted">O Musculinho monta treinos, dieta e rotina de descanso para o seu objetivo.</span></span><span aria-hidden="true">›</span></button>
       <p class="muted small" style="margin:0">Toque em Editar para montar cada dia. Segure um treino e arraste para mudar a ordem.</p>
       <div class="stack" id="sortPlanos">
       ${S.planos.map((p, i) => `
@@ -1135,7 +1180,7 @@ function vTreinos(){
             <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><div style="min-width:0"><h3 class="ell">${esc(p.nome)}</h3><span class="small muted">Dia ${i + 1}</span></div></div>
             <button class="btn sm ${p.itens.length ? '' : 'primary'}" onclick="editar('${p.id}')">${p.itens.length ? 'Editar' : 'Montar'}</button>
           </div>
-          <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do assistente: <b>${esc(divisao()[i % 5][0])}</b>`}</p>
+          <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do Musculinho: <b>${esc(divisao()[i % 5][0])}</b>`}</p>
         </div>`).join('')}
       </div>
       <h2 style="margin-top:12px">Grade completa de exercícios</h2>
@@ -1158,15 +1203,8 @@ function vEditar(){
     <div class="stack">
       ${emAndamento ? `<div class="card andamento"><div><b>Treino em andamento · ${tempoDecorrido()}</b><div class="small muted">Adicione ou mude exercícios. O que você já fez continua marcado.</div></div><button class="btn primary" onclick="continuarTreino()">Voltar ao treino</button></div>` : ''}
       <div class="card"><label class="small muted" for="pn">Nome do treino</label><input type="text" id="pn" value="${esc(p.nome)}" onchange="plano('${p.id}').nome=this.value;save()"></div>
-      <section class="card coach">
-        ${coachHead()}
-        ${dicasHtml(dicasDia(i))}
-        ${sug.itens.length ? `<h3 class="coach-sub">${esc(sug.titulo)}</h3>
-        <div class="sug">${sug.itens.map(e => `<button class="sug-item" onclick="addEx('${e.id}')" aria-label="Adicionar ${esc(e.nome)}"><span class="mini" data-anim="${e.id}" data-still="1"></span><span class="grow"><b>${esc(e.nome)}</b><small class="muted">${esc(cap(ALVO[e.alvo[0]]))} · ${e.alvo[0] === 'cardio' ? 'aeróbico' : e.tipo === 'C' ? 'trabalha vários músculos' : 'isolado'}</small></span><span class="plus" aria-hidden="true">+</span></button>`).join('')}</div>` : ''}
-        ${IA_URL ? iaBox() : ''}
-      </section>
       ${p.itens.length > 1 ? `<p class="muted small" style="margin:0">Segure um exercício e arraste até a posição em que ele deve ficar.</p>` : ''}
-      ${p.itens.length ? '' : `<div class="card empty-note">Nenhum exercício ainda. Use as sugestões acima ou busque na grade abaixo.</div>`}
+      ${p.itens.length ? '' : `<div class="card empty-note">Nenhum exercício ainda. Busque na grade abaixo ou peça sugestões ao Musculinho.</div>`}
       <div class="stack" id="sortEx">
       ${p.itens.map((it, k) => `
         <div class="card sort-item">
@@ -1636,5 +1674,6 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
+<script src="musculinho.js?v=1"></script>
 </body>
 </html>

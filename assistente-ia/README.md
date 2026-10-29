@@ -2,7 +2,9 @@
 
 O Musculito já traz um assistente automático que funciona sem internet: ele sugere o foco de cada dia, recomenda exercícios e avisa sobre volume, ordem e descanso.
 
-Para liberar também a caixa **"Pergunte ao assistente"**, com respostas de IA (Claude), é preciso um pequeno servidor que guarde a chave da API. A chave **não pode** ficar no site, porque o código do GitHub Pages é público.
+O **Musculinho** (aba Musculinho) já monta dieta, rotina de descanso, treinos e o PDF sem IA. Com a IA ligada, ele também responde perguntas livres que não estão nas respostas prontas.
+
+Para liberar as respostas de IA (Claude), é preciso um pequeno servidor que guarde a chave da API. A chave **não pode** ficar no site, porque o código do GitHub Pages é público.
 
 ## Passo a passo
 
