@@ -242,11 +242,24 @@ function respostaLocal(q){
   if (tem_('obrigad', 'valeu')) return { t: 'Tamo junto! Bora pra cima 💪' };
   return null;
 }
+// "apague a conversa", "limpar chat", "nova conversa", "começar um novo chat"...
+function pedeLimpar(q){
+  const t = semAc(q);
+  const verbo = /\b(apag|limp|zer|delet|exclu|reset|reinici|recome)/.test(t), alvo = /(conversa|chat|historico|mensage|papo)/.test(t);
+  return (verbo && alvo) || /\b(nova|novo|outra|outro)\s+(conversa|chat)\b/.test(t);
+}
+function novaConversa(){
+  const n = nutri(); n.chat = []; n.sug = false;
+  if (n.plano && !etapaAtual()) falar(`Conversa nova! 🧹 Apaguei as mensagens anteriores, ${S.nome || ''}. Seu plano continua salvo em "Meu plano". Em que posso ajudar?`, { acao: 'plano:inicio' });
+  else { falar('Conversa nova! 🧹 Vamos recomeçar.'); perguntarProxima(); }
+  save(); renderChat(true); toast('Conversa apagada');
+}
 async function enviarPergunta(){
   const inp = document.getElementById('muQ'), q = inp?.value.trim(); if (!q) return;
   inp.value = ''; eu(q);
   const etapa = etapaAtual();
   if (etapa && etapa.num) { const v = parseInt(q); if (v >= etapa.num[0] && v <= etapa.num[1]) { nutri().chat.pop(); return responder(etapa.id, v, `${v} anos`); } }
+  if (pedeLimpar(q)) return novaConversa();
   const loc = respostaLocal(q);
   if (loc) {
     const n = nutri(); n.sug = false; falar('', { pensando: true }); renderChat(true);
