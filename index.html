@@ -331,7 +331,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=23"></script>
+<script src="exercicios.js?v=24"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -406,6 +406,7 @@ function proximoPlano(){
 
 /* ---------- Temas de cores ---------- */
 const TEMAS = [
+  { id: 'allblack', nome: 'All Black', p: '#ffffff', s: '#3a3a3a', pd: '#ffffff', black: true },
   { id: 'coral', nome: 'Coral', p: '#e8573f', s: '#ffb4a2', pd: '#ff7a5f' },
   { id: 'laranja', nome: 'Laranja Energia', p: '#ea580c', s: '#fdba74', pd: '#fb923c' },
   { id: 'vermelho', nome: 'Vermelho Fogo', p: '#dc2626', s: '#fca5a5', pd: '#f87171' },
@@ -424,6 +425,21 @@ function aplicarTema(id){
   $('#temaCss').textContent = t.id === 'coral' ? '' : `
 :root{--accent:${t.p};--accent-2:${t.s};--db:${t.p};--bg:${m(t.p, 4, '#ffffff')};--soft:${m(t.p, 10, '#ffffff')};--line:${m(t.p, 16, '#ececec')};--mat:${m(t.s, 45, '#ffffff')}}
 @media (prefers-color-scheme: dark){:root{--accent:${t.pd};--accent-2:${t.sd || m(t.s, 45, '#151515')};--db:${t.pd};--bg:${m(t.pd, 5, '#121212')};--card:${m(t.pd, 7, '#1b1b1b')};--soft:${m(t.pd, 13, '#1d1d1d')};--line:${m(t.pd, 20, '#2b2b2b')};--mat:${m(t.pd, 30, '#222222')}}}`;
+  if (t.black) $('#temaCss').textContent = `
+:root,:root:not(#x){--bg:#000;--card:#0b0b0b;--soft:#161616;--line:#262626;--text:#f5f5f5;--muted:#8f8f8f;--accent:#ffffff;--accent-2:#3a3a3a;--on-accent:#000;--ok:#e6e6e6;
+  --fig:#f5f5f5;--fig-far:#555;--mat:#1c1c1c;--db:#ffffff;--mq:#4a4a4a;--shadow:none;--share:#0a0a0a;color-scheme:dark}
+.hd-logo .mascote,.ci-masc,.cel-mini,.cel-masc,svg.pf-av{background:#1a1a1a!important;box-shadow:inset 0 0 0 2px #333}
+.mascote .m-faixa{fill:#000}.mascote .m-boch{fill:#3a3a3a}
+.ci-badge{background:#fff;color:#000}
+.tip.ok .tip-ic{background:#fff;color:#000}
+.cel{background:#000}.cel-blob{fill:#161616}
+.cel-final{background:#000!important}
+.cel-btn{background:#fff;color:#000}.cel-btn.sec{background:#1c1c1c;color:#fff}.cel-btn.foto{background:#1c1c1c;color:#fff;box-shadow:inset 0 0 0 1px #333}
+.cel-card{background:#111;color:#f5f5f5}.cel-card .muted,.cel-linha{color:#9a9a9a}
+.progress i{background:#fff}
+.tema-cor{box-shadow:inset 0 0 0 2px #444}
+img.gif{filter:none}
+.anim:has(img.gif),.mini:has(img.gif){background:#fff}`;
   if (t.listra) {
     const l2 = t.listra === true ? 'var(--accent-2)' : t.listra;
     $('#temaCss').textContent += `
@@ -651,7 +667,7 @@ function brilho(c, x, y, r){ c.beginPath(); c.moveTo(x, y - r); c.quadraticCurve
 
 async function dadosShare(info){
   const h = hoje(), i = S.sessoes.map(x => x.data).lastIndexOf(h), sess = S.sessoes[i];
-  const acc = corCss('--accent', '#e8573f'), acc2 = corCss('--accent-2', '#ffb4a2');
+  const acc = corCss(getComputedStyle(document.documentElement).getPropertyValue('--share').trim() ? '--share' : '--accent', '#e8573f'), acc2 = corCss('--accent-2', '#ffb4a2');
   await Promise.all(['700 80px Fraunces', '600 40px Inter', '500 40px Inter'].map(f => document.fonts?.load(f).catch(() => {})));
   const [masc, fotoUser] = await Promise.all([imgDe(mascoteSrc(acc)), S.foto ? imgDe(S.foto).catch(() => null) : null]);
   const fotoUrl = sess?.foto ? await fotoGet(sess.foto).catch(() => null) : null;
