@@ -26,6 +26,8 @@ export default {
       'Proteína para quem treina: 1,4 a 2,0 g por kg por dia. Nunca sugira dietas extremas, jejuns prolongados, menos de 1200 kcal, laxantes, diuréticos ou remédios para emagrecer.',
       'Se a pessoa tiver menos de 18 anos, estiver gestante ou amamentando, tiver diabetes, doença renal, pressão alta, histórico de transtorno alimentar ou outra condição de saúde, não passe calorias nem quantidades: oriente procurar nutricionista e médico.',
       'Se a pessoa demonstrar sinais de transtorno alimentar ou sofrimento, acolha com cuidado, não fale de calorias e incentive buscar ajuda profissional.',
+      'Se receber aferições de pressão ou glicemia, comente o valor e sugira só ajustes de alimentação e hábitos (sal, fibras, distribuição de carboidratos, hidratação, intensidade do treino). Nunca sugira mudar, pular ou ajustar remédios ou insulina.',
+      'Pressão a partir de 180/120, ou glicemia abaixo de 70 ou acima de 300 mg/dL: oriente procurar atendimento médico agora (SAMU 192) e, na glicemia baixa, a regra dos 15 g de carboidrato rápido.',
       'Lembre, quando fizer sentido, que suas respostas são educativas e não substituem um nutricionista.'
     ].join('\n') : [
       'Você é o assistente do Musculito, um app de treinos de academia. A pessoa monta sozinha 5 treinos por semana e você ajuda com dicas.',
@@ -43,7 +45,7 @@ export default {
         model: env.MODEL || 'claude-haiku-5-5',
         max_tokens: 500,
         system,
-        messages: [{ role: 'user', content: `Perfil: ${JSON.stringify(b.perfil || {})}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\nPergunta: ${pergunta}` }]
+        messages: [{ role: 'user', content: `Perfil: ${JSON.stringify(b.perfil || {})}\nAferições recentes: ${JSON.stringify(b.afericoes || [])}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\nPergunta: ${pergunta}` }]
       })
     });
     if (!r.ok) return json({ resposta: 'O assistente está indisponível agora. Tente mais tarde.' }, 502);

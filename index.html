@@ -375,6 +375,21 @@ button.day:disabled{opacity:.45}
 .mu-destaque{animation:destaque 1.6s ease-out}
 @keyframes destaque{0%,40%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
 .mu-plano .mu-step{scroll-margin-top:16px}
+
+/* Registro de saúde */
+.sd-painel{gap:12px}
+.sd-head{display:flex;gap:10px;align-items:center}
+.sd-head b{font-size:17px}
+.sd-grupo{border:1px solid var(--line);border-radius:14px;padding:10px 12px 12px;margin:0}
+.sd-grupo legend{font-weight:600;font-size:14px;padding:0 6px}
+.sd-grupo input,.sd-grupo select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:inherit;margin-top:4px}
+.sd-x{align-self:flex-end;padding-bottom:12px;color:var(--muted)}
+.sd-tag{margin-left:auto;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.sd-tag.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.sd-tag.atencao{background:color-mix(in srgb,#e9a23b 22%,transparent);color:#c7841f}
+.sd-tag.alerta{background:color-mix(in srgb,#e8573f 22%,transparent);color:#e8573f}
+.sd-tag.perigo{background:#d92c2c;color:#fff}
+.sd-urg p{margin:0 0 10px}
 @media (prefers-reduced-motion: reduce){.sh-sub.boom .sh-op{animation:none;opacity:1}.sh-painel{transition:none}}
 /* Temas */
 .tema-grupo{display:grid;gap:8px}
@@ -418,7 +433,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=30"></script>
+<script src="exercicios.js?v=31"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -1647,6 +1662,7 @@ function vEvolucao(){
         ${exUsados.length ? `<select style="margin-top:10px" onchange="evoEx=this.value;render()" aria-label="Exercício">${exUsados.map(id => `<option value="${id}" ${id === evoEx ? 'selected' : ''}>${esc(EX[id]?.nome || id)}</option>`).join('')}</select>${lineChart(cargas, 'kg')}${historicoEx(evoEx)}`
           : '<p class="muted small">Registre a carga durante os treinos para acompanhar a evolução.</p>'}
       </section>
+      ${typeof saudeHtml === 'function' ? saudeHtml() : ''}
       <section class="card">
         <h3>Peso corporal</h3>
         <div class="row" style="margin-top:10px">
@@ -1764,6 +1780,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
-<script src="musculinho.js?v=3"></script>
+<script src="musculinho.js?v=4"></script>
+<script src="saude.js?v=1"></script>
 </body>
 </html>

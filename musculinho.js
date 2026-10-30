@@ -225,6 +225,10 @@ function respostaLocal(q){
   const tem_ = (...ws) => ws.some(w => t.includes(w));
   if (tem_('pdf', 'baixar', 'imprimir')) return { t: 'Claro! Toque em "Baixar PDF" para gerar seu plano com o timbrado do Musculito.', acao: 'pdf' };
   if (!p && tem_('dieta', 'plano', 'cardapio', 'almoco', 'jantar', 'lanche', 'comer', 'alimenta', 'treino', 'exercicio', 'meta', 'caloria')) return { t: 'Primeiro preciso terminar as perguntas. Responda a pergunta acima e eu monto tudo.' };
+  if (tem_('pressao', 'glicemia', 'glicose', 'afericao', 'aferir', 'diabetes', 'acucar no sangue')) {
+    const ult = (S.saude?.afericoes || []).slice(-2);
+    return { t: ult.length ? `Suas últimas aferições: ${ult.map(a => a.tipo === 'pa' ? `pressão ${a.sis}/${a.dia} (${fmtData(a.data)})` : `glicemia ${a.valor} mg/dL (${fmtData(a.data)})`).join(' · ')}. Quer registrar uma nova? Eu ajusto as dicas de hoje com base nela.` : 'Registre sua aferição de hoje que eu ajusto as dicas de alimentação com base nela.', acao: 'afericao' };
+  }
   if (tem_('proteina', 'whey')) return { t: m ? `Sua meta é de cerca de ${m.prot} g de proteína por dia (${String(m.protKg).replace('.', ',')} g por kg). Boas fontes: ovos, frango, peixe, carne magra, iogurte, queijo branco, feijão, lentilha e tofu. O whey é só uma praticidade, não é obrigatório.` : 'Quem treina costuma precisar de 1,4 a 2,0 g de proteína por kg por dia. Para o seu caso, o ideal é definir a quantidade com um nutricionista.' };
   if (tem_('agua', 'hidrat')) return { t: m ? `Beba cerca de ${String(m.agua).replace('.', ',')} litros de água por dia, mais nos dias quentes e de treino. Uma dica é deixar uma garrafa sempre à vista.` : 'Beba água ao longo do dia todo, mais nos dias quentes e de treino.' };
   if (tem_('pre treino', 'pre-treino', 'antes do treino', 'antes de treinar')) return { t: 'De 1 a 2 horas antes do treino, prefira carboidratos fáceis de digerir com um pouco de proteína: banana com aveia, pão com ovo ou tapioca com queijo. Treinando cedo, uma fruta já ajuda.' };
@@ -271,7 +275,7 @@ async function enviarPergunta(){
     falar('Pensando…', { pensando: true }); renderChat(true);
     const n = nutri();
     try {
-      const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil: { ...S.perfil, nome: S.nome, ...n.r }, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null }) });
+      const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil: { ...S.perfil, nome: S.nome, ...n.r }, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10) }) });
       const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
     } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
     save(); return renderChat(true);
@@ -324,7 +328,7 @@ function animarPlano(){
 }
 function bolha(msg){
   const b = msg.de === 'u';
-  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${msg.pensando ? '<span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span>' : esc(msg.t).replace(/\n/g, '<br>')}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary mu-ir" onclick="baixarPDF()">Baixar PDF</button>` : ''}${/^plano/.test(msg.acao || '') ? `<button class="btn sm mu-ir" onclick="abrirPlano('${msg.acao.split(':')[1] || ''}')">${{ 'plano:refeicoes': 'Ver minha dieta', 'plano:treinos': 'Ver meus treinos', 'plano:descanso': 'Ver rotina de descanso', 'plano:metas': 'Ver minhas metas', 'plano:inicio': 'Ver meu plano', plano: 'Ver meu plano' }[msg.acao]} ›</button>` : ''}</div></div>`;
+  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${msg.pensando ? '<span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span>' : esc(msg.t).replace(/\n/g, '<br>')}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'afericao' ? `<button class="btn sm primary mu-ir" onclick="abrirRegistroSaude(true)">Registrar aferição</button>` : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary mu-ir" onclick="baixarPDF()">Baixar PDF</button>` : ''}${/^plano/.test(msg.acao || '') ? `<button class="btn sm mu-ir" onclick="abrirPlano('${msg.acao.split(':')[1] || ''}')">${{ 'plano:refeicoes': 'Ver minha dieta', 'plano:treinos': 'Ver meus treinos', 'plano:descanso': 'Ver rotina de descanso', 'plano:metas': 'Ver minhas metas', 'plano:inicio': 'Ver meu plano', plano: 'Ver meu plano' }[msg.acao]} ›</button>` : ''}</div></div>`;
 }
 function resumoPlano(p){
   const m = p.metas;
@@ -500,6 +504,12 @@ async function baixarPDF(){
       if (r.nota) para(r.nota, 9.5, false, cinza, 10);
       y += 6;
     });
+  }
+  const afs = (S.saude?.afericoes || []).slice(-14);
+  if (afs.length) {
+    titulo('Registro de saúde (últimas aferições)');
+    afs.forEach(a => { const k = a.tipo === 'pa' ? classificarPA(a.sis, a.dia) : classificarGli(a.valor, a.momento); bullet(`${fmtData(a.data)} ${a.hora} · ${a.tipo === 'pa' ? `Pressão ${a.sis}/${a.dia} mmHg` : `Glicemia ${a.valor} mg/dL (${MOMENTOS[a.momento].toLowerCase()})`} · ${k.nome}`); });
+    para('Leve este registro às suas consultas. Não altere remédios sem orientação médica.', 9.5, false, cinza);
   }
   titulo('Rotina de descanso'); p.descanso.forEach(bullet);
   titulo('Treinos sugeridos pelo Musculinho');
