@@ -104,6 +104,25 @@ function respostaApp(q){
   }
   if (tem_('abas', 'o que o app faz', 'como funciona o app', 'funcoes do app', 'me explica o app', 'organograma')) return { t: Object.values(TELAS).map(x => `• ${x.nome}: ${x.desc.replace(/^fica[m]? /, '').replace(/^sou eu! /, '')}`).join('\n') };
 
+  // o que foi feito hoje (lê o check-in e as sessões finalizadas no dia)
+  const fezHoje = S.checkins.includes(h);
+  const sobreHoje = /\bhoje\b/.test(t) && !/proximo|amanha|vou treinar|devo treinar/.test(t);
+  const passado = /\b(treinei|malhei|fiz|fez|foi|feito|conclui|concluido|registrei)\b/.test(t) && /trein|malhei|academia|exercicio|fiz|fez/.test(t);
+  if (sobreHoje && (passado || (fezHoje && /\btreino\b/.test(t)))) {
+    const sess = S.sessoes.filter(s => s.data === h), hora = S.horas?.[h], prox = proximoPlano();
+    const dica = prox ? `\n\nO próximo da sequência é o treino ${letra(S.planos.indexOf(prox))}, ${prox.nome}.` : '';
+    if (sess.length) {
+      const txt = sess.map(s => {
+        const series = s.itens.reduce((a, i) => a + (+i.series || 0), 0);
+        const linhas = s.itens.filter(i => +i.series).map(i => `• ${EX[i.ex]?.nome || i.ex}: ${plural(+i.series, 'série', 'séries')}${i.cargas?.some(c => c !== '' && c != null) ? ' · ' + i.cargas.map(c => c === '' || c == null ? '–' : num(c)).join(' · ') + ' kg' : (i.carga !== '' && i.carga != null ? ' · ' + num(i.carga) + ' kg' : '')}`).join('\n');
+        return `${s.nome || 'Treino'}${s.minutos ? ` (${fmtMin(s.minutos)}` + `, ${plural(series, 'série', 'séries')})` : ''}${linhas ? ':\n' + linhas : ''}`;
+      }).join('\n\n');
+      return { t: `Hoje você treinou ${txt}${hora ? `\n\nCheck-in feito às ${hora}. ✅` : ''}${dica}`, acao: 'ir:hoje' };
+    }
+    if (fezHoje) return { t: `Você fez check-in hoje${hora ? ` às ${hora}` : ''} ✅, mas não finalizou um treino pelo app, então não sei quais exercícios foram. Da próxima vez, inicie o treino em Hoje e toque em Finalizar que eu registro tudo.${dica}`, acao: 'ir:hoje' };
+    return { t: `Hoje você ainda não fez check-in.${prox ? ` O treino da vez é o ${letra(S.planos.indexOf(prox))}, ${prox.nome}:\n\n${resumoTreino(prox)}` : ''}`, acao: 'ir:hoje' };
+  }
+
   // estatísticas
   if (tem_('quantos treinos', 'quantas vezes', 'quantos check', 'frequencia', 'sequencia', 'dias seguidos', 'semanas seguidas', 'recorde de dias', 'constancia')) {
     const mes = S.checkins.filter(d => d.startsWith(h.slice(0, 7))).length;
@@ -130,7 +149,7 @@ function respostaApp(q){
   // treinos cadastrados
   if (/proximo treino|treino de hoje|treino hoje|o que (eu )?treino hoje/.test(t)) {
     const p = proximoPlano(); if (!p || !p.itens.length) return { t: 'Seus treinos ainda estão vazios. Quer que eu monte um? Diga, por exemplo, "monta um treino de peito para o dia 1".' };
-    const i = S.planos.indexOf(p); return { t: `Hoje é o treino ${letra(i)}, ${p.nome} (dia ${i + 1}):\n\n${resumoTreino(p)}${S.ativo ? '\n\nVocê já tem um treino em andamento.' : ''}`, acao: 'ir:hoje' };
+    const i = S.planos.indexOf(p); return { t: `${fezHoje ? 'Seu próximo treino é o' : 'Hoje é o treino'} ${letra(i)}, ${p.nome} (dia ${i + 1}):\n\n${resumoTreino(p)}${S.ativo ? '\n\nVocê já tem um treino em andamento.' : ''}`, acao: 'ir:hoje' };
   }
   if (/\b(meus|quais|mostra|lista)\b.*\btreinos\b|\btreino [a-e]\b|\bdia [1-5]\b/.test(t) && !tem_('dieta', 'refei')) {
     const dia = acharDia(t);
