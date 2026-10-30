@@ -324,6 +324,8 @@ button.day:disabled{opacity:.45}
 .mu-entrada{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(660px,calc(100% - 24px));display:flex;gap:8px;background:var(--bg);padding:8px 0;z-index:9}
 .mu-entrada input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:12px 16px;color:inherit}
 .mu-entrada .btn{border-radius:50%;width:48px;height:48px;padding:0;flex:none}
+.mu-dias{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.mu-dias .chip{font-size:13px;padding:7px 11px}
 .mu-dots{display:inline-flex;gap:3px;margin-left:6px}.mu-dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pisca 1s infinite}.mu-dots i:nth-child(2){animation-delay:.2s}.mu-dots i:nth-child(3){animation-delay:.4s}
 @keyframes pisca{0%,100%{opacity:.3}50%{opacity:1}}
 .mu-resumo{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
@@ -433,7 +435,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=31"></script>
+<script src="exercicios.js?v=32"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -1780,7 +1782,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
-<script src="musculinho.js?v=4"></script>
+<script src="musculinho.js?v=5"></script>
+<script src="musculinho-app.js?v=1"></script>
 <script src="saude.js?v=1"></script>
 </body>
 </html>

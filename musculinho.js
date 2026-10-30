@@ -204,7 +204,7 @@ function perguntarProxima(){
   const p = gerarPlano();
   falar(p.transtorno ? 'Pronto. Separei sua rotina de descanso e uma sugestão de treinos.' : 'Prontinho! Montei o seu plano 🎉', { plano: true });
   if (p.avisos.length) p.avisos.forEach(a => falar(a, { aviso: true }));
-  falar('Pode me perguntar sobre proteína, água, pré e pós-treino, doces, trocas de alimentos ou sono. Ou toque em uma das opções abaixo.');
+  falar('Pode me perguntar qualquer coisa do app: seu treino de hoje, sua evolução de carga, sequência, peso, onde fica cada função, ou pedir para eu montar um treino. Também respondo sobre dieta, proteína, água e sono. Toque em 💡 para ver sugestões.');
   n.aba = 'chat';
 }
 function responder(id, valor, rotulo){
@@ -275,7 +275,7 @@ async function enviarPergunta(){
     falar('Pensando…', { pensando: true }); renderChat(true);
     const n = nutri();
     try {
-      const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil: { ...S.perfil, nome: S.nome, ...n.r }, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10) }) });
+      const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil: { ...S.perfil, nome: S.nome, ...n.r }, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null }) });
       const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
     } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
     save(); return renderChat(true);
@@ -347,7 +347,7 @@ function rapidas(){
   if (e && e.num) return '';
   return '';
 }
-const SUGESTOES = ['Minha dieta', 'Meus treinos', 'Rotina de descanso', 'Minhas metas', 'Quanto de proteína?', 'O que comer antes do treino?', 'Posso comer doce?', 'Como trocar alimentos?', 'Dicas de sono', 'Baixar PDF'];
+const SUGESTOES = ['Qual meu treino de hoje?', 'Monta um treino de peito e tríceps', 'Como está minha sequência?', 'Minha evolução de carga', 'Minha dieta', 'Rotina de descanso', 'Minhas metas', 'Quanto de proteína?', 'O que comer antes do treino?', 'Posso comer doce?', 'Como trocar alimentos?', 'Onde fica o backup?', 'Baixar PDF'];
 function bandeja(){
   const n = nutri(); if (!n.plano || etapaAtual() || !n.sug) return '';
   return `<div class="mu-bandeja" role="group" aria-label="Sugestões de perguntas"><div class="mu-bandeja-h small muted">Sobre o que quer falar?</div>${SUGESTOES.map(x => `<button class="chip" data-livre="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;

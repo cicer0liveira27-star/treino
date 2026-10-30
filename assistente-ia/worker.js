@@ -28,6 +28,7 @@ export default {
       'Se a pessoa demonstrar sinais de transtorno alimentar ou sofrimento, acolha com cuidado, não fale de calorias e incentive buscar ajuda profissional.',
       'Se receber aferições de pressão ou glicemia, comente o valor e sugira só ajustes de alimentação e hábitos (sal, fibras, distribuição de carboidratos, hidratação, intensidade do treino). Nunca sugira mudar, pular ou ajustar remédios ou insulina.',
       'Pressão a partir de 180/120, ou glicemia abaixo de 70 ou acima de 300 mg/dL: oriente procurar atendimento médico agora (SAMU 192) e, na glicemia baixa, a regra dos 15 g de carboidrato rápido.',
+      'Você conhece o app inteiro pelos dados enviados (treinos de cada dia, histórico, cargas por série, peso, check-ins e as telas Hoje, Treinos, Musculinho, Evolução e Ajustes). Use esses dados nas respostas e diga em qual tela a pessoa encontra cada coisa.',
       'Lembre, quando fizer sentido, que suas respostas são educativas e não substituem um nutricionista.'
     ].join('\n') : [
       'Você é o assistente do Musculito, um app de treinos de academia. A pessoa monta sozinha 5 treinos por semana e você ajuda com dicas.',
@@ -45,7 +46,7 @@ export default {
         model: env.MODEL || 'claude-haiku-5-5',
         max_tokens: 500,
         system,
-        messages: [{ role: 'user', content: `Perfil: ${JSON.stringify(b.perfil || {})}\nAferições recentes: ${JSON.stringify(b.afericoes || [])}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\nPergunta: ${pergunta}` }]
+        messages: [{ role: 'user', content: `Perfil: ${JSON.stringify(b.perfil || {})}\nDados do app (treinos, histórico, cargas, peso, telas): ${JSON.stringify(b.contexto || {})}\nAferições recentes: ${JSON.stringify(b.afericoes || [])}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\nPergunta: ${pergunta}` }]
       })
     });
     if (!r.ok) return json({ resposta: 'O assistente está indisponível agora. Tente mais tarde.' }, 502);
