@@ -1,5 +1,5 @@
-const CACHE = 'musculito-v34';
-const FILES = ['./', 'index.html', 'catalogo.js?v=19', 'exercicios.js?v=32', 'musculinho.js?v=5', 'musculinho-app.js?v=3', 'saude.js?v=1', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'musculito-v35';
+const FILES = ['./', 'index.html', 'catalogo.js?v=19', 'exercicios.js?v=33', 'musculinho.js?v=6', 'musculinho-app.js?v=5', 'saude.js?v=1', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
 // Sempre busca a versão mais nova na internet (sem cache do navegador); sem internet, usa a cópia salva.

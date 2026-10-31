@@ -435,7 +435,7 @@ svg.pf-av{background:var(--accent);border-radius:50%}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="catalogo.js?v=19"></script>
-<script src="exercicios.js?v=32"></script>
+<script src="exercicios.js?v=33"></script>
 <script>
 /* ---------- Dados ---------- */
 const KEY = 'ritmo.v2';
@@ -443,7 +443,8 @@ const EX = Object.fromEntries(Exercicios.lista.map(e => [e.id, e]));
 const uid = () => Math.random().toString(36).slice(2, 9);
 const it = (ex, reps, series = 3, descanso = 60) => ({ ex, series, reps, descanso });
 const novoPlanoVazio = i => ({ id: uid(), nome: 'Treino ' + letra(i), itens: [] });
-function ensure5(){ while (S.planos.length < 5) S.planos.push(novoPlanoVazio(S.planos.length)); }
+const DIAS_TREINO = 6;
+function ensure5(){ while (S.planos.length < DIAS_TREINO) S.planos.push(novoPlanoVazio(S.planos.length)); }
 const defaultState = () => ({ nome: '', perfil: null, planos: [], checkins: [], sessoes: [], pesos: [], ativo: null });
 function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.planos) return s; }catch{} return defaultState(); }
 let S = load();
@@ -1055,7 +1056,7 @@ function vHoje(){
     <div class="top"><h1>Musculito 💪</h1></div>
     <div class="card stack">
       <h2>${S.nome ? 'Complete seu perfil' : 'Boas-vindas! 👋'}</h2>
-      <p class="muted" style="margin:0">Conte um pouco sobre você. O assistente usa essas informações para te ajudar a montar seus 5 treinos da semana, com dicas para o seu objetivo.</p>
+      <p class="muted" style="margin:0">Conte um pouco sobre você. O assistente usa essas informações para te ajudar a montar seus 6 treinos da semana, com dicas para o seu objetivo.</p>
       ${perfilForm()}
       <button class="btn primary block" onclick="salvarPerfil(true)">Começar</button>
     </div>`;
@@ -1092,7 +1093,7 @@ function vHoje(){
         <p class="small muted" style="margin:10px 0 0;text-align:center">Esqueceu de marcar algum dia? Toque nele.</p>
       </section>
       <h2 style="margin-top:8px">Seus treinos da semana</h2>
-      ${S.planos.every(p => !p.itens.length) ? `<div class="card stack"><b>Monte seus 5 treinos</b><p class="small muted" style="margin:0">Escolha os exercícios de cada dia. O assistente te dá sugestões e dicas para os seus objetivos.</p><button class="btn primary" onclick="view='treinos';render();scrollTo(0,0)">Montar meus treinos</button></div>` : ''}
+      ${S.planos.every(p => !p.itens.length) ? `<div class="card stack"><b>Monte seus 6 treinos</b><p class="small muted" style="margin:0">Escolha os exercícios de cada dia. O assistente te dá sugestões e dicas para os seus objetivos.</p><button class="btn primary" onclick="view='treinos';render();scrollTo(0,0)">Montar meus treinos</button></div>` : ''}
       ${S.planos.map((p, i) => p.itens.length ? `
         <button class="card plan" onclick="iniciar('${p.id}')">
           <span class="badge">${letra(i)}</span>
@@ -1240,7 +1241,7 @@ function bip(){ try{ const c = new (window.AudioContext || window.webkitAudioCon
 /* Treinos (planos) */
 function vTreinos(){
   return `
-    <div class="top"><h1>Seus 5 treinos</h1></div>
+    <div class="top"><h1>Seus 6 treinos</h1></div>
     <div class="stack">
       <button class="card mu-chamada" onclick="view='musculinho';render();scrollTo(0,0)"><span class="mu-av">${mascote()}</span><span class="grow"><b>Precisa de ajuda para montar?</b><span class="small muted">O Musculinho monta treinos, dieta e rotina de descanso para o seu objetivo.</span></span><span aria-hidden="true">›</span></button>
       <p class="muted small" style="margin:0">Toque em Editar para montar cada dia. Segure um treino e arraste para mudar a ordem.</p>
@@ -1251,7 +1252,7 @@ function vTreinos(){
             <div class="row" style="min-width:0"><button class="drag" aria-label="Mover ${esc(p.nome)} (setas para cima e para baixo)" title="Segure e arraste">⠿</button><span class="badge">${letra(i)}</span><div style="min-width:0"><h3 class="ell">${esc(p.nome)}</h3><span class="small muted">Dia ${i + 1}</span></div></div>
             <div class="row" style="gap:6px;flex:none">${p.itens.length ? `<button class="icon-btn" onclick="escolherDestino('${p.id}')" aria-label="Copiar ${esc(p.nome)} para outro dia" title="Copiar para outro dia">⧉</button>` : ''}<button class="btn sm ${p.itens.length ? '' : 'primary'}" onclick="editar('${p.id}')">${p.itens.length ? 'Editar' : 'Montar'}</button></div>
           </div>
-          <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do Musculinho: <b>${esc(divisao()[i % 5][0])}</b>`}</p>
+          <p class="small muted" style="margin:10px 0 0">${p.itens.length ? `${p.itens.length} exercício${p.itens.length === 1 ? '' : 's'}: ` + p.itens.map(it => esc(EX[it.ex]?.nome)).join(' · ') : `Sugestão do Musculinho: <b>${esc(divisao()[i % divisao().length][0])}</b>`}</p>
         </div>`).join('')}
       </div>
       <h2 style="margin-top:12px">Grade completa de exercícios</h2>
@@ -1352,7 +1353,7 @@ const ESQUEMA = {
   gluteos: { series: 3, reps: '10 a 12', descanso: 60 }, postura: { series: 3, reps: '12 a 15', descanso: 45 }, disposicao: { series: 3, reps: '10 a 15', descanso: 60 }
 };
 const DICA_OBJ = {
-  emagrecer: 'Para emagrecer, a constância vale mais que a intensidade: cumpra os 5 dias, inclua aeróbico e cuide da alimentação e do sono.',
+  emagrecer: 'Para emagrecer, a constância vale mais que a intensidade: cumpra os 6 dias, inclua aeróbico e cuide da alimentação e do sono.',
   hipertrofia: 'Para ganhar massa, aumente a carga aos poucos quando fizer todas as repetições com boa técnica, e capriche no descanso e na alimentação.',
   definir: 'Para definir, mantenha cargas desafiadoras com descansos curtos e some aeróbico em alguns dias.',
   forca: 'Para ganhar força, comece cada treino pelos exercícios compostos e descanse 2 a 3 minutos entre as séries pesadas.',
@@ -1360,11 +1361,12 @@ const DICA_OBJ = {
   saude: 'Para saúde e bem-estar, o mais importante é a regularidade e a técnica correta. Aumente a carga com calma.',
   gluteos: 'Para glúteos e pernas mais fortes, treine esses músculos em 2 dias da semana, com exercícios como hip thrust, agachamentos e abdução.',
   postura: 'Para a postura, fortaleça costas, abdômen e lombar, e tenha pelo menos tantos exercícios de costas quanto de peito.',
-  disposicao: 'Para ter mais disposição, mantenha a regularidade dos 5 treinos, durma bem e inclua um pouco de aeróbico.'
+  disposicao: 'Para ter mais disposição, mantenha a regularidade dos 6 treinos, durma bem e inclua um pouco de aeróbico.'
 };
 const DIVISAO = {
-  musc: [['Peito e tríceps', ['peito', 'triceps']], ['Costas e bíceps', ['costas', 'biceps']], ['Quadríceps e panturrilha', ['quadriceps', 'panturrilha']], ['Ombros e abdômen', ['ombros', 'abdomen']], ['Posterior e glúteos', ['posterior', 'gluteos']]],
-  geral: [['Pernas e aeróbico', ['quadriceps', 'gluteos', 'cardio']], ['Peito, ombros e tríceps', ['peito', 'ombros', 'triceps', 'cardio']], ['Costas, bíceps e abdômen', ['costas', 'biceps', 'abdomen', 'cardio']], ['Glúteos e posterior', ['gluteos', 'posterior', 'cardio']], ['Corpo inteiro', ['quadriceps', 'peito', 'costas', 'abdomen', 'cardio']]]
+  // 6 dias alternando superior e inferior: Superior (peito) · Inferior (perna) · Superior (costas) ...
+  musc: [['Superior · Peito e tríceps', ['peito', 'triceps']], ['Inferior · Quadríceps e panturrilha', ['quadriceps', 'panturrilha']], ['Superior · Costas e bíceps', ['costas', 'biceps']], ['Inferior · Posterior e glúteos', ['posterior', 'gluteos']], ['Superior · Ombros e braços', ['ombros', 'biceps', 'triceps']], ['Inferior · Pernas e abdômen', ['quadriceps', 'gluteos', 'abdomen']]],
+  geral: [['Superior · Peito, ombros e tríceps', ['peito', 'ombros', 'triceps', 'cardio']], ['Inferior · Pernas e aeróbico', ['quadriceps', 'gluteos', 'cardio']], ['Superior · Costas, bíceps e abdômen', ['costas', 'biceps', 'abdomen', 'cardio']], ['Inferior · Glúteos e posterior', ['gluteos', 'posterior', 'cardio']], ['Superior · Ombros e braços', ['ombros', 'biceps', 'triceps', 'cardio']], ['Inferior · Pernas e core', ['quadriceps', 'panturrilha', 'abdomen', 'cardio']]]
 };
 const cap = t => t ? t[0].toUpperCase() + t.slice(1) : '';
 const lista = arr => arr.length < 2 ? arr.join('') : arr.slice(0, -1).join(', ') + ' e ' + arr[arr.length - 1];
@@ -1383,7 +1385,7 @@ function focoDoDia(p){
   return Object.entries(c).filter(([a]) => !['cardio', 'lombar', 'adutores'].includes(a)).sort((x, y) => y[1] - x[1]).map(([a]) => a);
 }
 function sugestoes(i){
-  const p = S.planos[i], div = divisao()[i % 5], tem = new Set(p.itens.map(x => x.ex));
+  const p = S.planos[i], div = divisao()[i % divisao().length], tem = new Set(p.itens.map(x => x.ex));
   const outros = new Set(S.planos.filter((_, j) => j !== i).flatMap(q => q.itens.map(x => x.ex)));
   const foco = focoDoDia(p);
   const alvos = !p.itens.length || foco.some(a => div[1].includes(a)) ? div[1].filter(a => a !== 'cardio') : foco.slice(0, 2);
@@ -1506,7 +1508,7 @@ function salvarPerfil(inicio){
   S.nome = nome; S.perfil = { peso, altura, objetivos: objs, objetivo: PRIORIDADE.find(k => objs.includes(k)), nivel };
   if (pesoMudou) { S.pesos = S.pesos.filter(x => x.data !== hoje()); S.pesos.push({ data: hoje(), kg: peso }); }
   ensure5(); save();
-  if (inicio) { view = S.planos.some(p => p.itens.length) ? 'hoje' : 'treinos'; render(); scrollTo(0, 0); if (view === 'treinos') toast('Agora monte seus 5 treinos'); }
+  if (inicio) { view = S.planos.some(p => p.itens.length) ? 'hoje' : 'treinos'; render(); scrollTo(0, 0); if (view === 'treinos') toast('Agora monte seus 6 treinos'); }
   else { render(); toast('Perfil atualizado'); }
 }
 
@@ -1782,8 +1784,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
-<script src="musculinho.js?v=5"></script>
-<script src="musculinho-app.js?v=3"></script>
+<script src="musculinho.js?v=6"></script>
+<script src="musculinho-app.js?v=5"></script>
 <script src="saude.js?v=1"></script>
 </body>
 </html>

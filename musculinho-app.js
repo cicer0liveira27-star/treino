@@ -7,7 +7,7 @@ const num = v => String(v).replace('.', ',');
 /* ---------- Mapa do app ---------- */
 const TELAS = {
   hoje: { nome: 'Hoje', desc: 'fica o check-in do dia, a sua sequência (dias e semanas seguidos), a semana marcada e os seus treinos para começar.' },
-  treinos: { nome: 'Treinos', desc: 'ficam os seus 5 treinos: toque em Editar para montar, segure e arraste para mudar a ordem, use ⧉ para copiar um dia para outro, e embaixo está a grade completa de exercícios com busca.' },
+  treinos: { nome: 'Treinos', desc: 'ficam os seus 6 treinos: toque em Editar para montar, segure e arraste para mudar a ordem, use ⧉ para copiar um dia para outro, e embaixo está a grade completa de exercícios com busca.' },
   musculinho: { nome: 'Musculinho', desc: 'sou eu! Aqui ficam a conversa e o seu plano de dieta, descanso e treinos, com PDF.' },
   evolucao: { nome: 'Evolução', desc: 'ficam o calendário de check-ins, a carga por exercício (peso de cada série e recordes), o peso corporal, o registro de saúde, os últimos treinos e as fotos.' },
   ajustes: { nome: 'Ajustes', desc: 'ficam o tema de cores, o seu perfil e a foto de perfil, as estatísticas de uso e o backup (baixar ou restaurar).' }
@@ -36,7 +36,7 @@ function acharExercicio(t){
 }
 function acharDia(t){
   let m = t.match(/\bdia\s*([1-9])\b/); if (m && S.planos[+m[1] - 1]) return +m[1] - 1;
-  m = t.match(/\btreino\s+([a-e])\b/); if (m) return m[1].charCodeAt(0) - 97;
+  m = t.match(/\btreino\s+([a-f])\b/); if (m) return m[1].charCodeAt(0) - 97;
   const i = S.planos.findIndex(p => p.nome && nrm(p.nome).length > 3 && t.includes(nrm(p.nome))); if (i > -1) return i;
   if (/\bhoje\b|proximo treino|treino de hoje/.test(t)) { const p = proximoPlano(); return p ? S.planos.indexOf(p) : -1; }
   return -1;
@@ -177,7 +177,9 @@ function respostaApp(q){
 
   // o que a pessoa treinou (hoje, ontem, na semana, num dia, por grupo ou exercício)
   const fezHoje = S.checkins.includes(h);
-  const hist = perguntaHistorico(t, h, fezHoje); if (hist) return hist;
+  // pedidos para montar ou alterar treino têm prioridade sobre perguntas de histórico (ex.: "monta um treino para o dia 6")
+  const pedeAcao = /\b(mont|cri|gera|monta|sugere|sugira|prepara|adiciona|coloca|inclui|bota|tira|remove|retira)\w*\b/.test(t) || /quero (um )?treino/.test(t);
+  const hist = pedeAcao ? null : perguntaHistorico(t, h, fezHoje); if (hist) return hist;
 
   // montar / criar treino
   if (/\b(mont|cri|gera|faz|faca|fazer|monta|sugere|sugira|prepara)\w*\b.*\btreino|treino de .* pra mim|quero (um )?treino/.test(t) && !/sozinho|como (eu )?monto|antes d|depois d|pre.?treino|pos.?treino|comer|dieta/.test(t)) {
@@ -230,7 +232,7 @@ function respostaApp(q){
     const p = proximoPlano(); if (!p || !p.itens.length) return { t: 'Seus treinos ainda estão vazios. Quer que eu monte um? Diga, por exemplo, "monta um treino de peito para o dia 1".' };
     const i = S.planos.indexOf(p); return { t: `${fezHoje ? 'Seu próximo treino é o' : 'Hoje é o treino'} ${letra(i)}, ${p.nome} (dia ${i + 1}):\n\n${resumoTreino(p)}${S.ativo ? '\n\nVocê já tem um treino em andamento.' : ''}`, acao: 'ir:hoje' };
   }
-  if (/\b(meus|quais|mostra|lista)\b.*\btreinos\b|\btreino [a-e]\b|\bdia [1-5]\b/.test(t) && !tem_('dieta', 'refei')) {
+  if (/\b(meus|quais|mostra|lista)\b.*\btreinos\b|\btreino [a-f]\b|\bdia [1-6]\b/.test(t) && !tem_('dieta', 'refei')) {
     const dia = acharDia(t);
     if (dia > -1) { const p = S.planos[dia]; return { t: `Treino ${letra(dia)} · ${p.nome} (dia ${dia + 1}):\n\n${resumoTreino(p)}`, acao: 'ir:treinos' }; }
     return { t: S.planos.map((p, i) => `• ${letra(i)} · ${p.nome}: ${p.itens.length ? plural(p.itens.length, 'exercício', 'exercícios') : 'vazio'}`).join('\n') + '\n\nPergunte de um dia para ver os exercícios, por exemplo "o que tem no treino C?".', acao: 'ir:treinos' };

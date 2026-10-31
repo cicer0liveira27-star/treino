@@ -126,7 +126,7 @@ function rotinaDescanso(r){
   d.push(sono < 7 ? `Hoje você dorme cerca de ${String(Math.round(sono * 10) / 10).replace('.', ',')} h. Tente chegar a 7 a 9 horas: é durante o sono que o músculo se recupera.`
     : `Você dorme cerca de ${String(Math.round(sono * 10) / 10).replace('.', ',')} h por noite. Ótimo, mantenha entre 7 e 9 horas.`);
   d.push(`Horário sugerido: deitar às ${r.dorme || '22:30'} e acordar às ${r.acorda || '06:30'}, inclusive no fim de semana, para manter o relógio do corpo regulado.`);
-  d.push('Com 5 treinos por semana, use os 2 dias livres para descanso ativo: caminhada leve, alongamento ou bicicleta tranquila.');
+  d.push('Com 6 treinos por semana, use o dia livre para descanso ativo: caminhada leve, alongamento ou bicicleta tranquila.');
   d.push('Evite treinar o mesmo grupo muscular em dias seguidos. Cada músculo precisa de cerca de 48 horas para se recuperar.');
   d.push('Café e outros estimulantes só até umas 6 horas antes de dormir. Na última hora antes de deitar, diminua as telas e a luz forte.');
   d.push('Sentiu dor que não passa, cansaço excessivo ou queda de desempenho por vários dias? Descanse um dia a mais e, se continuar, procure um profissional.');
@@ -239,7 +239,7 @@ function respostaLocal(q){
   if (tem_('dica de sono', 'dicas de sono')) return { t: (p ? p.descanso.slice(0, 2) : rotinaDescanso(nutri().r).slice(0, 2)).join('\n\n') + (p ? '\n\nA rotina completa está em "Meu plano" › Rotina de descanso.' : ''), acao: p ? 'plano:descanso' : null };
   if (tem_('sono', 'dormir', 'descanso', 'recupera')) return p ? { t: 'Sua rotina de descanso está em "Meu plano" › Rotina de descanso: horas de sono, horários, dias de descanso ativo e recuperação. Toque abaixo que eu te levo lá 👇', acao: 'plano:descanso' } : { t: rotinaDescanso(nutri().r).slice(0, 2).join('\n\n') };
   if (tem_('cafe da manha', 'almoco', 'jantar', 'lanche', 'ceia', 'cardapio', 'dieta', 'refeic', 'comer', 'alimenta')) return { t: `Sua dieta está em "Meu plano" › Plano alimentar: ${p.refeicoes.length} refeições com horários e duas opções em cada uma. Toque abaixo que eu te levo lá 👇`, acao: 'plano:refeicoes' };
-  if (tem_('treino', 'exercicio', 'academia', 'musculacao')) return { t: 'Seus 5 treinos sugeridos estão em "Meu plano" › Treinos sugeridos. De lá você pode copiar todos para a aba Treinos com um toque. Te levo lá 👇', acao: 'plano:treinos' };
+  if (tem_('treino', 'exercicio', 'academia', 'musculacao')) return { t: 'Seus 6 treinos sugeridos estão em "Meu plano" › Treinos sugeridos. De lá você pode copiar todos para a aba Treinos com um toque. Te levo lá 👇', acao: 'plano:treinos' };
   if (tem_('caloria', 'kcal', 'meta', 'macro')) return { t: m ? `Sua meta é de cerca de ${m.kcal} kcal por dia, para ${m.foco}. Você gasta em torno de ${m.gasto} kcal. Divisão: ${m.prot} g de proteína, ${m.carb} g de carboidrato e ${m.gord} g de gordura.` : 'No seu caso, as metas de calorias precisam ser definidas com um nutricionista.', acao: m ? 'plano:metas' : null };
   if (tem_('meu plano', 'plano')) return { t: 'Seu plano completo está na aba "Meu plano": metas, dieta, descanso, treinos e dicas. Te levo lá 👇', acao: 'plano:inicio' };
   if (tem_('oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e ai')) return { t: `Oi, ${S.nome || ''}! 😄 Em que posso ajudar?` };
@@ -395,7 +395,7 @@ function planoHtml(p){
     <section class="card mu-step" id="sec-descanso"><h3>Rotina de descanso</h3><ul class="mu-lista">${p.descanso.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
     <section class="card mu-step" id="sec-treinos"><h3>Treinos sugeridos</h3><p class="small muted" style="margin:4px 0 8px">${esquema().series} séries de ${esquema().reps} repetições, para o seu objetivo principal.</p>
       ${p.treinos.map((t, i) => `<div class="mu-tr"><b>${letra(i)} · ${esc(t.nome)}</b><span class="small muted">${t.itens.map(it => esc(EX[it.ex]?.nome || it.ex)).join(' · ')}</span></div>`).join('')}
-      <button class="btn block" style="margin-top:12px" onclick="usarTreinosSugeridos()">Usar estes treinos nos meus 5 dias</button></section>
+      <button class="btn block" style="margin-top:12px" onclick="usarTreinosSugeridos()">Usar estes treinos nos meus 6 dias</button></section>
     <section class="card mu-step" id="sec-dicas"><h3>Dicas do Musculinho</h3><ul class="mu-lista">${p.dicas.map(d => `<li>${esc(d)}</li>`).join('')}</ul></section>
     <div class="mu-step"><button class="btn primary block" onclick="baixarPDF()">Baixar PDF do plano</button></div>
     <div class="mu-msg ele mu-typing" hidden><span class="mu-mini">${mascote()}</span><div class="mu-b"><span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span></div></div>
@@ -405,7 +405,7 @@ function planoHtml(p){
 function usarTreinosSugeridos(){
   const p = nutri().plano; if (!p) return;
   const temAlgo = S.planos.some(x => x.itens.length);
-  if (temAlgo && !confirm('Isso vai substituir os exercícios dos seus 5 treinos pelos sugeridos. Continuar?')) return;
+  if (temAlgo && !confirm('Isso vai substituir os exercícios dos seus 6 treinos pelos sugeridos. Continuar?')) return;
   p.treinos.forEach((t, i) => { if (!S.planos[i]) S.planos.push({ id: uid(), nome: '', itens: [] }); S.planos[i].nome = t.nome; S.planos[i].itens = t.itens.map(x => ({ ...x })); });
   save(); toast('Treinos atualizados'); view = 'treinos'; render(); scrollTo(0, 0);
 }
