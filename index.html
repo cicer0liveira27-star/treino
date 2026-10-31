@@ -1336,7 +1336,7 @@ function addEx(id){
 }
 
 /* ---------- Assistente ---------- */
-const IA_URL = ''; // endereço do assistente com IA (ver README). Vazio = só as dicas automáticas.
+const IA_URL = 'https://musculinhoia.cicer0liveira27.workers.dev'; // endereço do assistente com IA (ver README). Vazio = só as dicas automáticas.
 const OBJ = { emagrecer: 'Emagrecer', hipertrofia: 'Ganhar massa muscular', definir: 'Definir o corpo', gluteos: 'Fortalecer glúteos e pernas', forca: 'Ganhar força', condicionamento: 'Melhorar o condicionamento', postura: 'Melhorar a postura', disposicao: 'Ter mais disposição no dia a dia', saude: 'Saúde e bem-estar' };
 const PRIORIDADE = ['forca', 'hipertrofia', 'gluteos', 'definir', 'emagrecer', 'condicionamento', 'postura', 'disposicao', 'saude'];
 const objetivos = () => { const o = S.perfil?.objetivos || (S.perfil?.objetivo ? [S.perfil.objetivo] : []); return o.length ? o : ['saude']; };
