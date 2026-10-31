@@ -271,17 +271,27 @@ async function enviarPergunta(){
     setTimeout(() => { n.chat = n.chat.filter(x => !x.pensando); falar(loc.t, loc.acao ? { acao: loc.acao } : {}); save(); renderChat(true); }, espera);
     return;
   }
-  if (typeof IA_URL === 'string' && IA_URL) {
-    falar('Pensando…', { pensando: true }); renderChat(true);
-    const n = nutri();
-    try {
-      const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil: { ...S.perfil, nome: S.nome, ...n.r }, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null }) });
-      const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
-    } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
-    save(); return renderChat(true);
+  if (typeof IA_URL === 'string' && IA_URL && S.iaOk !== false) {
+    if (S.iaOk !== true) { nutri().iaPendente = q; falar('Essa eu respondo melhor com a ajuda de uma IA (Google Gemini). Para isso, sua pergunta e um resumo do seu perfil, treinos, metas e aferições são enviados ao Google, sem o seu nome. No plano gratuito, o Google pode usar esse conteúdo para melhorar os produtos dele. Posso usar?', { acao: 'ia' }); save(); return renderChat(true); }
+    return perguntarIA(q);
   }
   falar('Ainda não sei responder isso 😅 Posso ajudar com proteína, água, pré e pós-treino, doces, trocas de alimentos, sono, calorias e treinos.');
   save(); renderChat(true);
+}
+
+async function perguntarIA(q){
+  const n = nutri(); falar('', { pensando: true }); renderChat(true);
+  try {
+    const { nome, foto, ...perfil } = { ...S.perfil, ...n.r };
+    const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null, historico: n.chat.filter(m => m.t && !m.pensando).slice(-6).map(m => ({ de: m.de, t: m.t.slice(0, 400) })) }) });
+    const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
+  } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
+  save(); renderChat(true);
+}
+function consentirIA(sim){
+  const n = nutri(), q = n.iaPendente; n.iaPendente = null; S.iaOk = sim; save();
+  if (sim) { eu('Pode usar'); if (q) perguntarIA(q); else { falar('Combinado! Pode perguntar.'); renderChat(true); } }
+  else { eu('Agora não'); falar('Tudo bem! Sigo só com as respostas que já sei, sem enviar nada para fora do seu celular. Dá para mudar isso em Ajustes › Musculinho com IA.'); save(); renderChat(true); }
 }
 
 /* ---------- Tela ---------- */
@@ -328,7 +338,7 @@ function animarPlano(){
 }
 function bolha(msg){
   const b = msg.de === 'u';
-  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${msg.pensando ? '<span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span>' : esc(msg.t).replace(/\n/g, '<br>')}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'afericao' ? `<button class="btn sm primary mu-ir" onclick="abrirRegistroSaude(true)">Registrar aferição</button>` : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary mu-ir" onclick="baixarPDF()">Baixar PDF</button>` : ''}${/^plano/.test(msg.acao || '') ? `<button class="btn sm mu-ir" onclick="abrirPlano('${msg.acao.split(':')[1] || ''}')">${{ 'plano:refeicoes': 'Ver minha dieta', 'plano:treinos': 'Ver meus treinos', 'plano:descanso': 'Ver rotina de descanso', 'plano:metas': 'Ver minhas metas', 'plano:inicio': 'Ver meu plano', plano: 'Ver meu plano' }[msg.acao]} ›</button>` : ''}</div></div>`;
+  return `<div class="mu-msg ${b ? 'eu' : 'ele'} ${msg.aviso ? 'aviso' : ''}">${b ? '' : `<span class="mu-mini">${mascote()}</span>`}<div class="mu-b">${msg.pensando ? '<span class="mu-dots" aria-label="Musculinho está digitando"><i></i><i></i><i></i></span>' : esc(msg.t).replace(/\n/g, '<br>')}${msg.plano && nutri().plano ? resumoPlano(nutri().plano) : ''}${msg.acao === 'ia' && S.iaOk === undefined ? `<div class="row mu-ir" style="gap:8px"><button class="btn sm primary" onclick="consentirIA(true)">Pode usar</button><button class="btn sm" onclick="consentirIA(false)">Agora não</button></div>` : ''}${msg.acao === 'afericao' ? `<button class="btn sm primary mu-ir" onclick="abrirRegistroSaude(true)">Registrar aferição</button>` : ''}${msg.acao === 'pdf' ? `<button class="btn sm primary mu-ir" onclick="baixarPDF()">Baixar PDF</button>` : ''}${/^plano/.test(msg.acao || '') ? `<button class="btn sm mu-ir" onclick="abrirPlano('${msg.acao.split(':')[1] || ''}')">${{ 'plano:refeicoes': 'Ver minha dieta', 'plano:treinos': 'Ver meus treinos', 'plano:descanso': 'Ver rotina de descanso', 'plano:metas': 'Ver minhas metas', 'plano:inicio': 'Ver meu plano', plano: 'Ver meu plano' }[msg.acao]} ›</button>` : ''}</div></div>`;
 }
 function resumoPlano(p){
   const m = p.metas;

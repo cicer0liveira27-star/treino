@@ -31,6 +31,8 @@ export default {
       'Você conhece o app inteiro pelos dados enviados (treinos de cada dia, histórico, cargas por série, peso, check-ins e as telas Hoje, Treinos, Musculinho, Evolução e Ajustes). Use esses dados nas respostas e diga em qual tela a pessoa encontra cada coisa.',
       'Quando perguntarem o que a pessoa treinou num dia, use a data de hoje enviada, treinosFeitosHoje, ultimosTreinos e checkinsRecentes. Nunca responda com o próximo treino da sequência como se fosse o treino já feito.',
       'Entenda gírias, abreviações e erros de digitação (hj, oq, treinei, malhei, fui na academia, puxei ferro).',
+      'Os dados do app trazem tudo o que a pessoa registrou: treinosDetalhe (cada dia com exercícios, séries, repetições e descanso), historicoCompleto (treinos feitos com kg de cada série), recordes, peso, check-ins, treino em andamento, planoMusculinho (metas, refeições e descanso) e as respostas dela. Responda com esses números reais, como um personal e nutricionista que acompanha a pessoa de perto.',
+      'Para criar ou alterar treinos, diga à pessoa que peça no chat com frases como "monta um treino de costas para o dia 3" ou "adiciona prancha no treino F", que o app salva automaticamente.',
       'Lembre, quando fizer sentido, que suas respostas são educativas e não substituem um nutricionista.'
     ].join('\n') : [
       'Você é o assistente do Musculito, um app de treinos de academia. A pessoa monta sozinha 6 treinos por semana e você ajuda com dicas.',
@@ -41,15 +43,37 @@ export default {
       'Não passe dietas nem metas numéricas de calorias ou de perda de peso.'
     ].join('\n');
 
+    const conversa = (Array.isArray(b.historico) ? b.historico.slice(-6) : []).map(m => `${m.de === 'u' ? 'Pessoa' : 'Musculinho'}: ${String(m.t || '').slice(0, 400)}`).join('\n');
+    const conteudo = `Hoje: ${new Date().toISOString().slice(0, 10)}\nPerfil: ${JSON.stringify(b.perfil || {})}\nDados do app (treinos, histórico, cargas, peso, telas): ${JSON.stringify(b.contexto || {})}\nAferições recentes: ${JSON.stringify(b.afericoes || [])}\nPlano: ${JSON.stringify(b.plano || {})}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\n${conversa ? `Conversa recente:\n${conversa}\n` : ''}Pergunta: ${pergunta}`;
+
+    // Gemini (plano gratuito do Google AI Studio) tem preferência; Claude fica como alternativa paga.
+    if (env.GEMINI_API_KEY) {
+      const modelos = (env.GEMINI_MODEL || 'gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash').split(',').map(m => m.trim()).filter(Boolean);
+      for (const modelo of modelos) {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
+          method: 'POST',
+          headers: { 'x-goog-api-key': env.GEMINI_API_KEY, 'content-type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: system }] },
+            contents: [{ role: 'user', parts: [{ text: conteudo }] }],
+            generationConfig: { maxOutputTokens: 600, temperature: 0.6 }
+          })
+        });
+        if (r.status === 404 || r.status === 400) continue; // modelo indisponível: tenta o próximo
+        if (r.status === 429) return json({ resposta: 'Muita gente me chamou agora e o limite gratuito da IA foi atingido 😅 Tente de novo em alguns minutos.' }, 429);
+        if (!r.ok) return json({ resposta: 'O assistente está indisponível agora. Tente mais tarde.' }, 502);
+        const j = await r.json();
+        const texto = (j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+        return json({ resposta: texto || 'Não consegui responder essa. Pode perguntar de outro jeito?' });
+      }
+      return json({ resposta: 'O modelo de IA configurado não está disponível. Confira GEMINI_MODEL no Worker.' }, 502);
+    }
+
+    if (!env.ANTHROPIC_API_KEY) return json({ resposta: 'A IA ainda não foi configurada.' }, 503);
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({
-        model: env.MODEL || 'claude-haiku-5-5',
-        max_tokens: 500,
-        system,
-        messages: [{ role: 'user', content: `Perfil: ${JSON.stringify(b.perfil || {})}\nDados do app (treinos, histórico, cargas, peso, telas): ${JSON.stringify(b.contexto || {})}\nAferições recentes: ${JSON.stringify(b.afericoes || [])}\nSemana: ${JSON.stringify(b.semana || [])}\nDia aberto: ${b.diaAtual || '-'}\nPergunta: ${pergunta}` }]
-      })
+      body: JSON.stringify({ model: env.MODEL || 'claude-haiku-5-5', max_tokens: 500, system, messages: [{ role: 'user', content: conteudo }] })
     });
     if (!r.ok) return json({ resposta: 'O assistente está indisponível agora. Tente mais tarde.' }, 502);
     const j = await r.json();

@@ -1,20 +1,26 @@
-# Assistente com IA (opcional)
+# Musculinho com IA (Google Gemini, plano gratuito)
 
-O Musculito já traz um assistente automático que funciona sem internet: ele sugere o foco de cada dia, recomenda exercícios e avisa sobre volume, ordem e descanso.
+O Musculinho já responde muita coisa sozinho, sem internet. Com a IA ligada, as perguntas livres que ele não sabe responder vão para o **Google Gemini**, que tem uma chave de API gratuita (sem cartão de crédito), com limite de uso por minuto e por dia.
 
-O **Musculinho** (aba Musculinho) já monta dieta, rotina de descanso, treinos e o PDF sem IA. Com a IA ligada, ele também responde perguntas livres que não estão nas respostas prontas.
+A chave **não pode** ficar no site, porque o código do GitHub Pages é público. Por isso ela fica guardada num pequeno servidor gratuito da Cloudflare (o "Worker"), que repassa as perguntas.
 
-Para liberar as respostas de IA (Claude), é preciso um pequeno servidor que guarde a chave da API. A chave **não pode** ficar no site, porque o código do GitHub Pages é público.
+## Passo a passo (uns 10 minutos)
 
-## Passo a passo
-
-1. Crie uma chave em https://console.anthropic.com e defina um **limite de gastos mensal** em *Billing → Limits*.
-2. Crie uma conta grátis na Cloudflare e vá em **Workers & Pages → Create → Worker**.
-3. Cole o conteúdo de `worker.js` e publique.
+1. **Chave do Gemini:** entre em https://aistudio.google.com com sua conta Google, abra **Get API key → Create API key** e copie a chave. Não compartilhe essa chave com ninguém.
+2. **Cloudflare:** crie uma conta grátis em https://dash.cloudflare.com e vá em **Workers & Pages → Create → Create Worker**. Dê o nome `musculinho-ia` e clique em **Deploy**.
+3. Clique em **Edit code**, apague o conteúdo, cole o arquivo `worker.js` desta pasta e clique em **Deploy**.
 4. Em **Settings → Variables and secrets** do Worker, adicione:
-   - `ANTHROPIC_API_KEY` (tipo *Secret*): sua chave da API.
-   - `ALLOWED_ORIGIN`: `https://cicer0liveira27-star.github.io`
-5. Copie o endereço do Worker (algo como `https://musculito-assistente.SEU-USUARIO.workers.dev`).
-6. No `index.html`, preencha `const IA_URL = '...'` com esse endereço e publique de novo.
+   - `GEMINI_API_KEY` (tipo **Secret**): a chave do passo 1.
+   - `ALLOWED_ORIGIN` (tipo Text): `https://cicer0liveira27-star.github.io`
+5. Copie o endereço do Worker (algo como `https://musculinho-ia.SEU-USUARIO.workers.dev`) e mande para o Claude, ou coloque em `const IA_URL = '...'` no `index.html` e publique de novo.
 
-Cada pergunta usa a sua chave da API. O limite de gastos evita surpresas na fatura.
+## Privacidade
+
+- Antes da primeira pergunta enviada à IA, o Musculinho pede permissão à pessoa. Dá para ligar ou desligar em **Ajustes → Musculinho com IA**.
+- O nome da pessoa não é enviado. Vão a pergunta e um resumo do perfil, treinos, metas e aferições.
+- No plano gratuito, o Google pode usar o conteúdo enviado para melhorar os produtos dele. Se quiser evitar isso, ative o faturamento no Google AI Studio (plano pago) ou use a alternativa com Claude (`ANTHROPIC_API_KEY`, pago por uso).
+
+## Opções avançadas
+
+- `GEMINI_MODEL`: lista de modelos separados por vírgula, testados em ordem (padrão: `gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash`). Se o Google trocar os nomes, ajuste aqui.
+- Sem `GEMINI_API_KEY`, o Worker usa o Claude se houver `ANTHROPIC_API_KEY`.

@@ -1735,6 +1735,11 @@ function vAjustes(){
         <button class="btn primary" onclick="salvarPerfil(false)">Salvar perfil</button>
       </section>
       <section class="card stack">
+        <h3>Musculinho com IA</h3>
+        <p class="muted small" style="margin:0">${IA_URL ? 'Perguntas que o Musculinho não sabe responder sozinho podem ir para uma IA (Google Gemini), com um resumo do seu perfil, treinos, metas e aferições, sem o seu nome. No plano gratuito, o Google pode usar esse conteúdo para melhorar os produtos dele.' : 'A IA ainda não foi ligada neste app. O Musculinho responde com o que já sabe, sem enviar nada para fora do seu celular.'}</p>
+        ${IA_URL ? `<label class="opt"><input type="checkbox" ${S.iaOk === true ? 'checked' : ''} onchange="S.iaOk=this.checked;save();toast(this.checked?'IA ligada no Musculinho':'IA desligada')"><span>Usar IA nas perguntas livres</span></label>` : ''}
+      </section>
+      <section class="card stack">
         <h3>Estatísticas de uso</h3>
         <p class="muted small" style="margin:0">Para melhorar o app, contamos de forma anônima quais telas e botões são usados (por exemplo, "check-in feito"). Não enviamos nome, peso, fotos nem treinos.</p>
         <label class="opt"><input type="checkbox" ${S.semMetricas ? '' : 'checked'} onchange="alternarMetricas(this.checked)"><span>Enviar estatísticas anônimas</span></label>
@@ -1784,8 +1789,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
 }
 </script>
-<script src="musculinho.js?v=6"></script>
-<script src="musculinho-app.js?v=5"></script>
+<script src="musculinho.js?v=7"></script>
+<script src="musculinho-app.js?v=6"></script>
 <script src="saude.js?v=1"></script>
 </body>
 </html>

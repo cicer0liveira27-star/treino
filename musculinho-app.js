@@ -254,7 +254,16 @@ function contextoApp(){
     ultimosTreinos: S.sessoes.slice(-5).map(s => ({ data: s.data, nome: s.nome, minutos: s.minutos, cargas: s.itens.filter(i => i.carga !== '' && i.carga != null).map(i => `${EX[i.ex]?.nome}: ${(i.cargas?.length ? i.cargas : [i.carga]).join('/')} kg`) })),
     hoje: hoje(), checkinHoje: S.checkins.includes(hoje()) ? (S.horas?.[hoje()] || true) : false, checkinsRecentes: [...S.checkins].sort().slice(-14),
     treinosFeitosHoje: S.sessoes.filter(s => s.data === hoje()).map(s => ({ nome: s.nome, minutos: s.minutos, exercicios: s.itens.map(i => `${EX[i.ex]?.nome} ${i.series} séries`) })),
-    pesos: S.pesos.slice(-6), telas: Object.fromEntries(Object.entries(TELAS).map(([k, v]) => [v.nome, v.desc]))
+    pesos: S.pesos.slice(-6), telas: Object.fromEntries(Object.entries(TELAS).map(([k, v]) => [v.nome, v.desc])),
+    // tudo o que a pessoa registrou, para a IA entender o app por completo
+    treinosDetalhe: S.planos.map((p, i) => ({ letra: letra(i), nome: p.nome, itens: p.itens.map(it => ({ exercicio: EX[it.ex]?.nome, grupo: EX[it.ex]?.grupo, aparelho: EX[it.ex]?.aparelho, series: it.series, reps: it.reps, descansoSeg: it.descanso })) })),
+    historicoCompleto: S.sessoes.slice(-20).map(s => ({ data: s.data, treino: s.nome, minutos: s.minutos || null, temFoto: !!s.foto, series: s.itens.reduce((a, i) => a + (i.series || 0), 0), cargas: s.itens.filter(i => i.carga !== '' && i.carga != null).map(i => ({ exercicio: EX[i.ex]?.nome, kgPorSerie: i.cargas?.length ? i.cargas : [i.carga] })) })),
+    recordes: [...new Set(S.sessoes.flatMap(s => s.itens.map(i => i.ex)))].map(id => ({ exercicio: EX[id]?.nome, recordeKg: Math.max(0, ...S.sessoes.flatMap(s => s.itens.filter(i => i.ex === id).map(i => +i.carga || 0))) })).filter(x => x.recordeKg).slice(0, 25),
+    treinoEmAndamento: S.ativo ? { treino: plano(S.ativo.plano)?.nome, minutos: Math.round((Date.now() - S.ativo.inicio) / 60000), seriesFeitas: S.ativo.itens.reduce((a, i) => a + i.feitas.filter(Boolean).length, 0) } : null,
+    objetivos: objetivos().map(k => OBJ[k]), nivel: S.perfil?.nivel, diasDeTreinoPorSemana: S.planos.length,
+    planoMusculinho: S.nutri?.plano ? { metas: S.nutri.plano.metas, refeicoes: (S.nutri.plano.refeicoes || []).map(r => ({ hora: r.hora, refeicao: r.nome, kcal: r.kcal, opcoes: r.opcoes.map(op => op.map(it => it.nome + (it.qtd ? ' ' + it.qtd : '')).join(', ')) })), descanso: S.nutri.plano.descanso, avisos: S.nutri.plano.avisos } : null,
+    respostasMusculinho: S.nutri?.r ? { refeicoesPorDia: S.nutri.r.refeicoes, restricoes: S.nutri.r.restricoes, treinaA: S.nutri.r.treinoHora, acorda: S.nutri.r.acorda, dorme: S.nutri.r.dorme, condicoes: S.nutri.r.saude } : null,
+    fotosDeTreino: S.sessoes.filter(s => s.foto).length, tema: S.tema || 'coral'
   };
 }
 
