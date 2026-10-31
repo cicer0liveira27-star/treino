@@ -48,7 +48,7 @@ export default {
 
     // Gemini (plano gratuito do Google AI Studio) tem preferência; Claude fica como alternativa paga.
     if (env.GEMINI_API_KEY) {
-      const modelos = (env.GEMINI_MODEL || 'gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash').split(',').map(m => m.trim()).filter(Boolean);
+      const modelos = (env.GEMINI_MODEL || 'gemini-flash-latest,gemini-3.8-flash,gemini-2.5-flash,gemini-flash-lite-latest').split(',').map(m => m.trim()).filter(Boolean);
       let erro = '';
       for (const modelo of modelos) {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
@@ -64,7 +64,7 @@ export default {
         if (!r.ok) {
           // Guarda o motivo (a mensagem do Google não contém a chave) e tenta o próximo modelo.
           let msg = ''; try { msg = (await r.json()).error?.message || ''; } catch {}
-          erro = `${modelo} → erro ${r.status}${msg ? ': ' + msg.slice(0, 160) : ''}`;
+          erro += `${erro ? ' | ' : ''}${modelo} → erro ${r.status}${msg ? ': ' + msg.slice(0, 120) : ''}`;
           console.log('Gemini', erro);
           if (r.status === 401 || r.status === 403) break; // chave inválida ou sem permissão: não adianta trocar de modelo
           continue;

@@ -22,5 +22,5 @@ A chave **não pode** ficar no site, porque o código do GitHub Pages é públic
 
 ## Opções avançadas
 
-- `GEMINI_MODEL`: lista de modelos separados por vírgula, testados em ordem (padrão: `gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash`). Se o Google trocar os nomes, ajuste aqui.
+- `GEMINI_MODEL`: lista de modelos separados por vírgula, testados em ordem (padrão: `gemini-flash-latest,gemini-3.8-flash,gemini-2.5-flash,gemini-flash-lite-latest`). Se o Google trocar os nomes, ajuste aqui.
 - Sem `GEMINI_API_KEY`, o Worker usa o Claude se houver `ANTHROPIC_API_KEY`.

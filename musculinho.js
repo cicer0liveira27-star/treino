@@ -286,7 +286,7 @@ async function perguntarIA(q){
     const { nome, foto, ...perfil } = { ...S.perfil, ...n.r };
     const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000);
     const r = await fetch(IA_URL, { signal: ctl.signal, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null, historico: n.chat.filter(m => m.t && !m.pensando).slice(-6).map(m => ({ de: m.de, t: m.t.slice(0, 400) })) }) });
-    clearTimeout(tm); const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
+    clearTimeout(tm); const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(String(j.resposta || 'Não consegui responder agora.').replace(/\*\*(.+?)\*\*/g, '$1').replace(/(^|\s)\*([^*\n]+)\*(?=\s|$)/g, '$1$2').replace(/^#+\s*/gm, ''));
   } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
   iaOcupada = false; save(); renderChat(true);
 }
