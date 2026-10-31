@@ -1,4 +1,4 @@
-// Assistente do Musculito com IA (Claude) — Cloudflare Worker.
+// Assistente do Musculito com IA (Gemini grátis, ou Claude) — Cloudflare Worker.
 // Guarda a chave da API fora do site público. Veja assistente-ia/README.md.
 export default {
   async fetch(req, env) {
@@ -49,6 +49,7 @@ export default {
     // Gemini (plano gratuito do Google AI Studio) tem preferência; Claude fica como alternativa paga.
     if (env.GEMINI_API_KEY) {
       const modelos = (env.GEMINI_MODEL || 'gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash').split(',').map(m => m.trim()).filter(Boolean);
+      let erro = '';
       for (const modelo of modelos) {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
           method: 'POST',
@@ -59,14 +60,20 @@ export default {
             generationConfig: { maxOutputTokens: 600, temperature: 0.6 }
           })
         });
-        if (r.status === 404 || r.status === 400) continue; // modelo indisponível: tenta o próximo
         if (r.status === 429) return json({ resposta: 'Muita gente me chamou agora e o limite gratuito da IA foi atingido 😅 Tente de novo em alguns minutos.' }, 429);
-        if (!r.ok) return json({ resposta: 'O assistente está indisponível agora. Tente mais tarde.' }, 502);
+        if (!r.ok) {
+          // Guarda o motivo (a mensagem do Google não contém a chave) e tenta o próximo modelo.
+          let msg = ''; try { msg = (await r.json()).error?.message || ''; } catch {}
+          erro = `${modelo} → erro ${r.status}${msg ? ': ' + msg.slice(0, 160) : ''}`;
+          console.log('Gemini', erro);
+          if (r.status === 401 || r.status === 403) break; // chave inválida ou sem permissão: não adianta trocar de modelo
+          continue;
+        }
         const j = await r.json();
         const texto = (j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
         return json({ resposta: texto || 'Não consegui responder essa. Pode perguntar de outro jeito?' });
       }
-      return json({ resposta: 'O modelo de IA configurado não está disponível. Confira GEMINI_MODEL no Worker.' }, 502);
+      return json({ resposta: `O assistente está indisponível agora. Tente mais tarde. (${erro})` }, 502);
     }
 
     if (!env.ANTHROPIC_API_KEY) return json({ resposta: 'A IA ainda não foi configurada.' }, 503);
