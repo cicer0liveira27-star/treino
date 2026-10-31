@@ -279,14 +279,16 @@ async function enviarPergunta(){
   save(); renderChat(true);
 }
 
+let iaOcupada = false;
 async function perguntarIA(q){
-  const n = nutri(); falar('', { pensando: true }); renderChat(true);
+  iaOcupada = true; const n = nutri(); falar('', { pensando: true }); renderChat(true);
   try {
     const { nome, foto, ...perfil } = { ...S.perfil, ...n.r };
-    const r = await fetch(IA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null, historico: n.chat.filter(m => m.t && !m.pensando).slice(-6).map(m => ({ de: m.de, t: m.t.slice(0, 400) })) }) });
-    const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
+    const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000);
+    const r = await fetch(IA_URL, { signal: ctl.signal, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ modo: 'musculinho', pergunta: q, perfil, plano: n.plano ? { metas: n.plano.metas, restrito: n.plano.restrito } : null, afericoes: (S.saude?.afericoes || []).slice(-10), contexto: typeof contextoApp === 'function' ? contextoApp() : null, historico: n.chat.filter(m => m.t && !m.pensando).slice(-6).map(m => ({ de: m.de, t: m.t.slice(0, 400) })) }) });
+    clearTimeout(tm); const j = await r.json(); n.chat = n.chat.filter(x => !x.pensando); falar(j.resposta || 'Não consegui responder agora.');
   } catch { n.chat = n.chat.filter(x => !x.pensando); falar('Não consegui falar com a IA agora. Tente de novo em instantes.'); }
-  save(); renderChat(true);
+  iaOcupada = false; save(); renderChat(true);
 }
 function consentirIA(sim){
   const n = nutri(), q = n.iaPendente; n.iaPendente = null; S.iaOk = sim; save();
@@ -299,6 +301,7 @@ function vMusculinho(){
   if (!S.perfil) { view = 'hoje'; return vHoje(); }
   iniciarMusculinho();
   const n = nutri();
+  if (!iaOcupada && n.chat.some(m => m.pensando)) n.chat = n.chat.filter(m => !m.pensando);
   return `
     <div class="mu-top">
       <span class="mu-av">${mascote()}</span>
